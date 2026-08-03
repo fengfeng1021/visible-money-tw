@@ -1,0 +1,213 @@
+/* ==========================================================================
+   看得見的錢 — 設計代幣
+   世界：台灣多聯式複寫單據（carbonless copy form）
+   形狀鎖：全站圓角 0。唯一的曲線來自印記與圖表。
+   色彩策略：Restrained — 紙與墨的中性底 + 單一強調色（印泥靛藍）
+             紅綠是語意色（台灣漲紅跌綠），永遠不作裝飾用。
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- 紙 ------------------------------------------------------------- */
+  --paper:          #F2F2EE;  /* 桌面：單據躺在上面的檯面 */
+  --sheet:          #FBFBF8;  /* 第一聯：白 */
+  --sheet-sunk:     #EAEAE4;  /* 凹陷區（輸入槽、表頭） */
+
+  /* 四聯紙色 — 用來標示情境（第一聯／第二聯／第三聯／第四聯） */
+  --ply-1:          #FBFBF8;
+  --ply-2:          #F7EEC6;
+  --ply-3:          #F6DCDE;
+  --ply-4:          #DCE7F1;
+  --ply-1-edge:     #D8D8D0;
+  --ply-2-edge:     #DCCF88;
+  --ply-3-edge:     #E0B4B8;
+  --ply-4-edge:     #A9C3DC;
+
+  /* --- 墨 ------------------------------------------------------------- */
+  --ink:            #15181B;
+  --ink-2:          #454A50;
+  --ink-3:          #5F656C;  /* 次要說明。已驗證對全部十種紙色皆 ≥4.55:1 */
+  --ink-inv:        #F7F7F3;
+
+  --rule:           #C6C6BE;  /* 表格細線 */
+  --rule-strong:    #9B9B92;
+  --rule-faint:     #E0E0D8;
+
+  /* --- 強調（印泥靛藍）：主要動作、選取、焦點 ------------------------ */
+  --accent:         #123A72;
+  --accent-hi:      #1B4F94;
+  --accent-ink:     #FFFFFF;
+  --accent-wash:    #E3EAF4;
+
+  /* --- 語意（台灣制：漲紅跌綠） --------------------------------------- */
+  --up:             #B4232C;  /* 漲／流入／增加 */
+  --up-wash:        #F7E3E4;
+  --down:           #0C6B44;  /* 跌／流出／減少 */
+  --down-wash:      #DFEDE6;
+  --warn:           #8A5A00;  /* 警戒線、注意 */
+  --warn-wash:      #F8EEDA;
+
+  /* --- 硃砂印記 -------------------------------------------------------- */
+  --stamp:          #B8342A;  /* 已驗證對全部十種紙色皆 ≥4.55:1 */
+  /* 空章的灰。作廢印記與拒答標題都是正文級字，必須自己過 AA：
+     舊值 #767C84 對凹陷紙 #EAEAE4 只有 3.49:1。 */
+  --stamp-void:     #646A72;
+
+  /* --- 圖表序列色（與語意色分離，避免誤讀漲跌） ----------------------- */
+  --series-1:       #123A72;
+  --series-2:       #B4232C;
+  --series-3:       #0C6B44;
+  --series-4:       #8A5A00;
+  --series-5:       #5B3A82;
+  --ghost:          #B6B6AD;  /* 前一個情境的鬼影 */
+
+  /* --- 字體 ------------------------------------------------------------ */
+  --font-cjk: "Noto Sans TC", -apple-system, BlinkMacSystemFont,
+              "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, "SF Mono", "Cascadia Mono",
+               Menlo, Consolas, monospace;
+
+  /* 固定 rem 級距，比率 ~1.2（Operate 介面不用流體字級） */
+  --t-xs:   0.75rem;   /* 12 */
+  --t-sm:   0.8125rem; /* 13 */
+  --t-base: 0.9375rem; /* 15 */
+  --t-md:   1.0625rem; /* 17 */
+  --t-lg:   1.25rem;   /* 20 */
+  --t-xl:   1.5rem;    /* 24 */
+  --t-2xl:  1.875rem;  /* 30 */
+  --t-3xl:  2.375rem;  /* 38 */
+  --t-4xl:  3rem;      /* 48 */
+  --t-5xl:  4rem;      /* 64 */
+
+  /* --- 間距：4px 基準 + 單據列高 --------------------------------------- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --row: 2.25rem;          /* 單據列高，所有表格對齊此格線 */
+
+  --measure: 34em;         /* 中文內文行長（約 40 字） */
+
+  /* --- 形狀鎖 ---------------------------------------------------------- */
+  --radius: 0;
+
+  /* --- 深度：紙的陰影帶位移與柔邊，不是零位移光暈 --------------------- */
+  --lift-1: 0 1px 0 var(--rule-faint), 0 2px 6px rgba(21, 24, 27, 0.06);
+  --lift-2: 0 2px 0 var(--rule-faint), 0 8px 24px rgba(21, 24, 27, 0.10);
+  --lift-3: 0 3px 0 var(--rule), 0 18px 48px rgba(21, 24, 27, 0.16);
+
+  /* --- 動效 ------------------------------------------------------------ */
+  --dur-1: 0.14s;   /* 狀態回饋 */
+  --dur-2: 0.24s;   /* 一般轉場 */
+  --dur-3: 0.42s;   /* 逐行推出 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --z-sheet: 1;
+  --z-sticky: 20;
+  --z-overlay: 60;
+  --z-toast: 80;
+}
+
+/* ==========================================================================
+   夜間：藍晒聯。同一套單據在檯燈下的樣子，不是另一個品牌。
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:        #101318;
+    --sheet:        #191D24;
+    --sheet-sunk:   #12161C;
+
+    --ply-1:        #191D24;
+    --ply-2:        #242017;
+    --ply-3:        #261A1C;
+    --ply-4:        #16212C;
+    --ply-1-edge:   #333A44;
+    --ply-2-edge:   #4B4227;
+    --ply-3-edge:   #4D3238;
+    --ply-4-edge:   #2C4460;
+
+    --ink:          #E9EAE4;
+    --ink-2:        #B4B8BE;
+    --ink-3:        #8A9099;
+    --ink-inv:      #101318;
+
+    --rule:         #333A44;
+    --rule-strong:  #525A66;
+    --rule-faint:   #232931;
+
+    --accent:       #6DA4EE;
+    --accent-hi:    #90BEFF;
+    --accent-ink:   #0B1017;
+    --accent-wash:  #17263A;
+
+    --up:           #F0616B;
+    --up-wash:      #2E181B;
+    --down:         #45C48C;
+    --down-wash:    #142A22;
+    --warn:         #E0A93F;
+    --warn-wash:    #2B2312;
+
+    --stamp:        #E4614E;
+    --stamp-void:   #848C97;
+
+    --series-1:     #6DA4EE;
+    --series-2:     #F0616B;
+    --series-3:     #45C48C;
+    --series-4:     #E0A93F;
+    --series-5:     #B198E0;
+    --ghost:        #4A515B;
+
+    --lift-1: 0 1px 0 rgba(255,255,255,0.04), 0 2px 6px rgba(0,0,0,0.5);
+    --lift-2: 0 2px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.55);
+    --lift-3: 0 3px 0 rgba(255,255,255,0.06), 0 18px 48px rgba(0,0,0,0.65);
+  }
+}
+
+/* 手動切換：使用者按下夜間鈕時覆寫系統偏好 */
+:root[data-theme="dark"] {
+  --paper:        #101318;
+  --sheet:        #191D24;
+  --sheet-sunk:   #12161C;
+  --ply-1:        #191D24;
+  --ply-2:        #242017;
+  --ply-3:        #261A1C;
+  --ply-4:        #16212C;
+  --ply-1-edge:   #333A44;
+  --ply-2-edge:   #4B4227;
+  --ply-3-edge:   #4D3238;
+  --ply-4-edge:   #2C4460;
+  --ink:          #E9EAE4;
+  --ink-2:        #B4B8BE;
+  --ink-3:        #8A9099;
+  --ink-inv:      #101318;
+  --rule:         #333A44;
+  --rule-strong:  #525A66;
+  --rule-faint:   #232931;
+  --accent:       #6DA4EE;
+  --accent-hi:    #90BEFF;
+  --accent-ink:   #0B1017;
+  --accent-wash:  #17263A;
+  --up:           #F0616B;
+  --up-wash:      #2E181B;
+  --down:         #45C48C;
+  --down-wash:    #142A22;
+  --warn:         #E0A93F;
+  --warn-wash:    #2B2312;
+  --stamp:        #E4614E;
+  --stamp-void:   #848C97;
+  --series-1:     #6DA4EE;
+  --series-2:     #F0616B;
+  --series-3:     #45C48C;
+  --series-4:     #E0A93F;
+  --series-5:     #B198E0;
+  --ghost:        #4A515B;
+  --lift-1: 0 1px 0 rgba(255,255,255,0.04), 0 2px 6px rgba(0,0,0,0.5);
+  --lift-2: 0 2px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.55);
+  --lift-3: 0 3px 0 rgba(255,255,255,0.06), 0 18px 48px rgba(0,0,0,0.65);
+}

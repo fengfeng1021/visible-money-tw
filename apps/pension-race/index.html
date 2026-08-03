@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勞保年金請領年齡賽跑｜看得見的錢</title>
+<meta name="description" content="60 歲減領、65 歲全額、70 歲展延，三條累積已領總額曲線在同一條人生軸上賽跑，交叉的那一年就是答案。拖動預期壽命游標，勝出的線立刻改變。三格輸入、純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="勞保年金請領年齡賽跑｜看得見的錢">
+<meta property="og:description" content="提前領少 20%、延後領多 20%。三條累積曲線在你眼前賽跑，交叉的那一年就是答案。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者只填三格（平均月投保薪資、年資、出生年次），三條累積已領總額曲線就在 60→95 歲的人生軸上賽跑，交叉點被打上大字標籤；接著他親手把「我會活到幾歲」的游標拖到自己相信的地方，勝出的線變粗、結論當場改寫——先押注、再揭曉，而不是被直接告知答案。
+FIRST VIEWPORT: 單據抬頭（名稱＋資料版本徽章）在最上；左欄三格填寫與壽命游標，右欄先是結論卡與硃砂章，其下就是那張賽跑圖，載入即自動跑一次並在兩個交叉點停頓打標籤。手機改單欄：賽跑圖在上、填寫格在下。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">勞保年金請領年齡賽跑</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      提前領每年減 4%、延後領每年增 4%。三條「累積已領總額」曲線在同一條人生軸上賽跑，
+      交叉的那一年就是答案。先想好自己會活到幾歲，再拖那條游標。
+    </p>
+  </section>
+
+  <div class="workbench">
+
+    <!-- ============ 輸入：只有三格 ============ -->
+    <form class="workbench__inputs sheet" id="inputs" autocomplete="off">
+      <div class="sheet__head"><h2 class="sheet__title">填寫</h2></div>
+      <div class="sheet__body">
+
+        <label class="field" id="f-salary">
+          <span class="field__label">最高 60 個月平均月投保薪資 <span class="field__req" aria-hidden="true">＊</span></span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="45,800" required aria-required="true" aria-describedby="h-salary">
+            <span class="field__unit">元</span>
+          </span>
+          <span class="field__hint" id="h-salary">115 年分級表天花板 45,800 元，超過一律以 45,800 計。</span>
+          <span class="field__error"></span>
+        </label>
+
+        <details class="helper" id="wageHelp">
+          <summary>不知道投保薪資？用月薪估一個</summary>
+          <div class="helper__body">
+            <label class="field" id="f-wage">
+              <span class="field__label">目前月薪資總額</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" placeholder="例如 52,000">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">按 115 年投保薪資分級表對應到級距上限，只是估計值，正式數字請查勞保局個人資料。</span>
+            </label>
+            <button type="button" class="btn btn--ghost btn--sm" id="wageApply">換算成投保薪資</button>
+          </div>
+        </details>
+
+        <div class="fieldgrid fieldgrid--2">
+          <label class="field" id="f-years">
+            <span class="field__label">勞保年資（年） <span class="field__req" aria-hidden="true">＊</span></span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="30" required aria-required="true">
+              <span class="field__unit">年</span>
+            </span>
+            <span class="field__error"></span>
+          </label>
+          <label class="field" id="f-months">
+            <span class="field__label">另加（月）</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">月</span>
+            </span>
+            <span class="field__error"></span>
+          </label>
+        </div>
+
+        <label class="field" id="f-birth">
+          <span class="field__label">出生年次（民國） <span class="field__req" aria-hidden="true">＊</span></span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="55" required aria-required="true" aria-describedby="h-birth">
+            <span class="field__unit">年次</span>
+          </span>
+          <span class="field__hint" id="h-birth">法定請領年齡 -</span>
+          <span class="field__error"></span>
+        </label>
+
+        <div class="slider" id="s-life">
+          <div class="slider__top">
+            <span class="slider__label" id="l-life">你覺得自己會活到幾歲</span>
+            <span class="slider__value" aria-hidden="true">84<small>歲</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="66" max="100" step="1" value="84" aria-labelledby="l-life">
+          </div>
+          <div class="slider__ticks"><span>66</span><span>75</span><span>85</span><span>95</span><span>100</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">預期壽命（歲，數字輸入）</span>
+            <input type="text" inputmode="numeric">
+            <span class="field__unit">歲</span>
+          </label>
+          <p class="field__hint">也可以直接在右邊那張圖上拖。</p>
+        </div>
+
+        <details class="helper" id="advanced">
+          <summary>進階假設（預設全部關閉）</summary>
+          <div class="helper__body">
+
+            <fieldset class="fieldset">
+              <legend class="field__label">適用制度</legend>
+              <div class="segmented segmented--block" id="seg-system" role="group">
+                <button type="button" class="segmented__opt" data-value="legacy" aria-pressed="true">98 年前已有勞保年資</button>
+                <button type="button" class="segmented__opt" data-value="annuity" aria-pressed="false">98 年後才初次加保</button>
+              </div>
+              <p class="field__hint">
+                98 年 1 月 1 日勞保年金施行前已有年資者，才可以「一次請領老年給付」（月數規則完全不同）。
+                98 年後初次加保者只有年金制。
+              </p>
+            </fieldset>
+
+            <label class="field" id="f-salary36">
+              <span class="field__label">一次請領適用之平均月投保薪資</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="45,800">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">一次請領老年給付採「退保前 36 個月」平均，與年金的「最高 60 個月」平均是兩個數字，通常前者較低。</span>
+            </label>
+
+            <label class="switch" id="sw-cpi">
+              <input type="checkbox">
+              <span class="switch__box"></span>
+              <span>套用物價調整（累計成長率達 5% 才調）</span>
+            </label>
+            <label class="field field--tight" id="f-cpi">
+              <span class="field__label">假設年通膨率</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="2">
+                <span class="field__unit">%</span>
+              </span>
+              <span class="field__hint">這是你自己設的假設，不是官方預測。法規是累計達 5% 才依該成長率調整，不是每年調。</span>
+            </label>
+
+            <fieldset class="fieldset">
+              <legend class="field__label">勞保財務壓力情境</legend>
+              <div class="segmented segmented--block" id="seg-cut" role="group">
+                <button type="button" class="segmented__opt" data-value="100" aria-pressed="true">不打折</button>
+                <button type="button" class="segmented__opt" data-value="90" aria-pressed="false">9 折</button>
+                <button type="button" class="segmented__opt" data-value="80" aria-pressed="false">8 折</button>
+              </div>
+              <p class="field__hint">
+                <b>使用者自選假設，非官方預測。</b>目前沒有任何法律規定年金會被打折；這個開關只是讓你看見「如果」的形狀。
+              </p>
+            </fieldset>
+
+          </div>
+        </details>
+
+        <div class="btnrow">
+          <button type="button" class="btn btn--quiet btn--sm" id="resetBtn">全部清空重填</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- ============ 輸出 ============ -->
+    <div class="workbench__out stack-lg">
+
+      <section class="sheet" aria-labelledby="verdict-h">
+        <div class="sheet__body">
+          <div class="verdict" id="verdict">
+            <span class="verdict__stamp" id="verdictStamp" hidden></span>
+            <h2 class="verdict__lead" id="verdict-h">請先填入投保薪資、年資與出生年次</h2>
+            <p class="verdict__body" id="verdictBody">左邊填好三格，這裡就會告訴你哪個年齡開始領最划算。</p>
+          </div>
+          <div class="readout-row" id="readouts">
+            <div class="readout"><span class="readout__label" id="lb-early">提前 5 年月領</span><span class="readout__value" data-live id="r-early">-</span><span class="readout__delta" data-dir="down" id="r-earlyd"></span></div>
+            <div class="readout"><span class="readout__label" id="lb-legal">法定年齡月領</span><span class="readout__value" data-live id="r-legal">-</span><span class="readout__delta" data-dir="flat" id="r-legald"></span></div>
+            <div class="readout"><span class="readout__label" id="lb-defer">展延 5 年月領</span><span class="readout__value" data-live id="r-defer">-</span><span class="readout__delta" data-dir="up" id="r-deferd"></span></div>
+            <div class="readout"><span class="readout__label" id="lb-best">到壽命為止最高總額</span><span class="readout__value" data-live id="r-best">-</span><span class="readout__delta" data-dir="flat" id="r-bestd"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 招牌視覺：三條累積曲線的賽跑 -->
+      <section class="plot" id="plotCard">
+        <div class="plot__head">
+          <h2 class="plot__title">累積已領總額，在同一條人生軸上賽跑</h2>
+          <div class="legend" id="legend"></div>
+        </div>
+        <canvas class="plot__canvas" id="chart" role="img" aria-labelledby="chartDesc"></canvas>
+        <div class="plot__foot">
+          <p id="chartDesc" class="plot__desc">
+            橫軸是年齡，縱軸是從開始請領那天算起、累積已經領到手的總金額。
+          </p>
+          <div class="btnrow plot__actions">
+            <button type="button" class="btn btn--ghost btn--sm" id="raceBtn">再跑一次</button>
+            <span class="chip" id="lifeChip">壽命游標 84 歲</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 年資未滿 15 年：整個介面換成一次金，不算出一個不存在的月退 -->
+      <section class="sheet" id="lumpCard" hidden>
+        <div class="sheet__head">
+          <h2 class="sheet__title">你的情況：老年一次金</h2>
+        </div>
+        <div class="sheet__body stack">
+          <div class="state state--refuse" id="refuse">
+            <h3 class="state__title">這個問題現在回答不了：你沒有月退可以比</h3>
+            <p class="state__body" id="refuseBody">
+              勞保年資未滿 15 年，依法不能請領老年年金，只能請領老年一次金。
+              沒有三條月領曲線可以賽跑，所以這張圖不畫；畫出來的會是一個不存在的東西。
+            </p>
+          </div>
+          <div class="readout-row" id="lumpReadouts">
+            <div class="readout"><span class="readout__label">老年一次金</span><span class="readout__value" id="r-lump">-</span></div>
+            <div class="readout"><span class="readout__label">給付月數</span><span class="readout__value" id="r-lumpm">-</span></div>
+            <div class="readout"><span class="readout__label">可請領年齡</span><span class="readout__value" id="r-lumpage">-</span></div>
+          </div>
+          <p class="note" id="lumpNote"></p>
+        </div>
+      </section>
+
+      <!-- 次要：每個請領年齡的月領金額與終身總額 -->
+      <section class="sheet" id="tableCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">法定年齡 −5 到 +5 歲，每一格的月領金額</h2>
+        </div>
+        <div class="ledger-wrap" id="ledgerWrap">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">請領年齡</th>
+              <th scope="col">增減</th>
+              <th scope="col">月領金額</th>
+              <th scope="col">到壽命為止總額</th>
+              <th scope="col">與最佳差額</th>
+            </tr></thead>
+            <tbody id="ageBody"></tbody>
+          </table>
+        </div>
+        <div class="sheet__foot" id="tableFoot"></div>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet__body" id="formulaHost"></div>
+      </section>
+
+      <p class="disclaimer" id="disclaimer">
+        本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+        <b>正式金額以勞保局核定為準</b>，請以
+        <a href="https://www.bli.gov.tw/0014162.html" rel="noopener">勞保局官方試算</a>
+        與你的個人年資資料核對。本工具以「年資與投保薪資已固定」為前提，未模擬你之後繼續投保會增加的年資；
+        未涵蓋特殊性質工作提前請領、國民年金年資併計、失能年金與遺屬年金的競合，也未套用「逾 60 歲後年資最多採計 5 年」的一次金上限。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

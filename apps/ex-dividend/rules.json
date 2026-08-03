@@ -1,0 +1,136 @@
+{
+  "version": "2026-08",
+  "asOf": "2026-08-03",
+  "note": "除息填息機所引用的法規常數。每一項附法源與出處；confidence 為 unverified 者不得作為結論依據，畫面上另有標示。",
+  "ruleRegime": {
+    "nhiSupplement": "現行單筆起扣制",
+    "nhiSupplementNote": "衛福部於 2025-11-05 提出「利息／股利／租金改年度累計結算」等三項修正方向，行政院於 2025-11-06 指示暫緩。截至本資料版本仍未預告、未修法，本工具只實作現行單筆起扣制。"
+  },
+
+  "incomeTax": {
+    "dividendCreditRate": {
+      "value": 0.085,
+      "label": "股利合併計稅之可抵減稅額比率",
+      "legalBasis": "所得稅法第15條第4項（自107年1月1日施行）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15",
+      "confidence": "verified"
+    },
+    "dividendCreditCap": {
+      "value": 80000,
+      "label": "股利合併計稅可抵減稅額之每一申報戶每年上限",
+      "legalBasis": "所得稅法第15條第4項：「每一申報戶每年抵減金額以八萬元為限」",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15",
+      "confidence": "verified"
+    },
+    "dividendSeparateRate": {
+      "value": 0.28,
+      "label": "股利分開計稅之單一稅率",
+      "legalBasis": "所得稅法第15條第5項。選此制者不得再適用 8.5% 可抵減稅額，且須就整戶全部股利擇一，不能部分合併部分分開。另依所得稅法第17條第3項，選 28% 分開計稅者不適用長期照顧特別扣除額與房屋租金支出特別扣除額（各 18 萬元）；本工具只算單次配息的稅，未含此代價，故此處 28% 制的稅負為低估。",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15",
+      "confidence": "verified"
+    },
+    "brackets114": {
+      "label": "114 年度綜合所得稅累進稅率級距（115 年 5 月申報適用）",
+      "legalBasis": "所得稅法第5條第2項；財政部113年11月28日公告114年度課稅級距",
+      "sourceUrl": "https://www.etax.nat.gov.tw/etwmain/alien-tax-service/alien-individual-income-tax/Zv7zzqa",
+      "confidence": "verified",
+      "value": [
+        { "rate": 0.05, "min": 0, "max": 590000, "quick": 0 },
+        { "rate": 0.12, "min": 590001, "max": 1330000, "quick": 41300 },
+        { "rate": 0.20, "min": 1330001, "max": 2660000, "quick": 147700 },
+        { "rate": 0.30, "min": 2660001, "max": 4980000, "quick": 413700 },
+        { "rate": 0.40, "min": 4980001, "max": null, "quick": 911700 }
+      ]
+    },
+    "brackets115Note": {
+      "label": "115 年度級距已公告（116 年 5 月申報適用），與 114 年度不同",
+      "value": "5%／12%／20%／30%／40% 五級不變，級距上緣調整為 61 萬／138 萬／277 萬／519 萬",
+      "legalBasis": "所得稅法第5條之1；財政部114年11月27日公告115年度課稅級距",
+      "sourceUrl": "https://www.ntbt.gov.tw/multiplehtml/1b82b380e1a34de9afd204d39b007db2",
+      "confidence": "verified"
+    }
+  },
+
+  "nhi": {
+    "supplementRate": {
+      "value": 0.0211,
+      "label": "二代健保補充保險費費率",
+      "legalBasis": "全民健康保險法第31條；衛生福利部修正「全民健康保險費率」，補充保險費費率 2.11%，自110年1月1日生效",
+      "sourceUrl": "https://www.nhi.gov.tw/ch/cp-4516-74b0f-2613-1.html",
+      "confidence": "verified"
+    },
+    "threshold": {
+      "value": 20000,
+      "label": "股利所得單次給付起扣門檻",
+      "legalBasis": "全民健康保險扣取及繳納補充保險費辦法第4條第1項。達門檻時以「全額」計費，不是只就超過部分計費，這就是門檻附近會出現階梯的原因。",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0060027",
+      "confidence": "verified"
+    },
+    "singlePaymentCap": {
+      "value": 10000000,
+      "label": "單次給付計費上限",
+      "legalBasis": "全民健康保險法第31條第1項但書：單次給付金額逾新臺幣一千萬元之部分，免予扣取",
+      "sourceUrl": "https://www.nhi.gov.tw/ch/cp-4516-74b0f-2613-1.html",
+      "confidence": "verified"
+    },
+    "base": {
+      "value": "股利所得部分",
+      "label": "補充保費的計費基礎只含「股利所得」",
+      "legalBasis": "全民健康保險法第31條第1項第4款。ETF 配息中屬於收益平準金或已實現資本利得的部分不是股利所得，不計入。",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=L0060001&flno=31",
+      "confidence": "verified"
+    },
+    "annualSettlementReform": {
+      "value": 0,
+      "label": "年度累計／年度結算制修法狀態（0 = 未上路）",
+      "legalBasis": "擬修正全民健康保險法第31條；行政院114年11月6日指示暫緩具爭議規劃。全國法規資料庫顯示第31條條文未修正。",
+      "sourceUrl": "https://tfc-taiwan.org.tw/fact-check-reports/nhia-supplementary-premium-reform-postponed/",
+      "confidence": "probable"
+    }
+  },
+
+  "market": {
+    "exRightRefPrice": {
+      "value": "除權息參考價 = (前一營業日收盤價 − 現金股利 + 現金增資認購價 × 現金增資配股率) ÷ (1 + 無償配股率 + 現金增資配股率)",
+      "label": "除權除息參考價計算式",
+      "legalBasis": "臺灣證券交易所「股票除權除息參考價計算說明」；本工具不模擬現金增資，故該兩項以 0 代入，退化為 (前收盤價 − 現金股利) ÷ (1 + 無償配股率)。",
+      "sourceUrl": "https://www.twse.com.tw/zh/announcement/ex-right/cal.html",
+      "confidence": "verified"
+    },
+    "lotSize": {
+      "value": 1000,
+      "label": "上市有價證券一張（一交易單位）＝ 1,000 股",
+      "legalBasis": "臺灣證券交易所股份有限公司營業細則所定之交易單位",
+      "sourceUrl": "https://twse-regulation.twse.com.tw/",
+      "confidence": "verified"
+    },
+    "parValue": {
+      "value": 10,
+      "label": "無償配股率 = 股票股利（元／股）÷ 每股面額 10 元",
+      "legalBasis": "現行公司法已允許無面額股，但上市櫃普通股仍以每股面額 10 元為常態，配股率習以 10 元換算（配 1 元股票股利 = 每千股配 100 股）。",
+      "sourceUrl": "https://www.twse.com.tw/zh/announcement/ex-right/cal.html",
+      "confidence": "probable"
+    },
+    "brokerFeeRate": {
+      "value": 0.001425,
+      "label": "證券經紀商受託買賣手續費牌告基準費率",
+      "legalBasis": "證券交易法第85條授權主管機關核定之費率。注意：金管會97年6月20日金管證二字第0970019212號函開放後，1.425‰ 已非法定上限，而是牌告基準，各券商可自訂並打折。",
+      "sourceUrl": "https://www.twsa.org.tw/DOC/970709.html",
+      "confidence": "verified"
+    },
+    "brokerFeeMin": {
+      "value": 20,
+      "label": "每筆手續費未滿新臺幣 20 元者按 20 元計收",
+      "legalBasis": "證券商營業處所受託買賣股票手續費費率（單筆最低費用）；各券商得自訂，多數仍為 20 元，零股與定期定額另有 1 元下限。",
+      "sourceUrl": "https://twse-regulation.twse.com.tw/TW/int/DAT01_print.aspx?FLCODE=FE064320",
+      "confidence": "verified"
+    },
+    "brokerFeeDiscount": {
+      "value": 0.6,
+      "label": "電子下單手續費折讓（本工具假設值）",
+      "legalBasis": "無法源。各券商折讓從 6 折到 2 折不等，且常有活動與門檻，無公定值。",
+      "sourceUrl": "",
+      "confidence": "unverified"
+    }
+  }
+}

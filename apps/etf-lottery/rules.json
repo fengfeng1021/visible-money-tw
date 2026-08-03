@@ -1,0 +1,136 @@
+{
+  "version": "115 年度（2026）",
+  "asOf": "2026-08-03",
+  "note": "台股 ETF 交易成本、股利課稅與二代健保補充保費的法規常數。每一項都附法源與出處；標示 unverified 者為實務慣例或推導值，畫面上會另外註明。",
+  "trading": {
+    "feeRateMax": {
+      "value": 0.001425,
+      "labelZh": "券商受託買賣手續費費率上限（買賣雙向各收一次）",
+      "legalBasis": "臺灣證券交易所股份有限公司證券經紀商受託買賣有價證券手續費費率標準：手續費費率上限為成交金額之千分之一點四二五。手續費非稅捐，各券商得自行折讓。",
+      "confidence": "verified",
+      "sourceUrl": "https://www.twse.com.tw/zh/products/brokerage/fee.html"
+    },
+    "feeMin": {
+      "value": 20,
+      "labelZh": "單筆最低手續費（實務慣例）",
+      "legalBasis": "無法源。券商普遍設定之單筆最低收費，常見為 20 元，部分電子下單方案為 1 元或 0 元。因各券商不同，本工具預設 20 元並允許改寫。",
+      "confidence": "unverified",
+      "sourceUrl": "https://www.twse.com.tw/zh/products/brokerage/fee.html"
+    },
+    "sttEtf": {
+      "value": 0.001,
+      "labelZh": "股票型 ETF 賣出證券交易稅（千分之一）",
+      "legalBasis": "證券交易稅條例第 2 條第 2 款「公司債及其他經政府核准之有價證券，徵千分之一」。ETF 受益憑證屬「其他經政府核准之有價證券」，適用千分之一，且僅於賣出時向出賣人課徵。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340078"
+    },
+    "sttStock": {
+      "value": 0.003,
+      "labelZh": "個股賣出證券交易稅（千分之三）",
+      "legalBasis": "證券交易稅條例第 2 條第 1 款「公司發行之股票及表明股票權利之證書或憑證，徵千分之三」。本工具只算 ETF，此值僅供對照顯示。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340078"
+    },
+    "sttBondEtfSuspended": {
+      "value": true,
+      "labelZh": "債券型 ETF 證交稅停徵至 115 年 12 月 31 日",
+      "legalBasis": "證券交易稅條例第 2 條之 1：自 106 年 1 月 1 日起至 115 年 12 月 31 日止，暫停徵以債券為主要投資標的之上市櫃 ETF 受益憑證之證券交易稅；槓桿型與反向型不適用。本工具收錄的五檔皆非債券型，不套用此條。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340078"
+    }
+  },
+  "dividendTax": {
+    "creditRate": {
+      "value": 0.085,
+      "labelZh": "股利合併計稅之可抵減稅額比率 8.5%",
+      "legalBasis": "所得稅法第 15 條第 4 項（自 107 年 1 月 1 日施行）：以股利及盈餘合計金額 × 8.5% 計算可抵減稅額，抵減結算申報應納稅額，抵減有餘可退稅。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15"
+    },
+    "creditCapPerHousehold": {
+      "value": 80000,
+      "labelZh": "合併計稅可抵減稅額之每一申報戶每年上限 80,000 元",
+      "legalBasis": "所得稅法第 15 條第 4 項但書：「每一申報戶每年抵減金額以八萬元為限」。是每戶不是每人；對應股利約 941,176 元時抵減額達頂。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15"
+    },
+    "separateRate": {
+      "value": 0.28,
+      "labelZh": "股利分開計稅之單一稅率 28%",
+      "legalBasis": "所得稅法第 15 條第 5 項：就申報戶全部股利及盈餘合計金額按 28% 分開計算稅額。選此制即不得再用 8.5% 抵減，且整戶全部股利須擇一，不能部分合併部分分開。另依所得稅法第 17 條第 3 項，選 28% 分開計稅者不適用長期照顧特別扣除額與房屋租金支出特別扣除額（各 18 萬元）；本工具只計算股利那一段的稅，不含申報戶其他扣除額，因此此處的 28% 稅負為低估，兩制比較請用「股利課稅交叉點地圖」。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15"
+    },
+    "brackets": {
+      "value": [
+        { "upTo": 590000, "rate": 0.05 },
+        { "upTo": 1330000, "rate": 0.12 },
+        { "upTo": 2660000, "rate": 0.2 },
+        { "upTo": 4980000, "rate": 0.3 },
+        { "upTo": null, "rate": 0.4 }
+      ],
+      "labelZh": "114 年度綜合所得稅累進稅率級距（供選擇邊際稅率用）",
+      "legalBasis": "所得稅法第 5 條第 2 項；財政部 113 年 11 月 28 日公告 114 年度課稅級距（114 年度與 113 年度相同）。114 年度所得於 115 年 5 月申報。",
+      "confidence": "verified",
+      "sourceUrl": "https://www.etax.nat.gov.tw/etwmain/alien-tax-service/alien-individual-income-tax/Zv7zzqa"
+    }
+  },
+  "nhi": {
+    "rate": {
+      "value": 0.0211,
+      "labelZh": "二代健保補充保險費費率 2.11%",
+      "legalBasis": "全民健康保險法第 31 條；補充保險費費率 2.11%，自 110 年 1 月 1 日生效迄今未變。",
+      "confidence": "verified",
+      "sourceUrl": "https://www.nhi.gov.tw/ch/cp-4516-74b0f-2613-1.html"
+    },
+    "floor": {
+      "value": 20000,
+      "labelZh": "股利所得單次給付起扣門檻 20,000 元",
+      "legalBasis": "全民健康保險扣取及繳納補充保險費辦法第 4 條第 1 項（113 年 3 月 20 日修正）。達門檻時就「全額」計費，不是只就超過部分計費。",
+      "confidence": "verified",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0060027"
+    },
+    "cap": {
+      "value": 10000000,
+      "labelZh": "單次給付計費上限 10,000,000 元",
+      "legalBasis": "全民健康保險法第 31 條第 1 項但書：單次給付金額逾新臺幣一千萬元之部分，免予扣取。",
+      "confidence": "verified",
+      "sourceUrl": "https://www.nhi.gov.tw/ch/cp-4516-74b0f-2613-1.html"
+    },
+    "annualSettlementReform": {
+      "value": false,
+      "labelZh": "「年度累計／年度結算制」修法未上路，且仍暫緩",
+      "legalBasis": "擬修正全民健康保險法第 31 條；行政院 114 年 11 月 6 日指示暫緩具爭議規劃。截至 115 年 8 月 3 日健保法第 31 條條文未修正，本工具只實作現行單筆起扣制。",
+      "confidence": "probable",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=L0060001&flno=31"
+    }
+  },
+  "splits": [
+    {
+      "id": "0050",
+      "date": "2025-06-18",
+      "ratio": 4,
+      "labelZh": "元大台灣 50（0050）1 拆 4 分割，115 年 6 月 18 日恢復交易",
+      "legalBasis": "元大投信受益人會議決議之受益權單位分割：以 114 年 6 月 11 日淨值為基準，每股淨值除以 4、持有股數乘以 4，總資產不變；6 月 11 日至 6 月 17 日暫停交易，6 月 18 日恢復交易。分割前一日收盤 188.65 元，分割後 47.16 元。",
+      "confidence": "verified",
+      "sourceUrl": "https://money.udn.com/money/story/124512/8553991",
+      "why": "bundled 的還原序列只處理了除權息因子，沒有處理這次分割，2025-05 到 2025-06 之間會出現 −73% 的假崩盤。本工具在載入後把分割日之前的還原價一律除以 4 才拿去算報酬。"
+    }
+  ],
+  "sampling": {
+    "minStarts": {
+      "value": 24,
+      "labelZh": "畫分布所需的最少起始月數",
+      "legalBasis": "非法規，是本工具自訂的拒答門檻：起始月少於 24 個（不足兩年份的起始點）時不畫分布，改為拒答並給出可回答的最長視窗。",
+      "confidence": "unverified",
+      "sourceUrl": ""
+    },
+    "dataFloor": {
+      "value": "2010-01",
+      "labelZh": "TWSE STOCK_DAY 可回溯下限為民國 99 年 1 月 4 日（2010-01-04）",
+      "legalBasis": "臺灣證券交易所個股日成交資訊查詢下限；早於此日期會回傳錯誤訊息而非空資料。0050 與 0056 的上市日雖早於 2010，序列仍自 2010-01 起算。",
+      "confidence": "verified",
+      "sourceUrl": "https://www.twse.com.tw/zh/trading/historical/stock-day.html"
+    }
+  }
+}

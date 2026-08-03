@@ -1,0 +1,68 @@
+/* 房貸懸崖模擬器：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-2);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+.plies { padding: 0 var(--s-4); border-top: 1px solid var(--rule-faint); }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: 0; margin-bottom: var(--s-2); }
+
+/* 可重複列：利率分段、額外還本 */
+.rows { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-2); }
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-end;
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+}
+.row .field { flex: 1 1 7rem; min-width: 0; }
+.row > .switch { flex: 1 0 100%; }
+.row .field { margin-bottom: 0; }
+.row .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.row .field__control { padding: var(--s-1) var(--s-2); background: var(--sheet); }
+.row .field input { font-size: var(--t-sm); }
+.row__del {
+  appearance: none; border: 1px solid var(--rule-strong); background: var(--sheet);
+  color: var(--ink-3); cursor: pointer; height: 30px; width: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.row__del:hover { color: var(--up); border-color: var(--up); background: var(--up-wash); }
+.rows__error { display: block; }
+.rows__error:empty { display: none; }
+
+/* 斷崖標註在圖上的浮動標籤 */
+.cliff-tag {
+  position: absolute;
+  z-index: 3;
+  background: var(--up);
+  /* 固定寫死 #fff 在夜間會壓在淺紅上，只有 3.17:1。
+     --ink-inv 會跟著日夜翻面，兩種模式都在 5.8:1 以上。 */
+  color: var(--ink-inv);
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 2px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--lift-1);
+}
+.plot { position: relative; }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+}

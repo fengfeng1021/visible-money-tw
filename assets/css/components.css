@@ -1,0 +1,897 @@
+/* ==========================================================================
+   看得見的錢 — 元件庫
+   每個元件都備齊 default / hover / focus / active / disabled / loading /
+   error / empty。形狀鎖：圓角 0。
+   ========================================================================== */
+
+/* ==========================================================================
+   1. 單據（sheet）— 全站唯一的內容容器。不用卡片。
+   ========================================================================== */
+.sheet {
+  position: relative;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  box-shadow: var(--lift-1);
+}
+.sheet--raised { box-shadow: var(--lift-2); }
+
+/* 騎縫線：撕開處 */
+.sheet--perf-top { border-top: 0; }
+.sheet--perf-top::before,
+.sheet--perf-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--rule-strong) 0 6px,
+    transparent 6px 12px
+  );
+}
+.sheet--perf-top::before { top: 0; }
+.sheet--perf-bottom::after { bottom: 0; }
+
+/* 單據表頭：機關列 + 單據名 + 資料版本 */
+.sheet__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--sheet-sunk);
+  border-bottom: 1px solid var(--rule);
+}
+.sheet__title {
+  font-size: var(--t-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.sheet__body { padding: var(--s-4); container-type: inline-size; }
+.sheet__foot {
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+/* 資料版本徽章：法規會變，所以版本必須永遠在畫面上 */
+.datestamp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+}
+.datestamp--editable { cursor: pointer; color: var(--accent); border-color: var(--accent); }
+.datestamp--editable:hover { background: var(--accent-wash); }
+
+/* ==========================================================================
+   2. 四聯：情境圖層。這是本套件比較情境的主要機制。
+   ========================================================================== */
+.plies {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-top: var(--s-1);
+}
+.plies::-webkit-scrollbar { display: none; }
+
+.ply {
+  appearance: none;
+  flex: 0 0 auto;
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  background: var(--sheet-sunk);
+  color: var(--ink-2);
+  font-family: var(--font-cjk);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  padding: var(--s-2) var(--s-4);
+  cursor: pointer;
+  position: relative;
+  top: 2px;
+  transition: background var(--dur-1) var(--ease-out),
+              color var(--dur-1) var(--ease-out),
+              top var(--dur-1) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  white-space: nowrap;
+}
+.ply:hover { background: var(--sheet); color: var(--ink); }
+.ply[aria-selected="true"] {
+  top: 0;
+  color: var(--ink);
+  border-color: var(--rule-strong);
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+.ply[data-ply="1"][aria-selected="true"] { background: var(--ply-1); }
+.ply[data-ply="2"][aria-selected="true"] { background: var(--ply-2); }
+.ply[data-ply="3"][aria-selected="true"] { background: var(--ply-3); }
+.ply[data-ply="4"][aria-selected="true"] { background: var(--ply-4); }
+.ply__swatch {
+  width: 10px; height: 10px;
+  border: 1px solid var(--rule-strong);
+  flex: 0 0 auto;
+}
+.ply[data-ply="1"] .ply__swatch { background: var(--ply-1); }
+.ply[data-ply="2"] .ply__swatch { background: var(--ply-2); }
+.ply[data-ply="3"] .ply__swatch { background: var(--ply-3); }
+.ply[data-ply="4"] .ply__swatch { background: var(--ply-4); }
+
+.ply__close {
+  appearance: none; border: 0; background: none;
+  color: var(--ink-3); cursor: pointer; padding: 0 0 0 var(--s-1);
+  line-height: 1; display: inline-flex;
+}
+.ply__close:hover { color: var(--up); }
+
+.ply--add { color: var(--accent); border-style: dashed; }
+.ply--add:hover { background: var(--accent-wash); }
+.ply:disabled, .ply--add:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ==========================================================================
+   3. 填寫格（field）— 底線式，像單據上要填的空格
+   ========================================================================== */
+.field { display: block; margin-bottom: var(--s-4); }
+.field__label {
+  display: block;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: var(--s-1);
+}
+.field__req { color: var(--up); font-weight: 700; }
+
+.field__control {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  border-bottom: 2px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  padding: var(--s-2) var(--s-3);
+  transition: border-color var(--dur-1) var(--ease-out),
+              background var(--dur-1) var(--ease-out);
+}
+.field__control:hover { border-bottom-color: var(--ink-2); }
+.field__control:focus-within {
+  border-bottom-color: var(--accent);
+  background: var(--sheet);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-md);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  padding: 0;
+  text-align: right;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; }
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field input[type="number"] { -moz-appearance: textfield; }
+.field input::placeholder { color: var(--ink-3); font-weight: 400; }
+
+.field select {
+  font-family: var(--font-cjk);
+  text-align: left;
+  cursor: pointer;
+}
+
+.field__unit {
+  flex: 0 0 auto;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.field__prefix { flex: 0 0 auto; font-size: var(--t-sm); color: var(--ink-2); }
+
+.field__hint {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.field__error {
+  display: none;
+  margin-top: var(--s-1);
+  font-size: var(--t-xs);
+  color: var(--up);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.field[data-state="error"] .field__control { border-bottom-color: var(--up); background: var(--up-wash); }
+.field[data-state="error"] .field__error { display: block; }
+.field[data-state="error"] .field__hint { display: none; }
+
+.field[data-disabled] { opacity: 0.5; }
+.field[data-disabled] .field__control { background: var(--sheet-sunk); border-bottom-style: dashed; }
+.field input:disabled, .field select:disabled { cursor: not-allowed; }
+
+/* 兩欄／三欄填寫區：依「容器」而非視窗寬度決定，否則窄側欄在寬螢幕上會被撐破 */
+.fieldgrid { display: grid; gap: 0 var(--s-4); }
+@container (min-width: 30rem) { .fieldgrid--2 { grid-template-columns: 1fr 1fr; } }
+@container (min-width: 46rem) { .fieldgrid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+/* ==========================================================================
+   4. 滑桿（slider）— 本套件最重要的輸入。拖動就是論證。
+   ========================================================================== */
+.slider { display: block; margin-bottom: var(--s-5); }
+.slider__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.slider__label { font-size: var(--t-sm); font-weight: 600; }
+.slider__value {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-lg);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.slider__value small { font-size: var(--t-sm); color: var(--ink-2); font-weight: 600; margin-left: 2px; }
+
+.slider__track { position: relative; padding-block: var(--s-2); }
+
+.slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: grab;
+  display: block;
+}
+.slider input[type="range"]:active { cursor: grabbing; }
+
+.slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+}
+.slider input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+}
+.slider input[type="range"]::-moz-range-progress {
+  height: 8px;
+  background: var(--accent);
+}
+/* 滑塊：方形游標，像單據上的可移動指標 */
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 28px;
+  margin-top: -11px;
+  background: var(--sheet);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(21,24,27,0.25);
+  cursor: grab;
+}
+.slider input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 24px;
+  border-radius: 0;
+  background: var(--sheet);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(21,24,27,0.25);
+  cursor: grab;
+}
+.slider input[type="range"]:hover::-webkit-slider-thumb { background: var(--accent-wash); }
+.slider input[type="range"]:hover::-moz-range-thumb { background: var(--accent-wash); }
+.slider input[type="range"]:disabled { cursor: not-allowed; opacity: 0.45; }
+
+/* 刻度：像尺 */
+.slider__ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-1);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  letter-spacing: -0.02em;
+}
+.slider__ticks span { position: relative; }
+
+/* 滑桿的數字孿生：鍵盤與精確輸入的等效路徑。
+   固定排在刻度下方左側，七個 App 一律用同一個位置，不各自搬家。 */
+.slider__twin {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-1);
+  border-bottom: 1px solid var(--rule-strong);
+  padding: 0 var(--s-1);
+  margin-top: var(--s-1);
+}
+.slider__twin input {
+  width: 5.5ch;
+  border: 0; background: none; padding: 0;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm);
+  text-align: right;
+  color: var(--ink);
+}
+.slider__twin input:focus { outline: none; }
+.slider__twin:focus-within { border-bottom-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ==========================================================================
+   5. 勾選格（segmented）— 單據上的選項方格
+   ========================================================================== */
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+}
+.segmented__opt {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--rule-strong);
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--font-cjk);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  padding: var(--s-2) var(--s-3);
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+  white-space: nowrap;
+}
+.segmented__opt:last-child { border-right: 0; }
+.segmented__opt:hover { background: var(--sheet); color: var(--ink); }
+.segmented__opt[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.segmented__opt:disabled { opacity: 0.4; cursor: not-allowed; }
+.segmented--block { display: flex; width: 100%; }
+.segmented--block .segmented__opt { flex: 1 1 0; text-align: center; }
+
+/* ==========================================================================
+   6. 開關（switch）
+   ========================================================================== */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  cursor: pointer;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  user-select: none;
+}
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch__box {
+  width: 40px; height: 22px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  position: relative;
+  flex: 0 0 auto;
+  transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+}
+.switch__box::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: var(--ink-3);
+  transition: transform var(--dur-2) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.switch input:checked + .switch__box { background: var(--accent-wash); border-color: var(--accent); }
+.switch input:checked + .switch__box::after { transform: translateX(18px); background: var(--accent); }
+.switch input:focus-visible + .switch__box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switch input:disabled + .switch__box { opacity: 0.4; }
+.switch:has(input:disabled) { cursor: not-allowed; opacity: 0.6; }
+
+/* ==========================================================================
+   7. 按鈕
+   ========================================================================== */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-cjk);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: var(--s-2) var(--s-5);
+  min-height: 40px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--dur-1) var(--ease-out),
+              transform var(--dur-1) var(--ease-out),
+              box-shadow var(--dur-1) var(--ease-out);
+}
+.btn:hover { background: var(--accent-hi); border-color: var(--accent-hi); text-decoration: none; }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--rule-strong);
+}
+.btn--ghost:hover { background: var(--accent-wash); border-color: var(--accent); color: var(--accent); }
+
+.btn--quiet {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: transparent;
+  padding-inline: var(--s-2);
+}
+.btn--quiet:hover { background: var(--sheet-sunk); color: var(--ink); }
+
+.btn--danger { background: var(--up); border-color: var(--up); color: #fff; }
+.btn--danger:hover { background: color-mix(in srgb, var(--up) 85%, #000); border-color: color-mix(in srgb, var(--up) 85%, #000); }
+
+.btn:disabled, .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn--sm { min-height: 32px; padding: var(--s-1) var(--s-3); font-size: var(--t-xs); }
+.btn--block { display: flex; width: 100%; }
+
+/* 載入中：不用轉圈圈，用逐格推進的進紙條 */
+.btn[data-loading="true"] { pointer-events: none; position: relative; color: transparent; }
+.btn[data-loading="true"]::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--accent-ink) 0 8px,
+    transparent 8px 16px
+  );
+  opacity: 0.5;
+  animation: feed 0.7s linear infinite;
+}
+@keyframes feed { to { background-position: 16px 0; } }
+
+.btnrow { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+
+/* ==========================================================================
+   8. 帳列表（ledger）— 存摺／攤還表
+   ========================================================================== */
+.ledger-wrap {
+  overflow: auto;
+  border: 1px solid var(--rule);
+  background: var(--sheet);
+  max-height: 26rem;
+  overscroll-behavior: contain;
+}
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-sm);
+}
+.ledger thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--sheet-sunk);
+  color: var(--ink-2);
+  font-family: var(--font-cjk);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-align: right;
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+}
+.ledger thead th:first-child { text-align: left; }
+.ledger td {
+  padding: 0 var(--s-3);
+  height: var(--row);
+  text-align: right;
+  border-bottom: 1px solid var(--rule-faint);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.ledger td:first-child { text-align: left; color: var(--ink-2); font-family: var(--font-mono);
+  font-stretch: 75%; }
+.ledger tbody tr:hover td { background: var(--accent-wash); }
+.ledger tbody tr[data-mark] td { background: var(--warn-wash); }
+.ledger tbody tr[data-mark] td:first-child { font-weight: 700; color: var(--warn); }
+.ledger .is-up { color: var(--up); }
+.ledger .is-down { color: var(--down); }
+.ledger tfoot td {
+  font-weight: 700;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 0;
+  background: var(--sheet-sunk);
+  position: sticky;
+  bottom: 0;
+}
+
+/* ==========================================================================
+   9. 讀出（readout）— 主要結論數字
+   ========================================================================== */
+.readout { display: block; }
+.readout__label {
+  display: block;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  font-weight: 600;
+  margin-bottom: var(--s-1);
+}
+.readout__value {
+  display: block;
+  font-size: var(--t-2xl);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+}
+.readout__value small {
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: -0.02em;
+  margin-left: 0.15em;
+}
+.readout__delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-1);
+  margin-top: var(--s-1);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-sm);
+  font-weight: 700;
+}
+.readout__delta[data-dir="up"] { color: var(--up); }
+.readout__delta[data-dir="down"] { color: var(--down); }
+.readout__delta[data-dir="flat"] { color: var(--ink-3); }
+.readout--lg .readout__value { font-size: var(--t-4xl); }
+@media (max-width: 30rem) { .readout--lg .readout__value { font-size: var(--t-3xl); } }
+
+.readout-row {
+  display: grid;
+  gap: var(--s-4) var(--s-5);
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-4);
+}
+
+/* ==========================================================================
+   10. 印記（stamp）與結論
+   ========================================================================== */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border: 2px solid var(--stamp);
+  color: var(--stamp);
+  font-family: var(--font-cjk);
+  font-weight: 800;
+  font-size: var(--t-sm);
+  letter-spacing: 0.08em;
+  padding: var(--s-1) var(--s-3);
+  transform: rotate(-3deg);
+  mix-blend-mode: multiply;
+  white-space: nowrap;
+}
+/* 夜間沒有紙可以壓印，multiply 會把印記吃掉 */
+:root[data-theme="dark"] .stamp { mix-blend-mode: normal; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .stamp { mix-blend-mode: normal; }
+}
+.stamp--void {
+  border-color: var(--stamp-void);
+  color: var(--stamp-void);
+  border-style: double;
+  border-width: 4px;
+}
+.stamp--ok { border-color: var(--down); color: var(--down); }
+
+.verdict {
+  position: relative;
+  border: 2px solid var(--ink);
+  background: var(--sheet);
+  padding: var(--s-5) var(--s-4);
+}
+.verdict__lead {
+  font-size: var(--t-xl);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--s-3);
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+.verdict__lead em { font-style: normal; color: var(--accent); }
+.verdict__body { font-size: var(--t-base); color: var(--ink-2); max-width: var(--measure); }
+.verdict__stamp {
+  position: absolute;
+  top: calc(var(--s-3) * -1);
+  right: var(--s-4);
+}
+
+/* ==========================================================================
+   11. 公式抽屜 — 每個數字都能攤開看法源
+   ========================================================================== */
+.formula { border-top: 1px solid var(--rule); }
+.formula > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--s-2) 0;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.formula > summary::-webkit-details-marker { display: none; }
+.formula > summary::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-2) var(--ease-out);
+  flex: 0 0 auto;
+}
+.formula[open] > summary::before { transform: rotate(45deg); }
+.formula__body {
+  padding: var(--s-3) 0 var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.formula__line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: baseline;
+  padding: var(--s-1) 0;
+  border-bottom: 1px dashed var(--rule-faint);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  letter-spacing: -0.02em;
+}
+.formula__line:last-child { border-bottom: 0; }
+.formula__line b { color: var(--ink); font-weight: 700; }
+.formula__src {
+  margin-top: var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-family: var(--font-cjk);
+}
+
+/* ==========================================================================
+   12. 圖表框（plot）
+   ========================================================================== */
+.plot {
+  position: relative;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+}
+.plot__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--s-3) var(--s-4) var(--s-2);
+}
+.plot__title { font-size: var(--t-base); font-weight: 700; margin: 0; }
+.plot__canvas { display: block; width: 100%; touch-action: pan-y; }
+.plot__svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.plot__foot {
+  padding: var(--s-2) var(--s-4) var(--s-3);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  border-top: 1px solid var(--rule-faint);
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); }
+.legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  font-weight: 600;
+  cursor: pointer;
+  background: none; border: 0; padding: 0;
+  font-family: var(--font-cjk);
+}
+.legend__item[aria-pressed="false"] { opacity: 0.4; }
+.legend__key { width: 14px; height: 3px; flex: 0 0 auto; }
+.legend__key--dash { background-image: repeating-linear-gradient(to right, currentColor 0 3px, transparent 3px 6px); height: 2px; }
+
+/* 圖表提示 */
+.tip {
+  position: absolute;
+  z-index: var(--z-overlay);
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  padding: var(--s-2) var(--s-3);
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--lift-2);
+  opacity: 0;
+}
+.tip b { color: var(--ink-inv); }
+
+/* ==========================================================================
+   13. 說明條（note）— 不用彩色粗左框
+   ========================================================================== */
+.note {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink-3);
+  background: var(--sheet);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.note b { color: var(--ink); }
+.note--warn { border-top-color: var(--warn); background: var(--warn-wash); }
+.note--stop { border-top-color: var(--up); background: var(--up-wash); }
+.note--ok { border-top-color: var(--down); background: var(--down-wash); }
+
+.disclaimer {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+  border-top: 1px solid var(--rule-faint);
+  padding-top: var(--s-3);
+}
+
+/* ==========================================================================
+   14. 狀態：載入 / 空 / 錯誤 / 拒答
+   ========================================================================== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--sheet-sunk) 0%,
+    color-mix(in srgb, var(--sheet-sunk) 60%, var(--sheet)) 50%,
+    var(--sheet-sunk) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+  height: var(--row);
+  margin-bottom: 1px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-6) var(--s-4);
+  border: 1px dashed var(--rule-strong);
+  background: var(--sheet-sunk);
+}
+.state__title { font-size: var(--t-md); font-weight: 700; margin: 0; }
+.state__body { font-size: var(--t-sm); color: var(--ink-2); max-width: var(--measure); margin: 0; }
+
+/* 拒答：資料不足以回答這個問題 */
+.state--refuse { border-color: var(--stamp-void); }
+.state--refuse .state__title { color: var(--stamp-void); }
+
+/* ==========================================================================
+   15. 提示訊息
+   ========================================================================== */
+.toast-host {
+  position: fixed;
+  left: 50%;
+  bottom: var(--s-4);
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100vw - var(--s-6));
+}
+.toast {
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  padding: var(--s-2) var(--s-4);
+  box-shadow: var(--lift-2);
+}
+
+/* ==========================================================================
+   16. 標籤
+   ========================================================================== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  color: var(--ink-2);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  padding: 2px var(--s-2);
+  white-space: nowrap;
+}
+.chip--on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* ==========================================================================
+   17. 圖示：單一線寬 1.75，方端點
+   ========================================================================== */
+.i {
+  width: 1em; height: 1em;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  vertical-align: -0.125em;
+}
+.i--lg { width: 1.25em; height: 1.25em; }
+
+/* ==========================================================================
+   18. 工作區版面：輸入在左、結果在右；手機時輸入收在下方抽屜
+   ========================================================================== */
+.workbench { display: grid; gap: var(--s-5); align-items: start; }
+@media (min-width: 62rem) {
+  .workbench { grid-template-columns: 23rem minmax(0, 1fr); }
+  .workbench__inputs {
+    position: sticky;
+    top: calc(56px + var(--s-4));
+    max-height: calc(100dvh - 56px - var(--s-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+/* 手機：招牌視覺先出現，填寫格排在下面。
+   用 order 而不是換成 flex —— grid 單欄本來就會撐滿，
+   換成 flex 會連帶繼承 align-items:start，把整張表單壓成一行字寬。 */
+@media (max-width: 61.99rem) {
+  .workbench__out { order: 1; }
+  .workbench__inputs { order: 2; }
+}
+.workbench__out, .workbench__inputs { min-width: 0; }

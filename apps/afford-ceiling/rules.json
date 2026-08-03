@@ -1,0 +1,215 @@
+{
+  "version": "2026-08",
+  "updated": "2026-08-03",
+  "note": "買房預算天花板所用的法規常數與統計基準。每一項附法源與出處；查不到官方全文的一律標 unverified，畫面上會標「未查證」。實際核貸條件以承貸銀行核定為準。",
+
+  "dbrCap": {
+    "label": "無擔保債務歸戶總餘額對月收入倍數上限（DBR 22 倍）",
+    "value": 22,
+    "unit": "倍",
+    "status": "verified",
+    "appliesTo": "信用卡、現金卡、信用貸款等無擔保債務。房貸屬有擔保債務，不在本規範內。",
+    "wording": "不宜超過（監理指導，非硬性上限）",
+    "practiceRange": [16, 18],
+    "practiceNote": "22 倍是監理指導的上緣用語「不宜超過」，不是硬性上限；銀行實務常見的內部控管帶約在 16～18 倍，還沒到 22 倍就可能被婉拒。與 assets/data/tw-lending.json 之 dbr 一致（查證日 2026-08-03）。",
+    "legalBasis": "金管會函釋「金融機構對於債務人於全體金融機構之無擔保債務歸戶後之總餘額（包括信用卡、現金卡及信用貸款）除以平均月收入，不宜超過 22 倍」",
+    "sourceUrl": "https://law.fsc.gov.tw/LawContent.aspx?id=FE052046"
+  },
+
+  "ltvFirstHomeNoProperty": {
+    "label": "名下無房者購屋貸款成數（銀行實務）",
+    "value": 0.8,
+    "unit": "成數",
+    "status": "unverified",
+    "legalBasis": "央行選擇性信用管制未規範此類；0.8 為市場常見上限，非法規數字",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html",
+    "note": "實際成數依鑑價、聯徵與個別銀行授信政策決定，可能明顯低於 8 成。"
+  },
+
+  "ltvSecondHome": {
+    "label": "自然人第 2 戶購屋貸款最高成數",
+    "value": 0.6,
+    "unit": "成數",
+    "status": "verified",
+    "effective": "2026-03-20",
+    "legalBasis": "中央銀行對金融機構辦理不動產抵押貸款業務規定 第四點（台央業字第1150011094號，115.3.20 生效）：已有一戶房貸者，額度上限為住宅（含基地）鑑價或買賣金額較低者之六成",
+    "sourceUrl": "https://gazette.nat.gov.tw/egFront/eguploadpubWrapper?metaid=164288"
+  },
+
+  "ltvThirdPlus": {
+    "label": "自然人第 3 戶（含）以上購屋貸款最高成數",
+    "value": 0.3,
+    "unit": "成數",
+    "status": "verified",
+    "effective": "2026-03-20",
+    "legalBasis": "中央銀行對金融機構辦理不動產抵押貸款業務規定 第三點、第四點（115-03-20 生效版）：自然人第三戶（含）以上購屋貸款最高成數三成。與本專案共用常數 assets/data/tw-lending.json 之 cbc.ltvCap3rdHomeAndAbove 一致（查證日 2026-08-03）。",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html"
+  },
+
+  "ltvHighValueHousing": {
+    "label": "高價住宅購屋貸款最高成數",
+    "value": 0.3,
+    "unit": "成數",
+    "status": "verified",
+    "effective": "2026-03-20",
+    "legalBasis": "中央銀行對金融機構辦理不動產抵押貸款業務規定（115-03-20 生效版）：高價住宅貸款最高成數三成。成數本身已查證；與 assets/data/tw-lending.json 之 cbc.ltvCapHighValueHousing 一致（查證日 2026-08-03）。",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html",
+    "thresholdStatus": "unverified",
+    "thresholdNote": "「多少錢才算高價住宅」的認定金額門檻未在央行官方新聞稿與問與答明載（坊間引用臺北市 7,000 萬、新北市 6,000 萬、其他 4,000 萬），本工具視為未查證，因此不提供高價住宅選項、不自動判定，只把成數列出來。成數與認定門檻是兩件事。"
+  },
+
+  "noGraceFirstHomeWithProperty": {
+    "label": "名下已有房屋者之第 1 戶購屋貸款不得有寬限期",
+    "value": true,
+    "status": "verified",
+    "effective": "2024-09-20",
+    "legalBasis": "中央銀行對金融機構辦理不動產抵押貸款業務規定 第四點；央行問與答明示「不得有寬限期」，前輕後重之本利攤還與僅繳息之短期房貸均屬違反",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html"
+  },
+
+  "noGraceSecondHome": {
+    "label": "自然人第 2 戶（含）以上購屋貸款不得有寬限期",
+    "value": true,
+    "status": "verified",
+    "effective": "2024-09-20",
+    "legalBasis": "同上規定；第 2 戶購屋貸款受成數上限與無寬限期限制",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html"
+  },
+
+  "switchHomeGraceMonths": {
+    "label": "換屋切結：撥款後須出售原屋並完成移轉登記之期限",
+    "value": 18,
+    "unit": "個月",
+    "status": "verified",
+    "legalBasis": "央行問與答（115.3.20 生效版）：切結於撥款後 18 個月內出售原屋並完成移轉登記者，得免除相關限制",
+    "sourceUrl": "https://www.cbc.gov.tw/tw/cp-4223-124873-79d4c-1.html"
+  },
+
+  "deedTaxRate": {
+    "label": "買賣契稅稅率",
+    "value": 0.06,
+    "unit": "比率",
+    "status": "verified",
+    "taxBase": "當地不動產評價委員會評定之房屋標準價格（不是成交價）",
+    "legalBasis": "契稅條例 第 3 條第 1 款：買賣契稅為其契價百分之六",
+    "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340105"
+  },
+
+  "assessedValueRatioOfPrice": {
+    "label": "房屋評定現值占成交總價的估計比例",
+    "value": 0.12,
+    "unit": "比率",
+    "status": "unverified",
+    "legalBasis": "無官方統一比例。評定現值由各地不動產評價委員會評定，與成交價無固定關係；0.12 為本工具的粗估值，用來把契稅換算成占房價的比率",
+    "sourceUrl": "https://www.etax.nat.gov.tw/etwmain/tax-info/understanding/tax-saving-manual/local/deed-tax/YQZLEmg"
+  },
+
+  "stampTaxRate": {
+    "label": "不動產契據印花稅稅率",
+    "value": 0.001,
+    "unit": "比率",
+    "status": "verified",
+    "taxBase": "公契金額（申報移轉現值）",
+    "legalBasis": "印花稅法 第 7 條第 1 項第 4 款：典賣、讓受及分割不動產契據，每件按金額千分之一",
+    "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340091"
+  },
+
+  "publicContractRatioOfPrice": {
+    "label": "公契金額占成交總價的估計比例",
+    "value": 0.3,
+    "unit": "比率",
+    "status": "unverified",
+    "legalBasis": "無官方統一比例；0.3 為本工具的粗估值（房屋評定現值＋公告土地現值相對於市價）",
+    "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340091"
+  },
+
+  "agencyFeeBuyer": {
+    "label": "買方仲介服務報酬（市場慣例）",
+    "value": 0.02,
+    "unit": "比率",
+    "status": "unverified",
+    "legalBasis": "非法定費率。市場慣例買方 1%～2%、賣方 3%～4%，買賣合計上限一般引用內政部公告之成交價 6%；本工具取 2% 為預設，可自行調整",
+    "sourceUrl": "https://www.land.moi.gov.tw/"
+  },
+
+  "scrivenerAndRegistryFee": {
+    "label": "代書費與地政登記規費（估計固定金額）",
+    "value": 25000,
+    "unit": "元",
+    "status": "unverified",
+    "legalBasis": "代書（地政士）報酬為自由市場價格；登記規費為申報地價與房屋現值之千分之一。25,000 元為本工具的行情估計中位值",
+    "sourceUrl": "https://www.land.moi.gov.tw/"
+  },
+
+  "settlingReserveRate": {
+    "label": "交屋後週轉金建議預留比例",
+    "value": 0.03,
+    "unit": "比率",
+    "status": "unverified",
+    "legalBasis": "非法規。建議另備成交價 3%～5% 作為搬遷、修繕與意外支出的緩衝；本工具預設 3%",
+    "sourceUrl": null
+  },
+
+  "dsrLevels": {
+    "label": "月負債支出對月收入比（DSR）的三檔基準",
+    "status": "unverified",
+    "legalBasis": "非法規上限。台灣銀行實務常見的內部審核參考帶，各行不同且不公開；本工具用來標示相對位置，不是核貸門檻",
+    "sourceUrl": null,
+    "levels": [
+      { "key": "conservative", "at": 0.33, "label": "保守" },
+      { "key": "normal", "at": 0.4, "label": "一般" },
+      { "key": "bankLimit", "at": 0.6, "label": "銀行極限" }
+    ]
+  },
+
+  "affordability": {
+    "label": "房價負擔能力指標統計",
+    "quarter": "115年第1季",
+    "status": "verified",
+    "legalBasis": "內政部不動產資訊平台 房價負擔能力指標統計成果（115 年第 1 季）。全國數與五大銀行新承做房貸利率與本專案共用常數 assets/data/tw-lending.json 之 market115q1 一致（查證日 2026-08-03）。",
+    "sourceUrl": "https://pip.moi.gov.tw/Publicize/Info/E1050",
+    "nationalMedianPrice": 9660000,
+    "nationalMedianHouseholdIncomeYear": 1019700,
+    "nationalBurdenRate": 41.46,
+    "nationalPir": 9.47,
+    "fiveBankMortgageRate": 2.318,
+    "method": "房貸負擔率以二十年期本利均等攤還、貸款成數七成計算；房價所得比＝中位數住宅價格 ÷ 中位數家戶可支配所得",
+    "countyQuarter": "114年第3季",
+    "countyNote": "各縣市分表本工具目前收錄的是 114 年第 3 季版本，與上方 115 年第 1 季的全國數不同季別，兩者不可混著比。共用常數檔 115 年第 1 季只查證到全國、臺北市（負擔率 64.41／房價所得比 14.72）與新北市（55.30／12.64）三筆，其餘縣市未取得該季官方數字，因此不逐筆改寫、也不推估。",
+    "counties": [
+      { "name": "全國", "burden": 42.42, "pir": 9.71 },
+      { "name": "臺北市", "burden": 65.47, "pir": 14.98 },
+      { "name": "新北市", "burden": 56.77, "pir": 12.99 },
+      { "name": "臺中市", "burden": 50.05, "pir": 11.45 },
+      { "name": "高雄市", "burden": 41.01, "pir": 9.39 },
+      { "name": "新竹縣", "burden": 40.52, "pir": 9.27 },
+      { "name": "臺南市", "burden": 39.65, "pir": 9.07 },
+      { "name": "花蓮縣", "burden": 38.92, "pir": 8.91 },
+      { "name": "南投縣", "burden": 38.32, "pir": 8.77 },
+      { "name": "澎湖縣", "burden": 37.42, "pir": 8.56 },
+      { "name": "新竹市", "burden": 37.26, "pir": 8.53 },
+      { "name": "桃園市", "burden": 37.13, "pir": 8.5 },
+      { "name": "金門縣", "burden": 36.88, "pir": 8.44 },
+      { "name": "彰化縣", "burden": 36.67, "pir": 8.39 },
+      { "name": "宜蘭縣", "burden": 35.58, "pir": 8.14 },
+      { "name": "臺東縣", "burden": 35.53, "pir": 8.13 },
+      { "name": "苗栗縣", "burden": 33.45, "pir": 7.65 },
+      { "name": "嘉義市", "burden": 32.64, "pir": 7.47 },
+      { "name": "雲林縣", "burden": 31.2, "pir": 7.14 },
+      { "name": "屏東縣", "burden": 30.93, "pir": 7.08 },
+      { "name": "嘉義縣", "burden": 29.24, "pir": 6.69 },
+      { "name": "基隆市", "burden": 26.34, "pir": 6.03 }
+    ],
+    "countyMedianPriceAvailable": false,
+    "countyMedianPriceNote": "內政部該季統計表只公布各縣市的房貸負擔率與房價所得比，未公布各縣市中位數住宅總價。因此本工具只提供全國中位數住宅價格（115 年第 1 季 966 萬元），各縣市改以房價所得比對照，不推估各縣市房價。"
+  },
+
+  "rateShockCode": {
+    "label": "一碼（升降息單位）",
+    "value": 0.25,
+    "unit": "百分點",
+    "status": "verified",
+    "legalBasis": "中央銀行政策利率調整以「碼」為單位，1 碼 = 0.25 個百分點",
+    "sourceUrl": "https://www.cbc.gov.tw/"
+  }
+}

@@ -1,0 +1,109 @@
+/* 股利課稅交叉點地圖：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-2);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+/* 官方試算排除股利所得者的聲明。用單據的「注意事項」腳位，不用彩色卡片。 */
+.app-lede--warn {
+  padding-block: var(--s-3) var(--s-4);
+  margin-top: var(--s-2);
+  border-top: 1px solid var(--rule-faint);
+  font-size: var(--t-sm);
+  color: var(--ink-3);
+}
+.app-lede--warn b { color: var(--ink); }
+
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: 0; margin-bottom: var(--s-2); }
+.fieldset .switch { margin-bottom: var(--s-2); }
+
+/* 四個以上的選項在 375px 上必須能換行，否則分段鈕會把側欄撐破 */
+.segmented--wrap { flex-wrap: wrap; }
+.segmented--wrap .segmented__opt { flex: 1 1 7rem; }
+
+.spouse-switch, .sandbox-switch { margin-top: var(--s-1); }
+.sandbox-switch { color: var(--warn); }
+
+/* 可重複列：逐筆配息 */
+.rows { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-2); }
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-end;
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+}
+.row .field { flex: 1 1 6.5rem; min-width: 0; margin-bottom: 0; }
+.row .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.row .field__control { padding: var(--s-1) var(--s-2); background: var(--sheet); }
+.row .field input { font-size: var(--t-sm); }
+.row__del {
+  appearance: none; border: 1px solid var(--rule-strong); background: var(--sheet);
+  color: var(--ink-3); cursor: pointer; height: 30px; width: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.row__del:hover { color: var(--up); border-color: var(--up); background: var(--up-wash); }
+
+/* 第二排讀數與第一排之間不再畫線，否則兩條規則之間像被切斷 */
+#readouts2 { border-top-style: dashed; border-top-color: var(--rule-faint); }
+
+/* .state 與 .ledger-wrap 自己帶 display，會蓋掉 hidden 屬性的 UA 樣式。
+   本 App 大量用 hidden 切換條件區塊，所以把它補回來。 */
+[hidden] { display: none !important; }
+
+/* 地圖：招牌視覺。提示氣泡掛在這個定位脈絡上。 */
+.plot { position: relative; }
+#mapCard .state { margin: var(--s-4); }
+
+/* 圖例上的色塊代表「一整區」，所以比線段厚，並帶邊框才看得出紙色 */
+.legend__key--area {
+  height: 12px;
+  width: 16px;
+  border: 1px solid var(--rule-strong);
+}
+.legend__key--hatch {
+  background-image: repeating-linear-gradient(
+    45deg, transparent 0 3px, var(--rule) 3px 4px
+  );
+}
+
+/* 沙盒：淡黃第二聯。視覺上與正式結果區隔，一眼看得出來不是現行法規。 */
+.sandbox {
+  background: var(--ply-2);
+  border-color: var(--ply-2-edge);
+}
+.sandbox .sheet__head {
+  background: color-mix(in srgb, var(--ply-2) 80%, var(--ink) 4%);
+  border-bottom-color: var(--ply-2-edge);
+}
+.chip--sandbox { border-color: var(--warn); color: var(--warn); background: transparent; }
+.sandbox__row {
+  display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4);
+  justify-content: space-between; align-items: baseline;
+  padding: var(--s-2) 0;
+  border-bottom: 1px dashed var(--ply-2-edge);
+}
+.sandbox__row:last-child { border-bottom: 0; }
+.sandbox__num { font-family: var(--font-mono); font-stretch: 75%; font-weight: 700; }
+
+/* 補充保費表：起扣與未起扣兩種列的區別要在灰階下也讀得出來 */
+.ledger tbody tr[data-off] td { color: var(--ink-3); }
+.ledger tbody tr[data-off] td:nth-child(3) { font-weight: 700; }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .app-lede { padding-inline: var(--s-3); }
+}

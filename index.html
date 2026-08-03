@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>看得見的錢｜台灣理財決策實驗室</title>
+<meta name="description" content="七個台灣人每年真的會遇到的財務決策，做成可以親手拖動、輸出分布與情境比較、每個數字都能攤開看法源的互動模型。純前端計算，資料不離開瀏覽器，不用登入。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="看得見的錢｜台灣理財決策實驗室">
+<meta property="og:description" content="房貸斷崖、預算天花板、勞保請領年齡、退休存活率、ETF 起始日運氣、股利課稅交叉點、除息填息。七張可以逐行核對的財務單據。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/tokens.css">
+<link rel="stylesheet" href="./assets/css/base.css">
+<link rel="stylesheet" href="./assets/css/components.css">
+<link rel="stylesheet" href="./assets/css/hub.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 訪客在第一個畫面看懂這是一疊什麼樣的單據、為什麼值得信任，並在幾秒內挑走他此刻真正需要的那一張。
+FIRST VIEWPORT: 一張封面單據佔滿上半，抬頭是套件名與資料版本；下面一行由真正的計算引擎當場算出的實例，證明這裡的數字是算出來的不是寫上去的；再下面就是七張單據的明細表，逐行印出。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#tools">跳到工具清單</a>
+
+<main class="wrap hub">
+
+  <!-- ============ 封面單據 ============ -->
+  <section class="sheet sheet--raised cover">
+    <div class="sheet__head">
+      <span class="cover__org">看得見的錢</span>
+      <span class="datestamp" id="dataver">資料版本 2026-08</span>
+      <span class="topbar__spacer"></span>
+      <span id="coverActions"></span>
+    </div>
+
+    <div class="cover__body">
+      <h1 class="cover__title">你的錢會怎麼走，<br>拖一下就看得到。</h1>
+      <p class="cover__lede">
+        七個台灣人每年真的會遇到的財務決策，做成可以親手操作的互動模型。
+        不用登入，計算全在你的瀏覽器裡跑。
+      </p>
+      <div class="btnrow">
+        <a class="btn" href="#tools">看七張單據</a>
+        <a class="btn btn--ghost" href="#how">為什麼是這七張</a>
+      </div>
+    </div>
+
+    <!-- 當場算給你看：這一行的數字是頁面載入時用同一套引擎算出來的 -->
+    <div class="proof" id="proof">
+      <div class="proof__label">現在用這套引擎算一次給你看</div>
+      <p class="proof__line" id="proofLine">計算中…</p>
+      <p class="proof__note" id="proofNote"></p>
+    </div>
+  </section>
+
+  <!-- ============ 七張單據明細 ============ -->
+  <section class="section" id="tools">
+    <h2>七張單據</h2>
+    <p class="section__lede">
+      每一張都對應一個具體的、有時間壓力的決定。挑你現在正在煩的那一張就好。
+    </p>
+    <ul class="docs" id="docs"></ul>
+  </section>
+
+  <!-- ============ 立場 ============ -->
+  <section class="section" id="how">
+    <h2>為什麼是這七張，以及它們跟別人不一樣的地方</h2>
+    <div class="terms">
+      <div class="term">
+        <h3>輸出分布與情境，不輸出一個數字</h3>
+        <p>市面上的試算工具給你一個答案就結束了。你真正要知道的是「我離那條線多遠」、「換一個起始日會差多少」、「如果升息兩碼還撐不撐得住」。所以這裡的每張單據都能同時攤開好幾個情境比較，而不是算一次清空一次。</p>
+      </div>
+      <div class="term">
+        <h3>資料不足就拒答</h3>
+        <p>樣本不夠、法規還沒上路、模型不適用的時候，畫面會直接說「這個問題現在回答不了」，並告訴你可以回答的範圍在哪裡。畫一個看起來很專業但其實沒有根據的圖，比不給還糟。</p>
+      </div>
+      <div class="term">
+        <h3>每個數字都能攤開看公式與法源</h3>
+        <p>每一張單據都有可以展開的算式抽屜，把代入的數值與依據的法條原文攤在你面前。稅率、級距、費率、給付係數全部放在有版本標記的常數檔裡，畫面上永遠看得到資料版本，而且你可以自己改。</p>
+      </div>
+      <div class="term">
+        <h3>資料不離開你的瀏覽器</h3>
+        <p>沒有帳號、沒有後端、沒有分析追蹤。你填的所得、貸款、年資只存在這台裝置的瀏覽器裡。要把情境傳給伴侶或行員，按「複製情境連結」把整組數字編進網址就好。</p>
+      </div>
+      <div class="term">
+        <h3>不做單向恐嚇，也不做單向鼓吹</h3>
+        <p>呈現壞情境的時候會同時給誠實的對照。例如把寬限期畫成一道斷崖，就必須同時說清楚「寬限期不會增加你的還款能力」；講配息不等於報酬，就必須同時呈現高股息在下跌年份現金流較穩定的一面。結論交還給你。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 法源與資料版本 ============ -->
+  <section class="section" id="sources">
+    <h2>資料版本與法源</h2>
+    <p class="section__lede">
+      法規會變，所以常數不寫死在程式碼裡，而是放在有版本標記、可覆寫的檔案中。以下是目前這一版採用的來源。
+    </p>
+    <div class="ledger-wrap ledger-wrap--auto">
+      <table class="ledger">
+        <thead><tr>
+          <th scope="col">常數檔</th><th scope="col">內容</th><th scope="col">資料時點</th>
+        </tr></thead>
+        <tbody id="srcRows"></tbody>
+      </table>
+    </div>
+    <p class="disclaimer">
+      本站為獨立試算工具，不是稅務、法律或投資建議，也不做任何導流或媒合。
+      正式金額以主管機關核定為準：綜合所得稅以財政部、勞保給付以勞動部勞工保險局、
+      補充保費以中央健康保險署、貸款條件以承貸銀行為準。
+      市場資料來自臺灣證券交易所公開資訊，僅供研究用途，不保證即時或無誤。
+    </p>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      看得見的錢．純靜態網站，原始碼公開。
+      <a href="https://github.com/fengfeng1021/visible-money-tw">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="./assets/js/vendor/gsap.min.js"></script>
+<script src="./assets/js/vendor/CustomEase.min.js"></script>
+<script src="./assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./assets/js/hub.js"></script>
+</body>
+</html>

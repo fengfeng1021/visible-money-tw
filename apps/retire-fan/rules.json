@@ -1,0 +1,197 @@
+{
+  "version": "2026-08",
+  "builtAt": "2026-08-03",
+  "note": "退休提領存活扇形所用的常數。分三類：『法規』是查得到條號的硬事實；『序列』是 assets/data/tw-returns.json 裡已查證的歷史年度報酬序列（本頁只放描述與出處，數字本身不重複一份）；『模型假設』是這個模擬器的假設，不是事實，全部標 unverified 且可由使用者覆寫。",
+  "dataFile": "../../assets/data/tw-returns.json",
+
+  "legal": [
+    {
+      "key": "laborInsuranceCpiTrigger",
+      "label": "勞保老年年金的物價調整門檻",
+      "value": 0.05,
+      "unit": "累計成長率",
+      "status": "verified",
+      "legalBasis": "勞工保險條例第 65-4 條：本保險之年金給付金額，於中央主計機關發布之消費者物價指數累計成長率達正負百分之五時，即依該成長率調整之。",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=N0050001&flno=65-4",
+      "note": "所以勞保年金會跟上通膨，但是階梯式、落後的，不是逐年連續調整。本模擬把它簡化成逐年跟上通膨，這會略為高估勞保年金的實質購買力。"
+    },
+    {
+      "key": "laborPensionNoCpiIndex",
+      "label": "勞退月退休金不隨物價調整",
+      "value": 0,
+      "unit": "調整機制",
+      "status": "verified",
+      "legalBasis": "勞工退休金條例第 23 條第 1 項第 1 款：月退休金為個人退休金專戶本金及累積收益，依據年金生命表，以平均餘命及利率等基礎計算所得之金額，作為定期發給之退休金。該條全文未設物價連動調整機制。",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=N0030020&flno=23",
+      "note": "這是台灣退休現金流最容易被忽略的結構差異：同樣是政府給的地板，勞保會跟上通膨、勞退不會。兩者在本 App 分開設定。"
+    },
+    {
+      "key": "lifeExpectancyAtBirth",
+      "label": "國人平均壽命（0 歲平均餘命）",
+      "value": 80.77,
+      "male": 77.42,
+      "female": 84.3,
+      "unit": "歲",
+      "status": "verified",
+      "legalBasis": "內政部 113 年簡易生命表（內政統計通報 114 年第 34 週）",
+      "sourceUrl": "https://www.moi.gov.tw/News_Content.aspx?n=4&s=330934",
+      "note": "這是出生時的平均壽命，不是 65 歲的平均餘命。已經活到 65 歲的人，可期待的終齡一定高於這個數字。"
+    },
+    {
+      "key": "lifeExpectancyAt65",
+      "label": "65 歲平均餘命",
+      "value": 18.35,
+      "male": 18.35,
+      "female": 22.41,
+      "unit": "年",
+      "display": "男 18.35 年／女 22.41 年",
+      "status": "verified",
+      "legalBasis": "內政部 113 年簡易生命表分齡表：65 歲男性平均餘命 18.35 年、女性 22.41 年，即平均活到約 83.4 歲與 87.4 歲。60／70／75／80 歲的分齡餘命同表，已收錄於 assets/data/tw-returns.json 的 lifeTable。",
+      "sourceUrl": "https://www.moi.gov.tw/cl.aspx?n=2953",
+      "note": "這是期間生命表（period life table），只反映 113 年當年各年齡層的死亡率，不含未來死亡率改善，用在 30 年退休模擬會系統性低估存活年數。而且平均餘命是期望值，約一半的人會活得更久，所以計畫終齡設在平均餘命之上才是保守的。"
+    }
+  ],
+
+  "series": [
+    {
+      "key": "taiexTotalReturn",
+      "label": "台股含息年度報酬序列",
+      "span": "2004-2025",
+      "n": 22,
+      "display": "22 個年度（2004-2025）",
+      "status": "verified",
+      "role": "歷史區塊拔靴法的預設抽樣池",
+      "legalBasis": "臺灣證券交易所發行量加權股價報酬指數（含息）年度報酬率。資料檔原文的但書：只有 22 個完整年度，而且這 22 年幾乎全落在台股結構性多頭（累積約 10.2 倍）。直接對它做拔靴抽樣會顯著高估期望報酬並低估尾端風險。使用時必須揭露樣本期間與筆數。",
+      "sourceUrl": "https://www.twse.com.tw/rwd/zh/TAIEX/MFI94U?date=20251231&response=json"
+    },
+    {
+      "key": "sp500TotalReturn",
+      "label": "S&P 500 含息年度報酬序列",
+      "span": "1928-2025",
+      "n": 98,
+      "display": "98 個年度（1928-2025）",
+      "status": "verified",
+      "role": "較厚的替代抽樣池",
+      "legalBasis": "Damodaran（NYU Stern）公開資料集。資料檔原文的但書：作為樣本較厚的替代抽樣池。它不是台股，幣別與稅制也不同，只能當作「長期股票報酬長什麼樣子」的參照。美元計價名目報酬，未做台幣避險或匯率轉換。",
+      "sourceUrl": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/histretSP.xls"
+    },
+    {
+      "key": "ust10yTotalReturn",
+      "label": "美國 10 年期公債含息年度報酬序列",
+      "span": "1928-2025",
+      "n": 98,
+      "display": "98 個年度（1928-2025）",
+      "status": "verified",
+      "role": "歷史模式的債券那一腳（與股票同年度配對抽樣）",
+      "legalBasis": "Damodaran（NYU Stern）公開資料集。資料檔原文的但書：這是以殖利率對固定 10 年到期債券重新定價加票息推算的模型化報酬，不是實際可投資指數，未扣違約損失、稅與交易成本，存續期間固定不變。對標實際債券 ETF 會有系統性偏差。台灣公債沒有可引用的長序列，所以歷史模式的債券只能用它替代。",
+      "sourceUrl": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/histretSP.xls"
+    },
+    {
+      "key": "twCPI",
+      "label": "臺灣 CPI 年增率序列",
+      "span": "1996-2025",
+      "n": 30,
+      "display": "30 個年度（1996-2025）",
+      "status": "verified",
+      "role": "通膨抽樣池（可改回固定值）",
+      "legalBasis": "行政院主計總處消費者物價指數年增率（官方銜接表，跨基期已由主計總處處理）。這 30 年的算術平均是 1.22%，最高 3.54%（2008）、最低 −0.88%（2009），沒有涵蓋任何一段高通膨時期。",
+      "sourceUrl": "https://ws.dgbas.gov.tw/001/Upload/463/relfile/10315/2670/cpispl.ods"
+    }
+  ],
+
+  "assumptions": [
+    {
+      "key": "stock",
+      "label": "股票：年報酬平均數／標準差",
+      "mu": 0.07,
+      "sigma": 0.18,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設，不是查證過的歷史統計。台股 2004-2025 那 22 年的算術平均是 14.15%、標準差 24.47%，但那 22 年幾乎全在多頭，直接拿來當 μ 會高估；這裡刻意不採用它，維持一個由你判斷並覆寫的保守數字。只在『參數化常態』模式生效。"
+    },
+    {
+      "key": "bond",
+      "label": "債券：年報酬平均數／標準差",
+      "mu": 0.025,
+      "sigma": 0.06,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設，同上。只在『參數化常態』模式生效；歷史模式的債券改用美國 10 年期公債的模型化年度報酬（與股票同年度配對抽樣）。"
+    },
+    {
+      "key": "cash",
+      "label": "現金：年報酬（無波動）",
+      "mu": 0.013,
+      "sigma": 0,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設。台灣銀行一年期定存利率量級，未逐日查證。現金在本模型視為零波動，所以它的風險完全表現在跑不贏通膨。"
+    },
+    {
+      "key": "correlation",
+      "label": "股債相關係數 ρ",
+      "value": 0.15,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設。實務上 ρ 不是常數，2022 年股債同跌就是反例。只在『參數化常態』模式生效；歷史模式不用 ρ，股債的共動關係直接來自同一批年度的實際序列。"
+    },
+    {
+      "key": "inflation",
+      "label": "通膨假設",
+      "value": 0.02,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設，是『固定通膨』選項的預設值。你也可以改用主計總處 CPI 年增率 1996-2025 的 30 個年度做抽樣，但那 30 年的平均只有 1.22%，沒有涵蓋任何一段高通膨時期，抽出來的通膨會偏低，對退休模擬是樂觀方向。"
+    },
+    {
+      "key": "safeWithdrawalRate",
+      "label": "4% 法則的首年提領率",
+      "value": 0.04,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "4% 不是台灣法規，也不是本工具查證過的研究結論。它來自以美國長期股債序列為基礎的英文圈研究，直接套到台灣、且不含勞保勞退地板的情況下並不成立。本 App 只把它畫成一條參考線。"
+    },
+    {
+      "key": "guardrail",
+      "label": "動態護欄門檻（Guyton-Klinger 簡化版）",
+      "upper": 1.2,
+      "lower": 0.8,
+      "cut": 0.1,
+      "raise": 0.1,
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "模型假設。當年提領率超過初始提領率的 1.2 倍就砍 10%，低於 0.8 倍就加 10%。原始 Guyton-Klinger 規則比這複雜。"
+    },
+    {
+      "key": "crashShape",
+      "label": "退休前五年大跌的年報酬形狀",
+      "shape": [-0.36, -0.22, 0.05, -0.12, 0.08],
+      "status": "unverified",
+      "legalBasis": null,
+      "sourceUrl": null,
+      "note": "這不是任何一段真實歷史。它是一個形狀假設，會被等比縮放到你指定的五年累計跌幅，只在『參數化常態』模式生效。切到歷史模式時，前五年改成直接套用所選抽樣池裡實際最差的連續 5 年，跌幅由資料決定，不再由滑桿決定。"
+    }
+  ],
+
+  "refusals": [
+    {
+      "key": "twBondSeries",
+      "label": "台灣公債／投資等級債的長期年度報酬序列",
+      "reason": "沒有可逐年驗證的公開官方序列，所以歷史模式的債券那一腳只能用美國 10 年期公債的模型化報酬（Damodaran）替代。它是美元計價、且是以殖利率重新定價推算的模型值，不是實際可投資指數，也沒有台幣避險。",
+      "answerable": "股票那一腳可以用台股含息報酬指數 2004-2025 的真實年度序列；債券只能標明是替代品。"
+    },
+    {
+      "key": "globalEquitySeries",
+      "label": "全球股票（MSCI World）年度報酬序列",
+      "reason": "完整年度序列受授權限制，無法從公開官方頁面逐年驗證，因此本 App 刻意不提供，避免捏造。較厚的抽樣池只能用 S&P 500，它是單一國家市場，不等於全球分散。",
+      "answerable": "台股 22 年、或 S&P 500 98 年，兩者都明說各自的限制。"
+    }
+  ]
+}

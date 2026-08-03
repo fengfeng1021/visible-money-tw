@@ -1,0 +1,124 @@
+/* 台股 ETF 起始日樂透：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-4);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); min-width: 0; }
+.fieldset legend { padding: 0; }
+.rows__error { display: block; }
+.rows__error:empty { display: none; }
+
+/* --- 標的清單：一列一檔，右側標示可回答的最長視窗 --------------------- */
+.tickers { display: flex; flex-direction: column; gap: 1px; margin-bottom: var(--s-2); }
+
+.tk {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+  cursor: pointer;
+  user-select: none;
+  min-width: 0;
+}
+.tk:hover { border-color: var(--rule-strong); }
+.tk input { position: absolute; opacity: 0; width: 0; height: 0; }
+/* 勾選方格：單據上的打勾格，方形 */
+.tk__box {
+  width: 16px; height: 16px;
+  flex: 0 0 auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  position: relative;
+}
+.tk input:checked + .tk__box { background: var(--accent); border-color: var(--accent); }
+.tk input:checked + .tk__box::after {
+  content: "";
+  position: absolute;
+  left: 4px; top: 0;
+  width: 6px; height: 11px;
+  border-right: 2px solid var(--accent-ink);
+  border-bottom: 2px solid var(--accent-ink);
+  transform: rotate(42deg);
+}
+.tk input:focus-visible + .tk__box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tk__key {
+  width: 3px;
+  align-self: stretch;
+  flex: 0 0 auto;
+  background: var(--rule);
+}
+.tk__id {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  flex: 0 0 auto;
+}
+.tk__name {
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tk__span {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.tk[data-short="1"] .tk__span { color: var(--warn); font-weight: 700; }
+
+.nhi-switch { margin-bottom: var(--s-1); }
+
+/* --- 招牌視覺：直方圖上、箱型圖疊在同一張畫布 ------------------------- */
+.plot__stack { position: relative; }
+.readout-row--tight { border-top: 0; padding-top: 0; }
+
+/* 拒答面板：與圖表隔開，讓它像被蓋了一個空章 */
+.state--refuse { background: var(--sheet); }
+.state--refuse .state__body b { color: var(--ink); }
+
+/* 共用元件有自己的 display，[hidden] 會被蓋掉，這裡把它補回來 */
+.state[hidden], .field[hidden], .btn[hidden], .legend[hidden] { display: none; }
+
+/* 分位表在窄螢幕上靠 .ledger-wrap 自己的 overflow 捲動，不外溢 */
+#tableCard .ledger td:first-child {
+  font-weight: 700;
+  color: var(--ink);
+  position: sticky;
+  left: 0;
+  background: var(--sheet);
+  border-right: 1px solid var(--rule-faint);
+}
+#tableCard .ledger tbody tr:hover td:first-child { background: var(--accent-wash); }
+
+.q-key {
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-right: 4px;
+  vertical-align: 0;
+}
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .app-lede { padding-inline: var(--s-3); }
+}

@@ -1,0 +1,8 @@
+node_modules/
+.shots/
+tools/*.log
+_constants.json
+_slate.json
+.DS_Store
+Thumbs.db
+.claude/

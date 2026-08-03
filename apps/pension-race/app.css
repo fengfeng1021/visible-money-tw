@@ -1,0 +1,132 @@
+/* 勞保年金請領年齡賽跑：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+/* --- 折疊式輔助區：月薪換算、進階假設 ------------------------------------ */
+.helper {
+  border: 1px solid var(--rule-faint);
+  border-top: 1px solid var(--rule);
+  background: var(--sheet-sunk);
+  margin-bottom: var(--s-5);
+}
+.helper > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.helper > summary::-webkit-details-marker { display: none; }
+.helper > summary::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-2) var(--ease-out);
+  flex: 0 0 auto;
+}
+.helper[open] > summary::before { transform: rotate(45deg); }
+.helper__body {
+  padding: var(--s-3);
+  border-top: 1px dashed var(--rule);
+  background: var(--sheet);
+}
+.helper__body > :last-child { margin-bottom: 0; }
+.helper .field:last-of-type { margin-bottom: var(--s-3); }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-4); }
+.fieldset legend { padding: 0; }
+.fieldset .field__hint { margin-top: var(--s-2); }
+
+/* 停用中的欄位（例如未開啟物價調整時的通膨率） */
+.field--tight { margin-top: var(--s-3); }
+.field[data-disabled] .field__hint { color: var(--ink-3); }
+
+.slider .field__hint { margin-top: var(--s-2); }
+
+/* --- 賽跑圖上的交叉點標籤 ------------------------------------------------- */
+.plot { position: relative; }
+.cross-tag {
+  position: absolute;
+  z-index: 3;
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  padding: 2px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--lift-1);
+  opacity: 0;
+}
+.cross-tag[data-lead="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* 壽命游標的把手：貼著 X 軸，也是「這條線可以拖」的提示 */
+.life-tag {
+  position: absolute;
+  z-index: 4;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: var(--lift-1);
+}
+
+.plot__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  align-items: center;
+  justify-content: space-between;
+}
+.plot__desc { margin: 0; font-size: var(--t-xs); color: var(--ink-3); max-width: 44em; }
+.plot__actions { flex: 0 0 auto; }
+
+/* 圖面本身就是壽命游標的拖曳區 */
+#chart { cursor: ew-resize; touch-action: pan-y; }
+
+/* --- 年齡表：勝出那一列 --------------------------------------------------- */
+.ledger tbody tr[data-best] td { background: var(--accent-wash); }
+.ledger tbody tr[data-best] td:first-child { font-weight: 700; color: var(--accent); }
+.ledger tbody tr[data-legal] td:first-child::after {
+  content: " 法定";
+  font-family: var(--font-cjk);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+
+/* --- 未驗證常數的標記 ----------------------------------------------------- */
+.chip--unverified { border-style: dashed; color: var(--stamp-void); }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .plot__foot { flex-direction: column; align-items: flex-start; }
+}

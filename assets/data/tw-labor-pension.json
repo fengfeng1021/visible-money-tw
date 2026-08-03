@@ -1,0 +1,55 @@
+{
+  "version": "2026-08",
+  "verifiedAt": "2026-08-03",
+  "note": "勞工保險老年給付。投保薪資分級表與最低工資自 115 年 1 月 1 日施行；年金物價指數調整自 115 年 5 月起生效。",
+  "formulaA": { "ratePct": 0.775, "addon": 3000 },
+  "formulaB": { "ratePct": 1.55 },
+  "deferred": { "perYearPct": 4, "maxPct": 20, "maxYears": 5 },
+  "early": { "perYearPct": 4, "maxPct": 20, "maxYears": 5 },
+  "annuityMinYears": 15,
+  "specialWorkAge": 55,
+  "avgSalaryMonthsAnnuity": 60,
+  "avgSalaryMonthsLegacyLumpsum": 36,
+  "claimAgeByBirthYear": [
+    { "birthYearROC": "46以前", "legalAge": 60, "earliestAge": 55 },
+    { "birthYearROC": "47", "legalAge": 61, "earliestAge": 56 },
+    { "birthYearROC": "48", "legalAge": 62, "earliestAge": 57 },
+    { "birthYearROC": "49", "legalAge": 63, "earliestAge": 58 },
+    { "birthYearROC": "50", "legalAge": 64, "earliestAge": 59 },
+    { "birthYearROC": "51以後", "legalAge": 65, "earliestAge": 60 }
+  ],
+  "insuredSalary": {
+    "grade1": 29500,
+    "max": 45800,
+    "grades": [29500, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800],
+    "occupationalMax": 72800
+  },
+  "lumpsum": {
+    "oldAgeLumpsumMonthsPerYear": 1,
+    "oldAgeLumpsumPost60YearsCap": 5,
+    "legacyMonthsFirst15": 1,
+    "legacyMonthsAfter15": 2,
+    "legacyMonthsCap": 45,
+    "legacyMonthsCapWithPost60": 50
+  },
+  "cpiAdjust": { "thresholdPct": 5, "applied2026Pct": 6.46 },
+  "minimumWage2026": { "monthly": 29500, "hourly": 196 },
+  "laborPensionMonthlyAnnuityInterestRatePct": 1.1473,
+  "traps": [
+    "年資未滿 15 年不得請領年金，只能請一次金。必須主動偵測並切換整個介面，不要算出一個不存在的月退。",
+    "提前請領的前提是年資已滿 15 年；年齡不足但年資已滿的可選區間要正確裁切。",
+    "投保薪資上限 45,800 會壓縮高薪者的年金。實際月薪高於上限時要明講「你的實際月薪不影響年金，因為已頂到級距天花板」。",
+    "CPI 調整是累計成長率達 5% 才調整，不是每年調，不可用固定通膨率外推。",
+    "老年一次金（年金制下）與一次請領老年給付（舊制）的給付月數規則差異極大，必須先讓使用者選擇適用制度。"
+  ],
+  "sources": [
+    {
+      "label": "勞工保險條例第 58 條、第 58-1 條、第 58-2 條",
+      "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001"
+    },
+    {
+      "label": "勞動部勞工保險局－老年給付",
+      "url": "https://www.bli.gov.tw/"
+    }
+  ]
+}

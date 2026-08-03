@@ -1,0 +1,179 @@
+/* 買房預算天花板：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: var(--s-1); margin-bottom: 0; }
+
+/* 自備款是七位數，共用的 5.5ch 放不下，這裡加寬到 8ch。 */
+.slider .slider__twin input { width: 8ch; }
+.slider .field__hint { margin-top: var(--s-1); }
+
+.bonus-switch { margin-bottom: var(--s-1); }
+#bonusHint { margin-bottom: var(--s-5); }
+.app-reset { margin-top: var(--s-5); }
+
+/* ==========================================================================
+   招牌視覺 1：安全房價上限量表
+   長度＝上限金額。顏色不編碼任何東西，一律強調色。
+   ========================================================================== */
+.gauge {
+  padding: var(--s-3) var(--s-4) var(--s-2);
+  border-top: 1px solid var(--rule-faint);
+  overflow: hidden;
+}
+.gauge__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.gauge__label { font-size: var(--t-sm); font-weight: 600; color: var(--ink-2); }
+.gauge__value {
+  font-size: var(--t-3xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--accent);
+}
+.gauge__value small { font-size: var(--t-lg); font-weight: 600; margin-left: 0.1em; }
+
+.gauge__track {
+  position: relative;
+  height: 22px;
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+}
+.gauge__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--accent);
+  border-right: 2px solid var(--ink);
+}
+/* 全國中位數住宅價格的騎縫標記 */
+.gauge__median {
+  position: absolute;
+  top: -1px; bottom: -1px;
+  width: 0;
+  border-left: 1px dashed var(--ink-2);
+}
+.gauge__median--flip .gauge__medianLabel { left: auto; right: 3px; }
+.gauge__medianLabel {
+  position: absolute;
+  left: 3px; top: 100%;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.gauge__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-4);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  letter-spacing: -0.02em;
+}
+
+/* ==========================================================================
+   招牌視覺 2：三個壓力情境鈕。方形、無圓角，按下就是壓力被施加。
+   ========================================================================== */
+.stressbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-4) var(--s-3);
+}
+.stressbar__label {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-right: var(--s-1);
+}
+.stress {
+  appearance: none;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  color: var(--ink-2);
+  font-family: var(--font-cjk);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  padding: var(--s-1) var(--s-3);
+  min-height: 34px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-1) var(--ease-out),
+              color var(--dur-1) var(--ease-out),
+              border-color var(--dur-1) var(--ease-out);
+}
+.stress:hover { background: var(--sheet); color: var(--ink); border-color: var(--ink-3); }
+/* 按下＝選取，跟全站的勾選格同一個狀態語彙，用強調色。
+   紅色在這套系統裡只代表「增加／流入」，不能拿來當開關的開啟狀態。 */
+.stress[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================================================
+   表格與說明
+   ========================================================================== */
+/* 這兩張圖的圖例不可切換，不要給假的可點手勢 */
+#legend .legend__item, #legend2 .legend__item { cursor: default; }
+
+.ledger-wrap--short { max-height: 20rem; }
+.ledger .is-est { color: var(--ink-3); }
+/* 「到得了」用唯一的強調色，不用紅綠燈：紅綠在本站只表示流入與流出 */
+.ledger .is-reach { color: var(--accent); font-weight: 700; }
+.ledger td.cell-note {
+  text-align: left;
+  color: var(--ink-3);
+  font-family: var(--font-cjk);
+  font-size: var(--t-xs);
+  white-space: normal;
+  min-width: 8rem;
+}
+.ledger tr[data-you] td { background: var(--accent-wash); font-weight: 700; }
+.ledger tr[data-you] td:first-child { color: var(--accent); }
+
+.dbr-row { border-top: 0; padding-top: 0; margin-bottom: var(--s-4); }
+#dbrNote p { margin-bottom: var(--s-2); }
+#dbrNote p:last-child { margin-bottom: 0; }
+
+.plainlist { margin: 0; padding-left: 1.15em; }
+.plainlist li { margin-bottom: var(--s-1); max-width: var(--measure); }
+.plainlist li:last-child { margin-bottom: 0; }
+
+.state--refuse { margin-bottom: var(--s-4); }
+/* .state 是 display:flex，會蓋掉瀏覽器對 [hidden] 的預設樣式 */
+.state[hidden] { display: none; }
+
+/* 行動裝置：讀數兩欄、量表數字收小，避免六位數把版面撐破 */
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .gauge__value { font-size: var(--t-2xl); }
+  .gauge__value small { font-size: var(--t-md); }
+  .stressbar { gap: var(--s-1); }
+  .stress { flex: 1 1 auto; padding-inline: var(--s-2); font-size: var(--t-xs); }
+}

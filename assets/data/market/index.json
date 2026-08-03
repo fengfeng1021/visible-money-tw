@@ -1,0 +1,57 @@
+{
+  "builtAt": "2026-08-03",
+  "dataFloor": "2010-01",
+  "tickers": [
+    {
+      "id": "0050",
+      "name": "元大台灣50",
+      "listed": "2003-06-30",
+      "firstDate": "2010-01-04",
+      "lastDate": "2026-08-03",
+      "months": 200,
+      "adjustments": 27,
+      "anomalies": 1
+    },
+    {
+      "id": "006208",
+      "name": "富邦台50",
+      "listed": "2012-07-17",
+      "firstDate": "2012-07-17",
+      "lastDate": "2026-08-03",
+      "months": 170,
+      "adjustments": 24,
+      "anomalies": 0
+    },
+    {
+      "id": "0056",
+      "name": "元大高股息",
+      "listed": "2007-12-26",
+      "firstDate": "2010-01-04",
+      "lastDate": "2026-08-03",
+      "months": 200,
+      "adjustments": 25,
+      "anomalies": 0
+    },
+    {
+      "id": "00878",
+      "name": "國泰永續高股息",
+      "listed": "2020-07-20",
+      "firstDate": "2020-07-20",
+      "lastDate": "2026-08-03",
+      "months": 74,
+      "adjustments": 23,
+      "anomalies": 0
+    },
+    {
+      "id": "00919",
+      "name": "群益台灣精選高息",
+      "listed": "2022-10-20",
+      "firstDate": "2022-10-20",
+      "lastDate": "2026-08-03",
+      "months": 47,
+      "adjustments": 13,
+      "anomalies": 0
+    }
+  ],
+  "filledAt": "2026-08-03"
+}

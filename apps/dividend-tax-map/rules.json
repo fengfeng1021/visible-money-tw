@@ -1,0 +1,95 @@
+{
+  "version": "2026-08",
+  "note": "股利課稅與二代健保補充保費常數。每一項附法源與出處；查不到公告者標為 unverified，UI 上會明白說出它沒被計入。",
+  "years": {
+    "114": {
+      "label": "114 年度（115 年 5 月申報）",
+      "status": "verified",
+      "exemption": 97000,
+      "exemption70": 145500,
+      "standardSingle": 131000,
+      "standardCouple": 262000,
+      "salaryCap": 218000,
+      "disabledCap": 218000,
+      "savingsCap": 270000,
+      "mortgageCap": 300000,
+      "longTermCareCap": 180000,
+      "rentCap": 180000,
+      "basicLiving": 213000,
+      "basicLivingStatus": "verified",
+      "brackets": [
+        { "upTo": 590000, "rate": 0.05, "quick": 0 },
+        { "upTo": 1330000, "rate": 0.12, "quick": 41300 },
+        { "upTo": 2660000, "rate": 0.2, "quick": 147700 },
+        { "upTo": 4980000, "rate": 0.3, "quick": 413700 },
+        { "upTo": null, "rate": 0.4, "quick": 911700 }
+      ],
+      "legalBasis": "所得稅法第 5 條、第 5 條之 1、第 17 條；財政部 114 年 11 月 27 日台財稅字第 1140466407 號公告「114 年度綜合所得稅及所得基本稅額相關免稅額、扣除額、課稅級距及計算退職所得定額免稅之金額」。累進差額由公告之「課徵 X 元，加超過 Y 元部分之 Z%」逐級推導。",
+      "sourceUrl": "https://www.dot.gov.tw/singlehtml/ch26?cntId=f55dca4144f54f7195a5ddfce4c08fbe",
+      "basicLivingBasis": "納稅者權利保護法第 4 條；財政部 114 年 11 月 27 日公告 114 年度每人基本生活所需之費用金額為 213,000 元。",
+      "basicLivingUrl": "https://www.mof.gov.tw/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=e14d053486394dc6b28c88aba2912f83"
+    },
+    "115": {
+      "label": "115 年度（116 年 5 月申報）",
+      "status": "verified",
+      "exemption": 101000,
+      "exemption70": 151500,
+      "standardSingle": 136000,
+      "standardCouple": 272000,
+      "salaryCap": 227000,
+      "disabledCap": 227000,
+      "savingsCap": 270000,
+      "mortgageCap": 300000,
+      "longTermCareCap": 180000,
+      "rentCap": 180000,
+      "basicLiving": null,
+      "basicLivingStatus": "unverified",
+      "brackets": [
+        { "upTo": 610000, "rate": 0.05, "quick": 0 },
+        { "upTo": 1380000, "rate": 0.12, "quick": 42700 },
+        { "upTo": 2770000, "rate": 0.2, "quick": 153100 },
+        { "upTo": 5190000, "rate": 0.3, "quick": 430100 },
+        { "upTo": null, "rate": 0.4, "quick": 949100 }
+      ],
+      "legalBasis": "所得稅法第 5 條、第 5 條之 1、第 17 條；財政部公告「115 年度綜合所得稅及所得基本稅額相關免稅額、扣除額、課稅級距及計算退職所得定額免稅之金額」（115 年度適用之平均消費者物價指數較 113 年度上漲 4.13%，達應調整標準）。累進差額由公告級距與稅率逐級推導。",
+      "cpiIndexedNote": "115 年度只有 6 類項目隨 CPI 調整：免稅額、標準扣除額、薪資所得特別扣除額、身心障礙特別扣除額、課稅級距、退職所得定額免稅。儲蓄投資 27 萬、購屋借款利息 30 萬、長照 18 萬、房屋租金 18 萬、幼兒學前、教育學費都是法定固定金額，115 年度與 114 年度相同，不隨 4.13% 調整。把所有數字一律乘 1.0413 是最常見的實作錯誤。",
+      "sourceUrl": "https://www.mof.gov.tw/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=34b463dc8f1b49f29d440d92a6fd5139",
+      "basicLivingBasis": "納稅者權利保護法第 4 條。115 年度每人基本生活所需之費用金額通常於 115 年 11 月才公告，本工具查證時尚未公告，因此 115 年度不計入基本生活費差額。",
+      "basicLivingUrl": "https://www.mof.gov.tw/singlehtml/384fb3077bb349ea973e7fc6f13b6974"
+    }
+  },
+  "dividend": {
+    "status": "verified",
+    "creditRate": 0.085,
+    "creditCap": 80000,
+    "separateRate": 0.28,
+    "wholeHouseholdOnly": true,
+    "separateForfeitsDeductions": ["longTermCare", "rentDeduction"],
+    "forfeitLegalBasis": "所得稅法第 17 條第 3 項：納稅義務人選擇股利及盈餘按 28% 單一稅率分開計算稅額者，不適用長期照顧特別扣除額與房屋租金支出特別扣除額。同項還有另外兩道排富（減除該扣除額後適用稅率在 20% 以上、或基本所得額超過規定扣除金額），本工具不自動判定，但會在你填了金額時提醒。幼兒學前特別扣除額自 113 年度起已取消排富，不在此列。",
+    "forfeitSourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=17",
+    "legalBasis": "所得稅法第 15 條第 4 項、第 5 項，自 107 年度施行：全戶股利及盈餘合計金額按 8.5% 計算可抵減稅額，抵減應納稅額，每一申報戶以 8 萬元為限；或不併入綜合所得總額，按 28% 單一稅率分開計算應納稅額，二者擇一適用。二者必須就整個申報戶的全部股利擇一，不能部分合併、部分分開。",
+    "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=G0340003&flno=15"
+  },
+  "nhi": {
+    "status": "verified",
+    "rate": 0.0211,
+    "floor": 20000,
+    "singleCap": 10000000,
+    "legalBasis": "全民健康保險法第 31 條及全民健康保險扣取及繳納補充保險費辦法：股利所得單次給付金額達 2 萬元者，由扣費義務人於給付時按補充保險費率扣取；單次給付金額超過 1,000 萬元者，以 1,000 萬元計。補充保險費率 2.11% 自 110 年 1 月 1 日起適用。",
+    "sourceUrl": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=L0060001&flno=31"
+  },
+  "nhiAnnualSandbox": {
+    "status": "unverified",
+    "rate": 0.0211,
+    "annualFloor": 20000,
+    "annualCap": 50000000,
+    "haltedOn": "2025-11-06",
+    "legalBasis": "衛福部曾研議將股利、利息、租金改採「年度累計制」，一年累計逾 2 萬元即計收 2.11%，扣繳上限自 1,000 萬元提高為 5,000 萬元。行政院已於 2025-11-06 指示暫緩，法條未修正、施行日與細節（是全額計收或僅就超過部分計收）均未定案。本區塊僅為假設情境，不是現行法規。",
+    "sourceUrl": "https://www.mohw.gov.tw/"
+  },
+  "official": {
+    "label": "財政部電子申報繳稅服務網",
+    "note": "財政部提供之綜合所得稅簡易試算服務，明文排除有股利所得等情形者適用；本工具為獨立試算，正式稅額以稽徵機關核定為準。",
+    "url": "https://tax.nat.gov.tw/"
+  }
+}

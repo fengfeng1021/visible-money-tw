@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>股利課稅交叉點地圖｜看得見的錢</title>
+<meta name="description" content="股利要勾合併計稅 8.5% 抵減，還是分開計稅 28%？不給你一個答案，給你一張二維地圖：看見自己站在哪一區、離翻轉點還有多少股利，以及 8.5% 抵減撞到 8 萬上限時那道折點。純前端計算，報稅資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="股利課稅交叉點地圖｜看得見的錢">
+<meta property="og:description" content="合併計稅還是分開計稅？一張地圖告訴你離翻轉點多遠，以及 8 萬抵減上限在哪裡開始咬人。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者拖動股利與其他所得兩支滑桿，看著自己那一點在地圖上移動；越過分界線的瞬間底色翻面、結論被改寫、硃砂章重蓋一次。他讀到的不是「答案是合併」，而是「我離翻盤還有 37.8 萬股利，而且 94.1 萬那道折點就長在我旁邊」。最後攤開算式核對每一格數字的法條與代入值，再把這張單子傳給配偶或記帳士。
+FIRST VIEWPORT: 單據抬頭（名稱＋適用年度與資料版本徽章）在最上；其下左欄是一疊填寫格與兩支主滑桿，右欄先是結論卡與硃砂章、四格讀數，接著是佔畫面主體的二維決策地圖——淡藍區「合併較省」、淡黃區「分開較省」，中間那條在 94.1 萬處明顯彎折的分界線，以及硃砂色的「你在這裡」與一條指向分界線的最短距離虛線。手機改單欄：地圖在上、填寫格在下。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">股利課稅交叉點地圖</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      五月報稅那一格，股利要勾「合併計稅、按 8.5% 抵減」還是「分開計稅、28% 單一稅率」？
+      這裡不只給你一個答案。拖動下面兩支滑桿，看你那一點在地圖上往哪一區走，
+      以及每戶 8 萬的抵減上限，是怎麼在股利 94.1 萬那裡把整條分界線折彎的。
+    </p>
+    <p class="app-lede app-lede--warn">
+      <b>本工具為獨立試算，正式稅額以稽徵機關核定為準。</b>
+      財政部的綜合所得稅簡易試算服務明文排除有股利所得者適用，這也是本工具存在的理由。
+      官方申報與試算請至 <a id="officialLink" href="https://tax.nat.gov.tw/" rel="noopener noreferrer" target="_blank">財政部電子申報繳稅服務網</a>。
+    </p>
+  </section>
+
+  <div class="workbench">
+
+    <!-- ============ 輸入：單據上要填的格子 ============ -->
+    <form class="workbench__inputs sheet" id="inputs" autocomplete="off">
+      <div class="sheet__head"><h2 class="sheet__title">填寫</h2></div>
+      <div class="sheet__body">
+
+        <fieldset class="fieldset">
+          <legend class="field__label">申報年度</legend>
+          <div class="segmented segmented--block" id="seg-year" role="group">
+            <button type="button" class="segmented__opt" data-value="114" aria-pressed="false">114 年度</button>
+            <button type="button" class="segmented__opt" data-value="115" aria-pressed="true">115 年度</button>
+          </div>
+          <p class="field__hint" id="yearHint">切換年度會同時換掉免稅額、扣除額、級距與累進差額，不是只換級距。</p>
+        </fieldset>
+
+        <div class="slider" id="s-dividend">
+          <div class="slider__top">
+            <span class="slider__label" id="l-dividend">全年股利所得</span>
+            <span class="slider__value" aria-hidden="true">100<small>萬</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="0" max="3000000" step="10000" value="1000000" aria-labelledby="l-dividend">
+          </div>
+          <div class="slider__ticks"><span>0</span><span>100萬</span><span>200萬</span><span>300萬</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">全年股利所得（元，數字輸入）</span>
+            <input type="text" inputmode="numeric" value="1000000">
+            <span class="field__unit">元</span>
+          </label>
+        </div>
+
+        <div class="slider" id="s-salary">
+          <div class="slider__top">
+            <span class="slider__label" id="l-salary">薪資所得（本人）</span>
+            <span class="slider__value" aria-hidden="true">480<small>萬</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="0" max="12000000" step="20000" value="4800000" aria-labelledby="l-salary">
+          </div>
+          <div class="slider__ticks"><span>0</span><span>300萬</span><span>600萬</span><span>900萬</span><span>1200萬</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">薪資所得（本人）（元，數字輸入）</span>
+            <input type="text" inputmode="numeric" value="4800000">
+            <span class="field__unit">元</span>
+          </label>
+        </div>
+
+        <div class="fieldgrid fieldgrid--2">
+          <label class="field" id="f-interest">
+            <span class="field__label">利息所得（存款）</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">元</span>
+            </span>
+            <span class="field__hint">用來算儲蓄投資特別扣除額</span>
+            <span class="field__error"></span>
+          </label>
+          <label class="field" id="f-other">
+            <span class="field__label">其他各類所得</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">元</span>
+            </span>
+            <span class="field__hint">租金、執行業務、稿費等</span>
+            <span class="field__error"></span>
+          </label>
+        </div>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">申報戶</legend>
+          <label class="switch spouse-switch">
+            <input type="checkbox" id="chk-spouse">
+            <span class="switch__box"></span>
+            <span>有配偶（標準扣除額加倍）</span>
+          </label>
+
+          <div id="spouseBox" hidden>
+            <div class="slider" id="s-salary2">
+              <div class="slider__top">
+                <span class="slider__label" id="l-salary2">薪資所得（配偶）</span>
+                <span class="slider__value" aria-hidden="true">0<small>萬</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="12000000" step="20000" value="0" aria-labelledby="l-salary2">
+              </div>
+              <label class="slider__twin">
+                <span class="sr-only">薪資所得（配偶）（元，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </label>
+            </div>
+
+            <div class="field" id="f-attrib">
+              <span class="field__label" id="l-attrib">利息與其他所得歸屬</span>
+              <div class="segmented segmented--block" id="seg-attrib" role="group" aria-labelledby="l-attrib">
+                <button type="button" class="segmented__opt" data-value="a" aria-pressed="true">本人</button>
+                <button type="button" class="segmented__opt" data-value="half" aria-pressed="false">各半</button>
+                <button type="button" class="segmented__opt" data-value="b" aria-pressed="false">配偶</button>
+              </div>
+              <span class="field__hint">只有「各類所得分開計稅」會用到這個歸屬</span>
+            </div>
+
+            <div class="field" id="f-couple">
+              <span class="field__label" id="l-couple">夫妻計稅方式</span>
+              <div class="segmented segmented--block segmented--wrap" id="seg-couple" role="group" aria-labelledby="l-couple">
+                <button type="button" class="segmented__opt" data-value="auto" aria-pressed="true">自動選最省</button>
+                <button type="button" class="segmented__opt" data-value="all" aria-pressed="false">全部合併</button>
+                <button type="button" class="segmented__opt" data-value="salary" aria-pressed="false">薪資分開</button>
+                <button type="button" class="segmented__opt" data-value="each" aria-pressed="false">各類所得分開</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-people">
+              <span class="field__label">免稅額人數（未滿 70）</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="1">
+                <span class="field__unit">人</span>
+              </span>
+              <span class="field__hint">含本人、配偶、受扶養親屬</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-people70">
+              <span class="field__label">年滿 70 歲人數</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">人</span>
+              </span>
+              <span class="field__hint">免稅額加成 1.5 倍</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+
+          <label class="field" id="f-disabled">
+            <span class="field__label">身心障礙人數</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">人</span>
+            </span>
+            <span class="field__error"></span>
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">扣除額</legend>
+          <label class="switch">
+            <input type="checkbox" id="chk-itemized">
+            <span class="switch__box"></span>
+            <span>改用列舉扣除額</span>
+          </label>
+          <p class="field__hint fieldset__hint" id="itemHint">
+            沒勾就用標準扣除額。勾了之後兩者取大者，因為實際申報一定是取大的那一個。
+          </p>
+
+          <div id="itemBox" hidden>
+            <label class="field" id="f-mortgage">
+              <span class="field__label">自用住宅購屋借款利息</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint" id="mortgageHint">
+                須先減除儲蓄投資特別扣除額，餘額才可列舉，且上限 30 萬元
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <div class="fieldgrid fieldgrid--2">
+              <label class="field" id="f-insurance">
+                <span class="field__label">保險費</span>
+                <span class="field__control">
+                  <input type="text" inputmode="numeric" value="0">
+                  <span class="field__unit">元</span>
+                </span>
+                <span class="field__error"></span>
+              </label>
+              <label class="field" id="f-medical">
+                <span class="field__label">醫藥及生育費</span>
+                <span class="field__control">
+                  <input type="text" inputmode="numeric" value="0">
+                  <span class="field__unit">元</span>
+                </span>
+                <span class="field__error"></span>
+              </label>
+            </div>
+            <label class="field" id="f-donation">
+              <span class="field__label">捐贈</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">請自行填入已通過限額檢查後的可扣除金額</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-ltc">
+              <span class="field__label">符合長照條件人數</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">人</span>
+              </span>
+              <span class="field__hint" id="ltcHint">每人 18 萬元</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-rent">
+              <span class="field__label">全年支付房屋租金</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint" id="rentHint">每戶上限 18 萬元</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <p class="field__hint fieldset__hint" id="forfeitHint">
+            這兩項是<b>現行僅存的兩項排富特別扣除額</b>：選 28% 分開計稅就整個喪失（所得稅法第 17 條第 3 項）。
+            右邊地圖已經把這件事算進去了；不算的話會系統性高估 28% 制的優勢。
+          </p>
+          <div class="note note--warn" id="forfeitWarn" hidden></div>
+
+          <label class="field" id="f-otherspecial">
+            <span class="field__label">其他特別扣除額</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">元</span>
+            </span>
+            <span class="field__hint">
+              幼兒學前、教育學費等<b>不受排富</b>的特別扣除額（幼兒學前自 113 年度起已取消排富）。
+              金額請自行填入，兩制都會照樣減除。
+            </span>
+            <span class="field__error"></span>
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">二代健保補充保費</legend>
+          <p class="field__hint fieldset__hint">
+            補充保費是<b>逐筆</b>判定的，只知道全年總額其實答不出來。請告訴這張單子你的配息是怎麼進來的。
+          </p>
+          <div class="segmented segmented--block segmented--wrap" id="seg-payout" role="group">
+            <button type="button" class="segmented__opt" data-value="12" aria-pressed="false">月配 12 筆</button>
+            <button type="button" class="segmented__opt" data-value="4" aria-pressed="true">季配 4 筆</button>
+            <button type="button" class="segmented__opt" data-value="2" aria-pressed="false">半年 2 筆</button>
+            <button type="button" class="segmented__opt" data-value="1" aria-pressed="false">年配 1 筆</button>
+            <button type="button" class="segmented__opt" data-value="rows" aria-pressed="false">逐筆輸入</button>
+            <button type="button" class="segmented__opt" data-value="unknown" aria-pressed="false">我不確定</button>
+          </div>
+          <p class="field__hint" id="payoutHint"></p>
+
+          <div id="rowsBox" hidden>
+            <div id="payoutRows" class="rows"></div>
+            <button type="button" class="btn btn--ghost btn--sm" id="addPayout">新增一筆配息</button>
+          </div>
+
+          <label class="switch sandbox-switch">
+            <input type="checkbox" id="chk-sandbox">
+            <span class="switch__box"></span>
+            <span>打開「年度累計制」沙盒（尚未上路）</span>
+          </label>
+        </fieldset>
+
+        <div class="btnrow">
+          <button type="button" class="btn btn--quiet btn--sm" id="resetBtn">全部清空重填</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- ============ 輸出 ============ -->
+    <div class="workbench__out stack-lg">
+
+      <section class="sheet" aria-labelledby="verdict-h">
+        <div class="sheet__body">
+          <div class="verdict" id="verdict">
+            <span class="verdict__stamp" id="verdictStamp" hidden></span>
+            <h2 class="verdict__lead" id="verdict-h">正在計算…</h2>
+            <p class="verdict__body" id="verdictBody">左邊的格子填好，這裡就會告訴你該勾哪一個，以及你離翻盤還有多遠。</p>
+          </div>
+          <div class="readout-row" id="readouts">
+            <div class="readout"><span class="readout__label">合併計稅應納</span><span class="readout__value" data-live id="r-combined">-</span></div>
+            <div class="readout"><span class="readout__label">分開計稅應納</span><span class="readout__value" data-live id="r-separate">-</span></div>
+            <div class="readout"><span class="readout__label">選對可省</span><span class="readout__value" data-live id="r-save">-</span><span class="readout__delta" data-dir="down" id="r-saveNote"></span></div>
+            <div class="readout"><span class="readout__label">離翻轉點（股利）</span><span class="readout__value" data-live id="r-gap">-</span><span class="readout__delta" data-dir="flat" id="r-gapNote"></span></div>
+          </div>
+          <div class="readout-row" id="readouts2">
+            <div class="readout"><span class="readout__label">二代健保補充保費</span><span class="readout__value" data-live id="r-nhi">-</span><span class="readout__delta" data-dir="flat" id="r-nhiNote"></span></div>
+            <div class="readout"><span class="readout__label">股利實拿</span><span class="readout__value" data-live id="r-take">-</span></div>
+            <div class="readout"><span class="readout__label">股利實質稅負率</span><span class="readout__value" data-live id="r-eff">-</span><span class="readout__delta" data-dir="flat" id="r-effNote">含補充保費</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 招牌視覺：二維決策地圖 ============ -->
+      <section class="plot" id="mapCard">
+        <div class="plot__head">
+          <h2 class="plot__title">哪一區比較省：一張地圖，不是一個數字</h2>
+          <div class="legend" id="mapLegend"></div>
+        </div>
+        <canvas class="plot__canvas" id="map" role="img" aria-labelledby="mapDesc"></canvas>
+        <div class="state" id="mapEmpty" hidden>
+          <h3 class="state__title">股利是 0，這張地圖退化了</h3>
+          <p class="state__body" id="mapEmptyBody">
+            沒有股利就沒有兩制可選，地圖上只剩一個點。下面直接給你一般綜合所得稅的結果。
+          </p>
+        </div>
+        <p class="plot__foot" id="mapDesc">
+          橫軸是全年股利所得，縱軸是其他所得淨額。淡藍區合併計稅較省，淡黃區分開計稅較省。
+        </p>
+      </section>
+
+      <section class="plot" id="marginCard">
+        <div class="plot__head">
+          <h2 class="plot__title">再多領 1 萬股利，實際會被拿走多少</h2>
+          <div class="legend" id="marginLegend"></div>
+        </div>
+        <canvas class="plot__canvas" id="margin" role="img" aria-labelledby="marginDesc"></canvas>
+        <p class="plot__foot" id="marginDesc">
+          橫軸是全年股利所得，縱軸是邊際實質稅負率。
+        </p>
+      </section>
+
+      <section class="sheet" id="coupleCard" hidden>
+        <div class="sheet__head"><h2 class="sheet__title">夫妻三種計稅方式，各跑一次的排序</h2></div>
+        <div class="ledger-wrap">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">計稅方式</th><th scope="col">股利合併</th><th scope="col">股利分開</th><th scope="col">取低</th>
+            </tr></thead>
+            <tbody id="coupleBody"></tbody>
+          </table>
+        </div>
+        <div class="sheet__foot" id="coupleFoot"></div>
+      </section>
+
+      <section class="sheet" id="nhiCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">補充保費逐筆判定</h2>
+          <span class="topbar__spacer"></span>
+          <span class="chip" id="nhiChip">-</span>
+        </div>
+        <div id="nhiRefuse" class="state state--refuse" hidden>
+          <h3 class="state__title">這個問題現在回答不了</h3>
+          <p class="state__body">
+            二代健保補充保費是按「單次給付」判定的：單筆達 2 萬元才起扣，未達就完全不扣。
+            只知道全年股利總額，無法推出有幾筆、每筆多少，所以這裡不畫一個看起來很像答案的數字。
+            請在左邊選擇配息頻率，或逐筆填入金額。
+          </p>
+        </div>
+        <div class="ledger-wrap" id="nhiWrap">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">筆次</th><th scope="col">金額</th><th scope="col">是否起扣</th><th scope="col">補充保費</th>
+            </tr></thead>
+            <tbody id="nhiBody"></tbody>
+            <tfoot><tr id="nhiFootRow"></tr></tfoot>
+          </table>
+        </div>
+        <div class="sheet__foot" id="nhiFoot"></div>
+      </section>
+
+      <section class="sheet sandbox" id="sandboxCard" hidden>
+        <div class="sheet__head">
+          <h2 class="sheet__title">沙盒：年度累計制（尚未上路）</h2>
+          <span class="topbar__spacer"></span>
+          <span class="chip chip--sandbox">假設情境</span>
+        </div>
+        <div class="sheet__body" id="sandboxBody"></div>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet__body" id="formulaHost"></div>
+      </section>
+
+      <p class="disclaimer" id="disclaimer">
+        本工具為獨立試算，所有計算都在你的瀏覽器內完成，你填入的所得與扣除額不會離開這台裝置，
+        沒有任何資料被送到伺服器。實際稅額以稽徵機關核定為準。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

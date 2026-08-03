@@ -1,0 +1,307 @@
+{
+  "version": "115年度（2026）",
+  "asOf": "2026-08-03",
+  "note": "勞工保險老年給付法規常數。每一項附法源條號與出處連結；confidence 為 verified 者已核對官方頁面，unverified 者本工具未能取得官方原始數值，畫面上一律標示並不參與計算。",
+  "items": [
+    {
+      "key": "formulaARatePct",
+      "labelZh": "老年年金 A 式 年資給付率",
+      "value": 0.775,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之1第1款",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "A 式＝平均月投保薪資 × 保險年資 × 0.775% ＋ 3,000 元。勞保局依 A、B 兩式擇優發給。"
+    },
+    {
+      "key": "formulaAAddon",
+      "labelZh": "老年年金 A 式 定額加計",
+      "value": 3000,
+      "unit": "元/月",
+      "legalBasis": "勞工保險條例第58條之1第1款（「並加計新臺幣三千元」）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001",
+      "confidence": "verified",
+      "note": "此 3,000 元為固定額，不隨物價自動調整；但整體年金金額適用第65條之4 的 CPI 調整。"
+    },
+    {
+      "key": "formulaBRatePct",
+      "labelZh": "老年年金 B 式 年資給付率",
+      "value": 1.55,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之1第2款",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "B 式＝平均月投保薪資 × 保險年資 × 1.55%。年資長、薪資高者通常 B 式較優；低薪短年資者 A 式較優。"
+    },
+    {
+      "key": "deferPerYearPct",
+      "labelZh": "展延年金 每延後 1 年增給率",
+      "value": 4,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之2第1項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "未滿 1 年者按實際月數比例計算。"
+    },
+    {
+      "key": "deferMaxPct",
+      "labelZh": "展延年金 增給上限",
+      "value": 20,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之2第1項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "最多延後 5 年、增給 20%。核定後增給比例不再變更。"
+    },
+    {
+      "key": "earlyPerYearPct",
+      "labelZh": "減給年金 每提前 1 年減給率",
+      "value": 4,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之2第2項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "未滿 1 年者按實際月數比例計算。"
+    },
+    {
+      "key": "earlyMaxPct",
+      "labelZh": "減給年金 減給上限",
+      "value": 20,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第58條之2第2項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "最多提前 5 年、減給 20%。減給比例一經核定終身不變，不會在到達法定年齡後回復。"
+    },
+    {
+      "key": "maxShiftYears",
+      "labelZh": "提前／延後請領 最多年數",
+      "value": 5,
+      "unit": "年",
+      "legalBasis": "勞工保險條例第58條之2",
+      "sourceUrl": "https://www.bli.gov.tw/0004856.html",
+      "confidence": "verified",
+      "note": "提前請領須保險年資已滿 15 年，僅差年齡未達者方可提前。"
+    },
+    {
+      "key": "minInsuredYears",
+      "labelZh": "老年年金請領最低保險年資",
+      "value": 15,
+      "unit": "年",
+      "legalBasis": "勞工保險條例第58條第1項第1款",
+      "sourceUrl": "https://www.bli.gov.tw/0004856.html",
+      "confidence": "verified",
+      "note": "年資合計滿 15 年且達法定請領年齡並離職退保。年資未滿 15 年者只能請領老年一次金；勞保年資未滿 15 年但併計國民年金年資滿 15 年者，年滿 65 歲可選擇請領勞保老年年金。"
+    },
+    {
+      "key": "insuredSalaryMax",
+      "labelZh": "勞保投保薪資分級表 最高級（第11級）",
+      "value": 45800,
+      "unit": "元/月",
+      "legalBasis": "中華民國114年11月21日勞動部勞動保2字第1140091863號令修正發布，自115年1月1日施行",
+      "sourceUrl": "https://www.bli.gov.tw/0100493.html",
+      "confidence": "verified",
+      "note": "115 年天花板未調整，仍為 45,800 元（自 110 年起未變）。實際薪資高於 45,800 元者仍以 45,800 元投保，這是老年年金金額的硬上限。"
+    },
+    {
+      "key": "insuredSalaryMin",
+      "labelZh": "勞保投保薪資分級表 第1級",
+      "value": 29500,
+      "unit": "元/月",
+      "legalBasis": "中華民國114年11月21日勞動部勞動保2字第1140091863號令修正發布，自115年1月1日施行；勞工保險條例第14條第3項",
+      "sourceUrl": "https://www.bli.gov.tw/0100493.html",
+      "confidence": "verified",
+      "note": "由 114 年的 28,590 元調升，並刪除原 28,800 元級距。與 115 年每月最低工資同額。"
+    },
+    {
+      "key": "avgSalaryMonthsAnnuity",
+      "labelZh": "年金／老年一次金 平均月投保薪資採計月數",
+      "value": 60,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第19條第3項第1款",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "按加保期間「最高 60 個月」之月投保薪資平均計算（不是最後 60 個月）；參加保險未滿 5 年者按實際投保年資之平均計算。"
+    },
+    {
+      "key": "avgSalaryMonthsLegacy",
+      "labelZh": "一次請領老年給付 平均月投保薪資採計月數",
+      "value": 36,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第19條第3項第2款",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "按退保之當月起前 3 年（36 個月）之實際月投保薪資平均計算。此點與年金／老年一次金的「最高 60 個月」不同，是常見誤植處。"
+    },
+    {
+      "key": "lumpsumMonthsPerYear",
+      "labelZh": "老年一次金 每滿 1 年給付月數",
+      "value": 1,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第58條第1項第2款、第59條第1項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "老年一次金＝平均月投保薪資 × 給付月數，保險年資每滿 1 年發給 1 個月。因請領資格本身即為「年資未滿 15 年」，故不會用到「超過 15 年加倍」規則。年資未滿 1 年按實際加保月數比例計算。"
+    },
+    {
+      "key": "lumpsumPost60YearsCap",
+      "labelZh": "老年一次金 逾 60 歲後年資最多採計",
+      "value": 5,
+      "unit": "年",
+      "legalBasis": "勞工保險條例第59條第2項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "逾 60 歲繼續工作者，60 歲以後之保險年資最多採計 5 年。本工具的輸入只有年資總數，無法判斷其中有多少落在 60 歲之後，此上限未套用，請自行檢查。"
+    },
+    {
+      "key": "legacyMonthsFirst15",
+      "labelZh": "一次請領老年給付 前 15 年每滿 1 年給付月數",
+      "value": 1,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第59條第1項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "僅 98 年 1 月 1 日勞保年金施行前已有勞保年資者可選擇；98 年 1 月 1 日後初次加保者不得選擇。核付後不得變更。"
+    },
+    {
+      "key": "legacyMonthsAfter15",
+      "labelZh": "一次請領老年給付 超過 15 年部分每滿 1 年給付月數",
+      "value": 2,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第59條第1項",
+      "sourceUrl": "https://www.bli.gov.tw/0004857.html",
+      "confidence": "verified",
+      "note": "保險年資超過 15 年之部分，每滿 1 年發給 2 個月。"
+    },
+    {
+      "key": "legacyMonthsCap",
+      "labelZh": "一次請領老年給付 給付月數上限（60 歲前年資）",
+      "value": 45,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第59條第1項（「最高以四十五個月為限」）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001",
+      "confidence": "verified",
+      "note": "45 個月相當於年資 30 年（15×1 ＋ 15×2）封頂。"
+    },
+    {
+      "key": "legacyMonthsCapWithPost60",
+      "labelZh": "一次請領老年給付 併計逾 60 歲年資之總上限",
+      "value": 50,
+      "unit": "個月",
+      "legalBasis": "勞工保險條例第59條第2項（「最高以五十個月為限」）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001",
+      "confidence": "verified",
+      "note": "逾 60 歲以後年資最多採計 5 年，與 60 歲前年資合併最高 50 個月。本工具以 45 個月為上限計算，未加計逾 60 歲部分。"
+    },
+    {
+      "key": "cpiThresholdPct",
+      "labelZh": "年金給付物價調整門檻（CPI 累計成長率）",
+      "value": 5,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第65條之4",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001",
+      "confidence": "verified",
+      "note": "條文為「達正負百分之五時，即依該成長率調整之」。以各人「請領當年度」為基期計算累計成長率，故不同年度請領者調整時點不同，非全體同步調整；達標時是按該累計成長率全額調整，不是只調超過 5% 的部分。"
+    },
+    {
+      "key": "cpiAdjust2026Pct",
+      "labelZh": "115 年 5 月起實際調整幅度",
+      "value": 6.46,
+      "unit": "%",
+      "legalBasis": "勞工保險條例第65條之4；勞動部115年4月23日公告",
+      "sourceUrl": "https://www.mol.gov.tw/1607/1632/1633/90100/",
+      "confidence": "verified",
+      "note": "111 至 114 年累計成長率達 6.46%，100 年、101 年、105 至 107 年及 111 年請領者自 115 年 5 月起調高 6.46%，其餘年度尚未達 5% 不予調整。這是已發生的事實，不是未來的預測。"
+    },
+    {
+      "key": "specialWorkAge",
+      "labelZh": "特殊性質工作提前請領年齡",
+      "value": 55,
+      "unit": "歲",
+      "legalBasis": "勞工保險條例第58條第5項；行政院勞工委員會97年12月25日勞保2字第0970140623號令",
+      "sourceUrl": "https://www.bli.gov.tw/0004856.html",
+      "confidence": "verified",
+      "note": "特殊性質工作限「高壓室內作業」與「潛水作業」，合計滿 15 年、年滿 55 歲並離職退保者，不適用年齡逐步調高及展延／減給規定。本工具未涵蓋此路徑。"
+    },
+    {
+      "key": "lifeExpectancyAtBirth113All",
+      "labelZh": "113 年國人平均壽命（0 歲平均餘命，全體）",
+      "value": 80.77,
+      "unit": "歲",
+      "legalBasis": "內政部 113 年簡易生命表（114 年 8 月 23 日公布）",
+      "sourceUrl": "https://www.moi.gov.tw/News_Content.aspx?n=4&s=330934",
+      "confidence": "verified",
+      "note": "這是「0 歲」的平均餘命，不是 65 歲的平均餘命。已經活到 60、65 歲的人，其預期壽命必然高於此數，因此本工具把它畫成參考線而非建議值。"
+    },
+    {
+      "key": "lifeExpectancyAtBirth113Male",
+      "labelZh": "113 年男性平均壽命（0 歲平均餘命）",
+      "value": 77.42,
+      "unit": "歲",
+      "legalBasis": "內政部 113 年簡易生命表（114 年 8 月 23 日公布）",
+      "sourceUrl": "https://www.moi.gov.tw/News_Content.aspx?n=4&s=330934",
+      "confidence": "verified",
+      "note": "同上，為 0 歲平均餘命。"
+    },
+    {
+      "key": "lifeExpectancyAtBirth113Female",
+      "labelZh": "113 年女性平均壽命（0 歲平均餘命）",
+      "value": 84.3,
+      "unit": "歲",
+      "legalBasis": "內政部 113 年簡易生命表（114 年 8 月 23 日公布）",
+      "sourceUrl": "https://www.moi.gov.tw/News_Content.aspx?n=4&s=330934",
+      "confidence": "verified",
+      "note": "同上，為 0 歲平均餘命。"
+    },
+    {
+      "key": "lifeExpectancyAt65Male",
+      "labelZh": "113 年簡易生命表 65 歲男性平均餘命",
+      "value": 18.35,
+      "unit": "年",
+      "legalBasis": "內政部 113 年簡易生命表（分齡平均餘命表）",
+      "sourceUrl": "https://www.moi.gov.tw/cl.aspx?n=2953",
+      "confidence": "verified",
+      "note": "與本專案共用常數 assets/data/tw-returns.json 的 lifeTable 一致（查證日 2026-08-03）。65 歲男性平均還能再活 18.35 年，也就是約 83.4 歲，明顯高於 0 歲平均壽命 77.42 歲，因為已經活到 65 歲的人不再承擔 65 歲前的死亡風險。"
+    },
+    {
+      "key": "lifeExpectancyAt65Female",
+      "labelZh": "113 年簡易生命表 65 歲女性平均餘命",
+      "value": 22.41,
+      "unit": "年",
+      "legalBasis": "內政部 113 年簡易生命表（分齡平均餘命表）",
+      "sourceUrl": "https://www.moi.gov.tw/cl.aspx?n=2953",
+      "confidence": "verified",
+      "note": "與 assets/data/tw-returns.json 的 lifeTable 一致（查證日 2026-08-03）。65 歲女性平均還能再活 22.41 年，約 87.4 歲。這是期間生命表的期望值，一半的人會活得更久，用它當固定規劃終點會低估長壽風險。"
+    }
+  ],
+  "claimAgeByBirthYear": [
+    { "birthYearROCFrom": null, "birthYearROCTo": 46, "legalAge": 60, "earliestAge": 55, "label": "46 年次（含）以前" },
+    { "birthYearROCFrom": 47, "birthYearROCTo": 47, "legalAge": 61, "earliestAge": 56, "label": "47 年次" },
+    { "birthYearROCFrom": 48, "birthYearROCTo": 48, "legalAge": 62, "earliestAge": 57, "label": "48 年次" },
+    { "birthYearROCFrom": 49, "birthYearROCTo": 49, "legalAge": 63, "earliestAge": 58, "label": "49 年次" },
+    { "birthYearROCFrom": 50, "birthYearROCTo": 50, "legalAge": 64, "earliestAge": 59, "label": "50 年次" },
+    { "birthYearROCFrom": 51, "birthYearROCTo": null, "legalAge": 65, "earliestAge": 60, "label": "51 年次（含）以後" }
+  ],
+  "claimAgeSource": {
+    "legalBasis": "勞工保險條例第58條第5項（「第十年提高一歲，其後每二年提高一歲，以提高至六十五歲為限」）",
+    "sourceUrl": "https://www.bli.gov.tw/0004856.html",
+    "confidence": "verified",
+    "note": "earliestAge 為減給年金最早可請領年齡（法定年齡 −5）。同一張表也適用老年一次金的請領年齡。"
+  },
+  "insuredSalaryGrades": {
+    "value": [29500, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800],
+    "labelZh": "勞保投保薪資分級表 全部級距（115 年，全時勞工，共 11 級）",
+    "legalBasis": "中華民國114年11月21日勞動部勞動保2字第1140091863號令修正發布，自115年1月1日施行",
+    "sourceUrl": "https://www.bli.gov.tw/0100493.html",
+    "confidence": "verified",
+    "note": "另有備註級距：職訓機構受訓者、部分工時勞工、庇護性就業身心障礙者，本工具未納入。"
+  },
+  "sources": [
+    { "key": "bli_old_age_annuity", "label": "勞保局：老年年金給付", "url": "https://www.bli.gov.tw/0004857.html" },
+    { "key": "bli_old_age_eligibility", "label": "勞保局：老年給付請領資格", "url": "https://www.bli.gov.tw/0004856.html" },
+    { "key": "bli_insured_salary", "label": "勞保局：勞工保險投保薪資分級表", "url": "https://www.bli.gov.tw/0100493.html" },
+    { "key": "law_labor_insurance_act", "label": "全國法規資料庫：勞工保險條例", "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001" },
+    { "key": "bli_calculator", "label": "勞保局：勞保老年給付金額試算（官方）", "url": "https://www.bli.gov.tw/0014162.html" },
+    { "key": "moi_life_table", "label": "內政部：簡易生命表及平均餘命查詢", "url": "https://www.moi.gov.tw/cl.aspx?n=2948" }
+  ]
+}

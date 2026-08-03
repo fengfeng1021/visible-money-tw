@@ -1,0 +1,161 @@
+/* 除息填息機：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.app-sub {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--s-3);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+/* --- 填寫區的分組 -------------------------------------------------------- */
+.fieldset {
+  border: 0;
+  padding: 0 0 var(--s-4);
+  margin: 0 0 var(--s-4);
+  border-bottom: 1px dashed var(--rule);
+}
+.fieldset:last-of-type { border-bottom: 0; }
+.fieldset legend { padding: 0 0 var(--s-2); }
+/* 填息是這張單子的主角，用騎縫線把它框出來 */
+.fieldset--star {
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+  padding: var(--s-3);
+}
+.fieldset--star legend { padding-inline: var(--s-1); }
+
+.subfield { margin-bottom: var(--s-4); }
+.subfield .field__label { margin-bottom: var(--s-1); }
+
+.slider .field__hint { margin-top: var(--s-2); }
+.slider__top { flex-wrap: wrap; }
+.slider__label { min-width: 0; }
+
+.switch--row { margin-block: var(--s-2); }
+.fieldset .chip { margin-bottom: var(--s-3); }
+
+/* --- 招牌視覺的播放控制 -------------------------------------------------- */
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: 0 var(--s-4) var(--s-3);
+  border-top: 1px solid var(--rule-faint);
+  padding-top: var(--s-3);
+}
+.transport .btn { flex: 1 1 auto; min-width: 7rem; }
+.stage__counter {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+}
+
+/* 區間讀數會比一般 delta 長很多，改成可換行的整塊，避免撐破讀數欄 */
+#r-finalRange {
+  display: block;
+  margin-top: var(--s-1);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink-3);
+  white-space: normal;
+}
+#r-finalRange:empty { display: none; }
+
+/* 圖例目前不可切換，不要給假的可點手勢 */
+#legend .legend__item { cursor: default; }
+
+/* --- 期末對照 ------------------------------------------------------------ */
+.compare { display: grid; gap: 1px; background: var(--rule-faint); border: 1px solid var(--rule); }
+.compare__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--s-2) var(--s-3);
+  align-items: baseline;
+  background: var(--sheet);
+  padding: var(--s-2) var(--s-3);
+}
+.compare__row--head { background: var(--sheet-sunk); font-size: var(--t-xs); color: var(--ink-2); font-weight: 700; }
+.compare__name { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-sm); font-weight: 600; min-width: 0; }
+.compare__key { width: 14px; height: 3px; flex: 0 0 auto; }
+.compare__val,
+.compare__cagr {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm);
+  letter-spacing: -0.02em;
+  text-align: right;
+  white-space: nowrap;
+}
+.compare__val { font-weight: 700; }
+.compare__cagr { color: var(--ink-2); min-width: 5.5ch; }
+.compare__note { margin-top: var(--s-4); }
+.compare__note:empty { display: none; }
+
+/* --- 2 萬元門檻 ---------------------------------------------------------- */
+.threshold {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink-3);
+  background: var(--sheet);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--s-4);
+}
+.threshold b { color: var(--ink); }
+.threshold[data-over="true"] { border-top-color: var(--warn); background: var(--warn-wash); }
+.threshold__big {
+  display: block;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  margin-bottom: var(--s-1);
+}
+
+/* --- 配息組成堆疊條 ------------------------------------------------------ */
+.compose__bar {
+  display: flex;
+  height: 22px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  overflow: hidden;
+}
+/* 不補間 width：那會逐幀觸發版面重算，而這一頁的招牌動效已經花在那一刀上了。 */
+.compose__seg { display: block; height: 100%; }
+.compose__seg--qual { background: var(--accent); }
+.compose__seg--other {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--rule-strong) 0 4px,
+    transparent 4px 8px
+  );
+}
+.compose__note { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--ink-3); }
+
+/* --- 讀數在窄螢幕改兩欄 -------------------------------------------------- */
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .transport .btn { min-width: 0; flex: 1 1 45%; padding-inline: var(--s-2); }
+  .compare__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .compare__cagr { grid-column: 2; }
+}

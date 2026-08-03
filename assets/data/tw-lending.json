@@ -1,0 +1,90 @@
+{
+  "version": "2026-08",
+  "verifiedAt": "2026-08-03",
+  "note": "房貸與授信管制。央行選擇性信用管制為 115-03-20 生效版本（115-06-18 理監事會確認未再調整）。",
+  "cbc": {
+    "ltvCap2ndHome": 0.6,
+    "ltvCap3rdHomeAndAbove": 0.3,
+    "ltvCapHighValueHousing": 0.3,
+    "ltvCapCorporate": 0.3,
+    "ltvCapUnsoldInventory": 0.3,
+    "ltvCapLandPurchase": 0.5,
+    "ltvCapIdleIndustrialLand": 0.4,
+    "gracePeriodAllowed2ndHome": false,
+    "gracePeriodAllowed1stHomeWithExistingHouse": false,
+    "specificAreaRuleAbolished": true,
+    "switchHomeSaleDeadlineMonths": 18,
+    "inheritanceExcluded": true
+  },
+  "dbr": {
+    "cap": 22,
+    "includesMortgage": false,
+    "numeratorItems": ["信用卡", "現金卡", "信用貸款"],
+    "wording": "不宜超過（監理指導，非硬性上限）",
+    "practiceRange": [16, 18]
+  },
+  "qingan3": {
+    "label": "青年安心成家購屋優惠貸款 3.0",
+    "effectiveFrom": "2026-08-01",
+    "applicationPeriod": ["2026-08-01", "2029-07-31"],
+    "disbursementDeadline": "2029-10-31",
+    "loanCapGeneral": 10000000,
+    "loanCapNewlywed": 12000000,
+    "loanCapWithChildren": 15000000,
+    "ltvCap": 0.8,
+    "maxTermYears": 40,
+    "maxGracePeriodYears": 5,
+    "maxAgeAtApplication": 50,
+    "agePlusTermCap": 80,
+    "annualIncomeCap": 2000000,
+    "propertyPriceCapByRegion": [
+      { "region": "臺北市", "cap": 35000000 },
+      { "region": "新北市", "cap": 25000000 },
+      { "region": "新竹縣市", "cap": 25000000 },
+      { "region": "其他縣市", "cap": 20000000 }
+    ],
+    "baseRate": 1.72,
+    "rateSpread": 0.555,
+    "subsidyHousingFund": 0.375,
+    "bankRateReduction": 0.125,
+    "effectiveRateFirst3y": 1.775,
+    "singleTierOnly": true,
+    "exemptFromCbcLimits": true,
+    "banks": ["臺灣銀行", "土地銀行", "合作金庫", "第一銀行", "華南銀行", "彰化銀行", "兆豐銀行", "臺灣中小企銀"]
+  },
+  "market115q1": {
+    "quarter": "115 年第 1 季",
+    "priceToIncomeNational": 9.47,
+    "burdenRateNational": 41.46,
+    "medianHousePriceNational": 9660000,
+    "medianHouseholdDisposableIncome": 1019700,
+    "big5BankNewMortgageRate": 2.318,
+    "byCity": [
+      { "city": "全國", "burdenRate": 41.46, "priceToIncome": 9.47 },
+      { "city": "臺北市", "burdenRate": 64.41, "priceToIncome": 14.72 },
+      { "city": "新北市", "burdenRate": 55.3, "priceToIncome": 12.64 }
+    ]
+  },
+  "affordabilityGrades": [
+    { "grade": "可合理負擔", "max": 30 },
+    { "grade": "略低", "min": 30, "max": 40 },
+    { "grade": "偏低", "min": 40, "max": 50 },
+    { "grade": "過低", "min": 50 }
+  ],
+  "traps": [
+    "央行第 2 戶成數已由 5 成放寬為 6 成，自 115-03-20 生效。網路上絕大多數文章仍寫『第 2 戶 5 成』，照抄會全錯。",
+    "『特定地區』制度已不存在。自 113-09-20 第七波起改為全國一體適用，不再有六都／特定地區的差別成數。前端若還有『是否為特定地區』選項就是過時設計。",
+    "DBR 22 倍只規範無擔保債務（信用卡、現金卡、信用貸款），房貸屬有擔保放款，不計入分子。把房貸月付金放進 DBR 22 試算是錯的。房貸應改用央行成數規範＋銀行自訂月負擔比評估。",
+    "新青安（青安 2.0）已於 115-07-31 截止受理，115-08-01 起改為青安 3.0，新增年齡上限 50 歲、年齡＋年限 ≤ 80、年所得 ≤ 200 萬、購屋總價上限三道限制，並取消二段式機動利率與混合式固定利率。",
+    "青安貸款不受央行第 1 戶／第 2 戶限制，仍可有最長 5 年寬限期。實作時要讓青安路徑繞過央行規則。",
+    "基準利率 1.72%（中華郵政 2 年期定儲機動利率）與五大銀行新承做房貸利率 2.318% 都是浮動參數，會隨央行政策與季別變動，必須可設定且標註資料日期。"
+  ],
+  "unverified": [
+    "高價住宅的認定金額門檻（一般引用臺北市 7,000 萬、新北市 6,000 萬、其他 4,000 萬）未在央行官方新聞稿與問答頁明載，目前視為未查證。"
+  ],
+  "sources": [
+    { "label": "中央銀行選擇性信用管制措施（115-03-20 生效）", "url": "https://www.cbc.gov.tw/" },
+    { "label": "內政部不動產資訊平台－房價負擔能力統計", "url": "https://pip.moi.gov.tw/" },
+    { "label": "金管會 98.12.15 銀局（票）字第 09800407380 號函（DBR 22 倍）", "url": "https://www.fsc.gov.tw/" }
+  ]
+}

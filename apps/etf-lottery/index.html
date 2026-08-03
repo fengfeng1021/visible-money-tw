@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>台股 ETF 起始日樂透｜看得見的錢</title>
+<meta name="description" content="不給你一個幸運的報酬率，給你所有可能起始月的分布。0050、006208、0056、00878、00919 逐月滾動回測，直方圖＋箱型圖同屏比高低與寬窄，扣掉手續費、證交稅、股利稅與補充保費後真正剩下什麼。樣本不足時直接拒答。純前端計算。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="台股 ETF 起始日樂透｜看得見的錢">
+<meta property="og:description" content="不給你一個幸運的報酬率，給你所有可能起始日的分布，因為你的績效有一大半只是運氣。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者拖動持有年數滑桿，親眼看見報酬分布從一片攤平的寬雲塌陷成一座右移的丘陵，於是知道「長期投資」四個字說的不是報酬變高、是運氣的影響範圍變窄；接著攤開成本瀑布看手續費、證交稅、股利稅、補充保費各吃掉多少；資料不夠時單據直接蓋上「資料不足」的空章，不畫假分布。
+FIRST VIEWPORT: 單據抬頭（名稱＋市場資料建置日與法規版本徽章）在最上；左欄是標的多選、持有年數主滑桿與成本設定，右欄第一眼就是報酬分布直方圖＋箱型圖——預設 0050 與 0056 疊在一起、持有 3 年，載入即是一片寬得嚇人的雲，中位、P10、P90 各有標線；結論與有效獨立樣本數以硃砂章落在單據右上。手機改單欄：分布圖在上、填寫格在下。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">台股 ETF 起始日樂透</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      同一檔 ETF、同樣的持有年數，換一個月開始買，結果差多少？
+      這裡對歷史上每一個可能的起始月各跑一次回測，把幾百個結果堆成一張分布圖。
+      拖動持有年數，看那片雲怎麼塌陷。
+    </p>
+  </section>
+
+  <div class="workbench">
+
+    <!-- ============ 輸入：單據上要填的格子 ============ -->
+    <form class="workbench__inputs sheet" id="inputs" autocomplete="off">
+      <div class="sheet__head"><h2 class="sheet__title">填寫</h2></div>
+      <div class="sheet__body">
+
+        <fieldset class="fieldset">
+          <legend class="field__label">標的（可複選）</legend>
+          <div id="tickerList" class="tickers"></div>
+          <p class="field__error rows__error" id="tickerError"></p>
+        </fieldset>
+
+        <div class="slider" id="s-years">
+          <div class="slider__top">
+            <span class="slider__label" id="l-years">持有年數</span>
+            <span class="slider__value" aria-hidden="true">3<small>年</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="1" max="15" step="1" value="3" aria-labelledby="l-years">
+          </div>
+          <div class="slider__ticks"><span>1</span><span>5</span><span>10</span><span>15</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">持有年數（年，數字輸入）</span>
+            <input type="text" inputmode="numeric" value="3">
+            <span class="field__unit">年</span>
+          </label>
+        </div>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">投入方式</legend>
+          <div class="segmented segmented--block" id="seg-mode" role="group">
+            <button type="button" class="segmented__opt" data-value="lump" aria-pressed="true">單筆</button>
+            <button type="button" class="segmented__opt" data-value="dca" aria-pressed="false">每月定期定額</button>
+            <button type="button" class="segmented__opt" data-value="split" aria-pressed="false">分 N 個月</button>
+          </div>
+        </fieldset>
+
+        <label class="field" id="f-amount">
+          <span class="field__label" id="l-amount">單筆金額</span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="600,000" aria-describedby="h-amount">
+            <span class="field__unit">元</span>
+          </span>
+          <span class="field__hint" id="h-amount">金額只影響最低手續費的侵蝕程度與絕對金額，不影響報酬率的形狀。</span>
+          <span class="field__error"></span>
+        </label>
+
+        <label class="field" id="f-split" hidden>
+          <span class="field__label">分幾個月投完</span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="12">
+            <span class="field__unit">個月</span>
+          </span>
+          <span class="field__hint">總金額不變，攤成 N 筆逐月買，買完續抱到期滿。</span>
+          <span class="field__error"></span>
+        </label>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">成本設定</legend>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-disc">
+              <span class="field__label">手續費折數</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="0.6">
+                <span class="field__unit">折</span>
+              </span>
+              <span class="field__hint">0.6 = 六折</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-minfee">
+              <span class="field__label">單筆最低手續費</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="20">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">實務慣例，非法規</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">配息處理</legend>
+          <div class="segmented segmented--block" id="seg-div" role="group">
+            <button type="button" class="segmented__opt" data-value="reinvest" aria-pressed="true">再投入</button>
+            <button type="button" class="segmented__opt" data-value="cash" aria-pressed="false">領現金</button>
+          </div>
+        </fieldset>
+
+        <label class="field" id="f-taxmode">
+          <span class="field__label">股利課稅方式</span>
+          <span class="field__control">
+            <select aria-describedby="h-taxmode">
+              <option value="none">不計股利稅（在免稅門檻內）</option>
+              <option value="combined" selected>合併計稅（8.5% 可抵減）</option>
+              <option value="separate">分開計稅（單一稅率 28%）</option>
+            </select>
+          </span>
+          <span class="field__hint" id="h-taxmode">兩制須就整戶全部股利擇一，不能部分合併部分分開。</span>
+        </label>
+
+        <label class="field" id="f-rate">
+          <span class="field__label">綜所稅邊際稅率</span>
+          <span class="field__control">
+            <select>
+              <option value="0.05">5%</option>
+              <option value="0.12" selected>12%</option>
+              <option value="0.2">20%</option>
+              <option value="0.3">30%</option>
+              <option value="0.4">40%</option>
+            </select>
+          </span>
+          <span class="field__hint">只在「合併計稅」時會用到。</span>
+        </label>
+
+        <label class="switch nhi-switch">
+          <input type="checkbox" id="chk-nhi" checked>
+          <span class="switch__box"></span>
+          <span>計入二代健保補充保費</span>
+        </label>
+        <p class="field__hint">單筆配息達 20,000 元才起扣，費率 2.11%。小額投資人多半一毛都扣不到，這一格會告訴你答案。</p>
+
+        <div class="btnrow">
+          <button type="button" class="btn btn--quiet btn--sm" id="resetBtn">全部清空重填</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- ============ 輸出 ============ -->
+    <div class="workbench__out stack-lg">
+
+      <section class="sheet" aria-labelledby="verdict-h">
+        <div class="sheet__body">
+          <div class="verdict" id="verdict">
+            <span class="verdict__stamp" id="verdictStamp" hidden></span>
+            <h2 class="verdict__lead" id="verdict-h">正在讀取市場資料</h2>
+            <p class="verdict__body" id="verdictBody">還原權息序列在瀏覽器裡重建中，資料不會離開這台裝置。</p>
+          </div>
+          <div class="readout-row" id="readouts">
+            <div class="readout"><span class="readout__label">年化中位數</span><span class="readout__value" data-live id="r-median">-</span></div>
+            <div class="readout"><span class="readout__label">最差起始月</span><span class="readout__value" data-live id="r-worst">-</span></div>
+            <div class="readout"><span class="readout__label">最好起始月</span><span class="readout__value" data-live id="r-best">-</span></div>
+            <div class="readout"><span class="readout__label">正報酬比例</span><span class="readout__value" data-live id="r-win">-</span><span class="readout__delta" data-dir="flat" id="r-winnote"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- 招牌視覺 ---- -->
+      <section class="plot" id="distCard">
+        <div class="plot__head">
+          <h2 class="plot__title">所有可能的起始月，各跑一次的結果</h2>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="plot__stack">
+          <canvas class="plot__canvas" id="chartDist" role="img" aria-labelledby="distDesc"></canvas>
+        </div>
+        <p class="plot__foot" id="distDesc">
+          橫軸是扣完成本與稅之後的年化報酬率，縱軸是有幾個起始月落在那一格。
+          下方的箱型圖由左至右是最差、P10、P25、中位、P75、P90、最好。
+        </p>
+      </section>
+
+      <div class="state state--refuse" id="refuse" hidden>
+        <h3 class="state__title" id="refuseTitle">資料不足以回答這個問題</h3>
+        <p class="state__body" id="refuseBody"></p>
+        <button type="button" class="btn btn--ghost btn--sm" id="refuseFix">改成可回答的最長視窗</button>
+      </div>
+
+      <section class="sheet" id="sampleCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">這張圖背後有幾個樣本</h2>
+        </div>
+        <div class="sheet__body">
+          <div class="readout-row readout-row--tight" id="sampleRow">
+            <div class="readout"><span class="readout__label">滾動起始月</span><span class="readout__value" data-live id="r-n">-</span></div>
+            <div class="readout"><span class="readout__label">有效獨立樣本數</span><span class="readout__value" data-live id="r-neff">-</span></div>
+            <div class="readout"><span class="readout__label">資料涵蓋期間</span><span class="readout__value" data-live id="r-span">-</span></div>
+          </div>
+          <p class="note note--warn" id="sampleNote">
+            滾動所有起始月會產生高度重疊的視窗，相鄰兩個樣本共用絕大部分的月份。
+            有效獨立樣本數 ≈ 總期間 ÷ 視窗長度，通常只有個位數。
+            <b>因此上面的勝率不是統計顯著的結論，它只是「歷史上這段期間發生過什麼」的計數。</b>
+          </p>
+        </div>
+      </section>
+
+      <section class="sheet" id="tableCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">分位數逐檔對照</h2>
+        </div>
+        <div class="ledger-wrap">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">標的</th><th scope="col">最差</th><th scope="col">P10</th>
+              <th scope="col">P25</th><th scope="col">中位</th><th scope="col">P75</th>
+              <th scope="col">P90</th><th scope="col">最好</th>
+              <th scope="col">正報酬</th><th scope="col">中位最大回撤</th>
+            </tr></thead>
+            <tbody id="qBody"></tbody>
+          </table>
+        </div>
+        <div class="sheet__foot" id="tableFoot"></div>
+      </section>
+
+      <section class="sheet" id="lumpCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">單筆一次投入，還是分月攤進去</h2>
+        </div>
+        <div class="sheet__body">
+          <div class="readout-row readout-row--tight">
+            <div class="readout"><span class="readout__label">單筆勝出比例</span><span class="readout__value" data-live id="r-lwin">-</span></div>
+            <div class="readout"><span class="readout__label">贏時平均多賺</span><span class="readout__value" data-live id="r-lwinamt">-</span></div>
+            <div class="readout"><span class="readout__label">輸時平均多虧</span><span class="readout__value" data-live id="r-llossamt">-</span></div>
+          </div>
+          <p class="note" id="lumpNote"></p>
+        </div>
+      </section>
+
+      <section class="plot" id="costCard">
+        <div class="plot__head">
+          <h2 class="plot__title">成本侵蝕：毛獲利走到淨獲利，中間掉了什麼</h2>
+        </div>
+        <canvas class="plot__canvas" id="chartCost" role="img" aria-labelledby="costDesc"></canvas>
+        <p class="plot__foot" id="costDesc">以中位數那一個起始月為例。</p>
+      </section>
+
+      <section class="plot" id="ddCard">
+        <div class="plot__head">
+          <h2 class="plot__title">最差那一次起始月，水面下有多深</h2>
+        </div>
+        <canvas class="plot__canvas" id="chartDD" role="img" aria-labelledby="ddDesc"></canvas>
+        <p class="plot__foot" id="ddDesc">縱軸是距離期間內最高點的跌幅。</p>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet__body" id="formulaHost"></div>
+      </section>
+
+      <p class="disclaimer" id="disclaimer">
+        本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+        歷史報酬不代表未來結果；本頁呈現的是「歷史上這段期間發生過什麼」的計數，不是機率，更不是預測。
+        報酬以還原權息序列計算，未還原的收盤價不參與任何報酬運算。
+        以金額近似買賣，不模擬整股／零股的成交顆粒度，也不模擬買賣價差與流動性衝擊。
+        股利稅以你選定的邊際稅率概算，未計入其他所得、扣除額與最低稅負制。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

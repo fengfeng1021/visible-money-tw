@@ -1,0 +1,50 @@
+{
+  "version": "2026-08",
+  "verifiedAt": "2026-08-03",
+  "note": "房貸試算參數。利率為公開參考值，實際以承貸銀行核定為準。詳細授信管制規則見 tw-lending.json。",
+  "defaultRate": 2.318,
+  "defaultRateLabel": "五大銀行新承做房貸平均利率（115 年第 1 季）",
+  "rateCodeStep": 0.25,
+  "burdenLines": [
+    { "at": 0.33, "label": "月付佔所得 33%" },
+    { "at": 0.4, "label": "40%" }
+  ],
+  "presets": [
+    {
+      "id": "qingan3",
+      "label": "青安 3.0（115-08-01 上路）",
+      "amount": 10000000,
+      "years": 40,
+      "grace": 5,
+      "rates": [
+        { "from": 1, "rate": 1.775 },
+        { "from": 37, "rate": 1.9 },
+        { "from": 49, "rate": 2.025 }
+      ],
+      "hint": "撥貸 3 年內 1.775%，之後補貼逐年退場。額度上限一般戶 1,000 萬、新婚 1,200 萬、育有子女 1,500 萬；申貸時須未滿 50 歲且年齡＋年限 ≤ 80、年所得 ≤ 200 萬、購屋總價不超過所在地區上限。"
+    },
+    {
+      "id": "general",
+      "label": "一般房貸",
+      "amount": 10000000,
+      "years": 30,
+      "grace": 0,
+      "rates": [{ "from": 1, "rate": 2.318 }],
+      "hint": "五大銀行新承做房貸平均利率，機動計息，會隨央行政策重訂。"
+    },
+    {
+      "id": "second",
+      "label": "第二戶（受央行管制）",
+      "amount": 6000000,
+      "years": 30,
+      "grace": 0,
+      "rates": [{ "from": 1, "rate": 2.6 }],
+      "hint": "央行第 2 戶貸款成數上限 6 成（115-03-20 起，由 5 成放寬），且不得有寬限期。"
+    }
+  ],
+  "sources": [
+    { "label": "青年安心成家購屋優惠貸款 3.0（財政部國庫署／內政部）", "url": "https://www.nta.gov.tw/" },
+    { "label": "中央銀行選擇性信用管制措施", "url": "https://www.cbc.gov.tw/" },
+    { "label": "內政部不動產資訊平台－房價負擔能力統計", "url": "https://pip.moi.gov.tw/" }
+  ]
+}

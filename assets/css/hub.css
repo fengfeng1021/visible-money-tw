@@ -1,0 +1,174 @@
+/* 首頁：一疊單據的封面與明細表。
+   這是全站唯一的 Persuade 版面，其餘七頁都是 Operate。 */
+
+.hub { padding-block: var(--s-5) var(--s-8); }
+
+/* ---------- 封面單據 ---------- */
+.cover { margin-bottom: var(--s-8); }
+.cover__org {
+  font-weight: 900;
+  font-size: var(--t-md);
+  letter-spacing: -0.02em;
+}
+.cover__body { padding: var(--s-7) var(--s-4) var(--s-6); }
+
+.cover__title {
+  font-size: clamp(2.125rem, 6.4vw, 4.25rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  margin: 0 0 var(--s-4);
+  max-width: 16ch;
+}
+.cover__lede {
+  font-size: var(--t-md);
+  color: var(--ink-2);
+  max-width: 30em;
+  margin-bottom: var(--s-5);
+}
+
+/* 當場算給你看：整站唯一的「證明」，不是宣稱 */
+.proof {
+  border-top: 1px dashed var(--rule-strong);
+  background: var(--sheet-sunk);
+  padding: var(--s-4);
+}
+.proof__label {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  margin-bottom: var(--s-2);
+}
+.proof__line {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(0.9375rem, 2.4vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0 0 var(--s-2);
+  max-width: none;
+}
+.proof__line b { color: var(--up); font-weight: 700; }
+.proof__line em { font-style: normal; color: var(--accent); font-weight: 700; }
+.proof__note { font-size: var(--t-xs); color: var(--ink-3); margin: 0; max-width: 46em; }
+
+/* ---------- 章節 ---------- */
+.section { padding-block: var(--s-7) var(--s-4); }
+.section > h2 {
+  font-size: clamp(1.375rem, 3.6vw, 1.875rem);
+  margin-bottom: var(--s-3);
+}
+.section__lede { color: var(--ink-2); margin-bottom: var(--s-5); }
+
+/* ---------- 七張單據明細表 ---------- */
+.docs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+
+.doc { border-bottom: 1px solid var(--rule); }
+.doc__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: var(--s-2) var(--s-4);
+  align-items: baseline;
+  padding: var(--s-4) var(--s-2);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--dur-1) var(--ease-out);
+}
+.doc__link:hover,
+.doc__link:focus-visible {
+  background: var(--accent-wash);
+  text-decoration: none;
+}
+/* 內縮用 transform，不用 padding —— 動 padding 會逐幀觸發版面重算 */
+.doc__main, .doc__tint {
+  transition: transform var(--dur-1) var(--ease-out);
+}
+.doc__link:hover .doc__main,
+.doc__link:focus-visible .doc__main { transform: translateX(6px); }
+.doc__tint {
+  width: 6px;
+  align-self: stretch;
+  border: 1px solid var(--rule-strong);
+}
+.doc__main { min-width: 0; }
+.doc__name {
+  font-size: var(--t-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+.doc__job { font-size: var(--t-sm); color: var(--ink-2); margin: 0; max-width: 48em; }
+.doc__see {
+  display: block;
+  margin-top: var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  letter-spacing: -0.02em;
+}
+/* 招牌視覺的形狀草稿：讓訪客一眼看出這張單據長什麼樣子 */
+.doc__thumb {
+  width: 132px;
+  height: 48px;
+  align-self: center;
+  border: 1px solid var(--rule-faint);
+  background: var(--sheet);
+  display: block;
+}
+.doc__link:hover .doc__thumb { border-color: var(--rule-strong); }
+
+.doc__go {
+  align-self: center;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+.doc__link:hover .doc__go { text-decoration: underline; }
+
+/* ---------- 立場條款 ---------- */
+.terms { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.term { border-bottom: 1px solid var(--rule); padding: var(--s-5) 0 var(--s-4); }
+.term h3 {
+  font-size: var(--t-md);
+  font-weight: 800;
+  margin-bottom: var(--s-2);
+  letter-spacing: -0.015em;
+}
+.term p { color: var(--ink-2); font-size: var(--t-sm); max-width: 52em; margin: 0; }
+@media (min-width: 62rem) {
+  .term { display: grid; grid-template-columns: 18rem minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+  .term h3 { margin-bottom: 0; }
+}
+
+/* ---------- 法源表 ---------- */
+.ledger-wrap--auto { max-height: none; }
+.ledger-wrap--auto .ledger td:first-child {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  color: var(--accent);
+}
+.ledger-wrap--auto .ledger td { white-space: normal; text-align: left; height: auto; padding-block: var(--s-2); }
+.ledger-wrap--auto .ledger th { text-align: left; }
+.ledger-wrap--auto .ledger td:nth-child(2) { color: var(--ink-2); font-size: var(--t-sm); }
+.ledger-wrap--auto .ledger td:last-child { white-space: nowrap; font-family: var(--font-mono); font-stretch: 75%; font-size: var(--t-xs); }
+
+.section .disclaimer { margin-top: var(--s-5); }
+
+@media (max-width: 52rem) {
+  .doc__link { grid-template-columns: auto minmax(0, 1fr); padding-inline: var(--s-1); }
+  .doc__thumb { grid-column: 2; width: 100%; max-width: 220px; justify-self: start; margin-top: var(--s-2); }
+  .doc__go { grid-column: 2; justify-self: start; margin-top: var(--s-2); }
+}

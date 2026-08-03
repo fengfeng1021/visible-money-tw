@@ -1,0 +1,237 @@
+/* 退休提領存活扇形：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+/* .state 與 .fan-progress 都自帶 display，會蓋掉 hidden 屬性。
+   拒答面板必須真的能收起來，所以在這一頁把 hidden 拉回最高優先。 */
+[hidden] { display: none !important; }
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); min-width: 0; }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: 0; margin-bottom: var(--s-3); }
+
+/* 年金的物價調整開關緊貼在該筆年金下方，不要看起來像獨立設定 */
+.pension-switch {
+  display: flex;
+  margin: calc(var(--s-3) * -1) 0 var(--s-4);
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.mode-switch { display: flex; margin-top: var(--s-3); font-size: var(--t-xs); color: var(--ink-2); }
+
+/* 配置滑桿下方的餘額列：現金是被算出來的，不是被填的 */
+.alloc-rest {
+  margin: calc(var(--s-2) * -1) 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+.alloc-rest b {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+/* 順序風險是這個 App 的主開關，給它一格凹陷紙面，按下去有事會發生 */
+.crash-set {
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--warn);
+  padding: var(--s-3);
+}
+.crash-set legend { margin-left: 0; padding-inline: 0; }
+.crash-switch { font-size: var(--t-base); margin-bottom: var(--s-3); }
+.crash-set .slider { margin-bottom: var(--s-2); }
+.crash-set[data-on="false"] .slider { opacity: 0.45; }
+/* 歷史模式下跌幅由資料決定，滑桿失效 */
+.crash-set[data-hist="true"] .slider { opacity: 0.45; }
+
+/* 抽樣池：只有歷史模式才作用，收在「模擬方式」底下當它的子設定 */
+.pool-set {
+  margin-top: var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--rule);
+  min-width: 0;
+}
+.pool-set[data-on="false"] { opacity: 0.45; }
+.pool-set > .field__label { display: block; margin-bottom: var(--s-2); }
+.pool-set .segmented { margin-bottom: var(--s-2); }
+
+/* 數字孿生：滑桿的鍵盤等效路徑 */
+#advBody .field { margin-bottom: var(--s-3); }
+#advBody .field__label { font-size: var(--t-xs); }
+#advBody .fieldgrid { gap: 0 var(--s-3); }
+#advBody .adv-note { font-family: var(--font-cjk); font-size: var(--t-xs); color: var(--ink-3); margin-top: var(--s-2); }
+
+/* ==========================================================================
+   結論區
+   ========================================================================== */
+.model-caveat {
+  margin: var(--s-3) 0 0;
+  padding-top: var(--s-2);
+  border-top: 1px dashed var(--rule);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   招牌視覺：扇形圖
+   ========================================================================== */
+.fan-host { position: relative; }
+.plot__canvas { display: block; width: 100%; }
+
+/* 成功率環：跟著模擬即時累加 */
+.fan-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  display: block;
+}
+.fan-ring canvas { width: 64px; height: 64px; display: block; }
+.fan-ring__num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-base);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  transform: translateY(-4px);
+}
+.fan-ring__cap {
+  position: absolute;
+  left: 0; right: 0; bottom: 6px;
+  text-align: center;
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+/* 模擬進度：不用轉圈圈，用進紙條 */
+.fan-progress {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: var(--sheet-sunk);
+}
+.fan-progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+}
+
+.fan-tools { padding-top: 0; padding-bottom: var(--s-3); align-items: center; }
+.fan-tools .btn { min-height: 32px; }
+
+.plot[data-stale="true"] { opacity: 0.35; }
+
+/* 圖例的鍵：帶狀與線狀分開 */
+.legend__key--band { height: 10px; opacity: 0.35; }
+
+/* 法源表：第一欄留給文字，不要被等寬數字擠掉 */
+.sources-wrap { max-height: 22rem; }
+.sources-wrap .ledger td { white-space: normal; height: auto; padding-block: var(--s-2); line-height: 1.5; }
+.sources-wrap .ledger td:first-child { font-family: var(--font-cjk); color: var(--ink); font-weight: 600; min-width: 8rem; }
+.sources-wrap .ledger td:nth-child(4) { font-family: var(--font-cjk); font-size: var(--t-xs); color: var(--ink-3); min-width: 14rem; }
+.sources-wrap .ledger td a { word-break: break-all; }
+
+.state--refuse .btn { margin-top: var(--s-1); }
+
+/* ==========================================================================
+   歷史模式的揭露面板：不是拒答，是先把樣本的形狀攤開
+   ========================================================================== */
+.boot-note { display: block; }
+.boot-note__title {
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-base);
+  font-weight: 700;
+  color: var(--ink);
+}
+.boot-note__title b {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+}
+.boot-note__lead { margin: 0 0 var(--s-3); max-width: var(--measure); }
+.boot-note__quote {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  /* 引文沿用 .note 的頂線，全站沒有彩色粗左框這種東西 */
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--warn);
+  background: var(--sheet);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: var(--measure);
+}
+.boot-note__quote-src {
+  display: block;
+  font-weight: 700;
+  color: var(--warn);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+/* 樣本統計：左標籤右數字，數字對齊到同一條格線 */
+.boot-note__stats {
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) minmax(0, 1fr);
+  gap: 0;
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-xs);
+  border-top: 1px solid var(--rule);
+}
+.boot-note__stats dt {
+  padding: var(--s-1) var(--s-2) var(--s-1) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  color: var(--ink-3);
+}
+.boot-note__stats dd {
+  margin: 0;
+  padding: var(--s-1) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.boot-note__more { margin: 0 0 var(--s-3); font-size: var(--t-xs); line-height: 1.7; max-width: var(--measure); }
+.boot-note__refuse {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+  max-width: var(--measure);
+}
+.boot-note__refuse li { margin-bottom: var(--s-1); }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .readout__label { font-size: var(--t-xs); }
+  .plot__title { font-size: var(--t-sm); }
+  .fan-tools { gap: var(--s-2); }
+}
