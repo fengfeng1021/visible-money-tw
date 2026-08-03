@@ -895,3 +895,149 @@
   .workbench__inputs { order: 2; }
 }
 .workbench__out, .workbench__inputs { min-width: 0; }
+
+/* ==========================================================================
+   19. 財務檔案：缺什麼問什麼
+   ========================================================================== */
+.askbox {
+  border: 1px solid var(--rule-strong);
+  border-top: 3px solid var(--accent);
+  background: var(--sheet-sunk);
+  padding: var(--s-3) var(--s-4) var(--s-4);
+}
+.askbox__lead {
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 var(--s-3);
+  max-width: none;
+}
+.askbox__grid {
+  display: grid;
+  gap: 0 var(--s-4);
+  grid-template-columns: 1fr;
+}
+@container (min-width: 30rem) { .askbox__grid { grid-template-columns: 1fr 1fr; } }
+@container (min-width: 52rem) { .askbox__grid { grid-template-columns: repeat(3, 1fr); } }
+.askbox__note {
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  max-width: none;
+}
+.field--compact { margin-bottom: var(--s-3); }
+.field--compact .field__hint { display: none; }
+
+/* 填寫進度 */
+.prog { margin-bottom: var(--s-5); }
+.prog__bar {
+  height: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  display: block;
+}
+.prog__fill { display: block; height: 100%; background: var(--accent); }
+.prog__text { font-size: var(--t-sm); color: var(--ink-2); margin: var(--s-2) 0 0; }
+
+/* ==========================================================================
+   20. 法規變動時間軸
+   ========================================================================== */
+.tl { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+
+.tl__item {
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0 var(--s-4);
+  padding: var(--s-4) 0;
+}
+@media (max-width: 44rem) {
+  .tl__item { grid-template-columns: 1fr; gap: var(--s-2); }
+}
+
+.tl__when {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  letter-spacing: -0.02em;
+  padding-top: 3px;
+}
+.tl__when b { display: block; color: var(--ink); font-size: var(--t-sm); font-weight: 700; }
+
+.tl__main { min-width: 0; }
+.tl__title {
+  font-size: var(--t-md);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--s-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+.tl__who { font-size: var(--t-sm); color: var(--ink-2); margin: 0 0 var(--s-2); max-width: var(--measure); }
+
+.tl__delta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-3);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--s-2);
+}
+.tl__delta s { color: var(--ink-3); text-decoration-thickness: 1px; }
+.tl__delta b { color: var(--ink); }
+
+/* 對你的影響：這一格才是整個產品的理由 */
+.tl__impact {
+  border: 1px solid var(--rule);
+  border-left: 0; border-right: 0;
+  background: var(--sheet);
+  padding: var(--s-3);
+  margin-top: var(--s-2);
+}
+.tl__impact-amount {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  display: block;
+}
+.tl__impact[data-dir="good"] .tl__impact-amount { color: var(--down); }
+.tl__impact[data-dir="bad"] .tl__impact-amount { color: var(--up); }
+.tl__impact-why { font-size: var(--t-xs); color: var(--ink-2); margin: var(--s-1) 0 0; max-width: none; }
+.tl__impact--muted { background: var(--sheet-sunk); }
+.tl__impact--muted .tl__impact-amount { font-size: var(--t-md); color: var(--ink-3); }
+
+.tl__status {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  padding: 1px var(--s-2);
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.tl__status[data-s="in-force"] { color: var(--down); }
+.tl__status[data-s="scheduled"] { color: var(--accent); }
+.tl__status[data-s="shelved"] { color: var(--stamp-void); }
+.tl__status[data-s="repealed"] { color: var(--ink-3); }
+
+/* 上次來訪之後的新變動 */
+.newsince {
+  border: 2px solid var(--accent);
+  background: var(--accent-wash);
+  padding: var(--s-4);
+  margin-bottom: var(--s-5);
+}
+.newsince__lead { font-size: var(--t-lg); font-weight: 800; margin: 0 0 var(--s-2); letter-spacing: -0.02em; }
+.newsince__body { font-size: var(--t-sm); color: var(--ink-2); margin: 0; max-width: var(--measure); }
+
+/* 篩選列 */
+.filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }

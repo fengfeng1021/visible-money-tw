@@ -1,0 +1,328 @@
+{
+  "version": "2026-08",
+  "verifiedAt": "2026-08-04",
+  "note": "台灣理財相關法規變動時間軸。收錄標準：能用使用者的財務資料把變動前後各算一次、取得金額差的條目。已被撤回或暫緩的也收，因為那正是最多人被誤導的地方。",
+  "changes": [
+    {
+      "id": "qingan-3-launch",
+      "title": "青安 3.0 上路，取代已截止的青安 2.0",
+      "effectiveDate": "2026-08-01",
+      "announcedDate": "2026-07",
+      "status": "in-force",
+      "category": "lending",
+      "field": "lending.qingan3",
+      "before": "青安 2.0（受理至 115-07-31）",
+      "after": "青安 3.0（115-08-01 起受理）",
+      "unit": "",
+      "whoIsAffected": "還沒申貸、打算用政策優惠貸款買第一間房的人。新增了三道舊制沒有的門檻：申貸時要未滿 50 歲且年齡加年限不超過 80、本人年所得不得超過 200 萬、購屋總價不得超過所在地區上限（北市 3,500 萬／新北與新竹縣市 2,500 萬／其他 2,000 萬）。同時取消二段式機動利率與混合式固定利率，只剩一段式。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "財政部國庫署青年安心成家購屋優惠貸款方案",
+      "sourceUrl": "https://www.nta.gov.tw/",
+      "confidence": "verified",
+      "note": "額度上限一般戶 1,000 萬、新婚 1,200 萬、育有子女 1,500 萬；最長 40 年、寬限期最長 5 年；撥貸 3 年內有效利率 1.775%，補貼逐年退場。青安貸款不受央行第 1／2 戶管制，仍可有寬限期。"
+    },
+    {
+      "id": "cbc-2nd-home-ltv-60",
+      "title": "央行第二戶貸款成數由 5 成放寬為 6 成",
+      "effectiveDate": "2026-03-20",
+      "announcedDate": "2026-03-20",
+      "status": "in-force",
+      "category": "lending",
+      "field": "lending.cbc.ltvCap2ndHome",
+      "before": "0.5",
+      "after": "0.6",
+      "unit": "成數",
+      "whoIsAffected": "名下已經有一間房、想再買第二間的人。同樣的自備款可以買更貴的房子，或同樣的房子可以少準備自備款。",
+      "impact": {
+        "kind": "ltv",
+        "onlyIf": {
+          "homeCount": {
+            "min": 1
+          }
+        },
+        "onlyIfMiss": "你名下沒有房，這一條規範的是第二戶，目前不影響你。"
+      },
+      "legalBasis": "中央銀行(115)新聞發布第051號；115-06-18 理監事會確認未再調整",
+      "sourceUrl": "https://www.cbc.gov.tw/",
+      "confidence": "verified",
+      "note": "網路上絕大多數文章仍寫「第 2 戶 5 成」，那是 113-09-20 第七波的舊值。第二戶仍然不得有寬限期。"
+    },
+    {
+      "id": "cbc-specific-area-abolished",
+      "title": "特定地區差別成數制度廢除，全國一體適用",
+      "effectiveDate": "2024-09-20",
+      "announcedDate": "2024-09-19",
+      "status": "in-force",
+      "category": "lending",
+      "field": "lending.cbc.specificAreaRule",
+      "before": "六都與特定地區另有較嚴成數",
+      "after": "全國一體適用",
+      "unit": "",
+      "whoIsAffected": "所有申請房貸的人。以前住在被列管的縣市會被套用較嚴的成數，現在沒有這個區分了。任何還要你先選「是否為特定地區」的試算工具都是過時的。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "中央銀行第七波選擇性信用管制",
+      "sourceUrl": "https://www.cbc.gov.tw/",
+      "confidence": "verified",
+      "note": ""
+    },
+    {
+      "id": "tax-115-exemption",
+      "title": "115 年度免稅額由 9.7 萬調高至 10.1 萬",
+      "effectiveDate": "2026-01-01",
+      "announcedDate": "2025-11-27",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.115.exemption",
+      "before": "97000",
+      "after": "101000",
+      "unit": "元／人",
+      "whoIsAffected": "所有要報綜合所得稅的人。扶養越多人，省越多。",
+      "impact": {
+        "kind": "deduction",
+        "perHead": "household",
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 5 條之 1、第 17 條；財政部 114-11-27 公告",
+      "sourceUrl": "https://www.mof.gov.tw/",
+      "confidence": "verified",
+      "note": "115 年度所得要到 116 年（2027 年）5 月才申報。年滿 70 歲的直系尊親屬由 14.55 萬調高至 15.15 萬。"
+    },
+    {
+      "id": "tax-115-standard",
+      "title": "115 年度標準扣除額由 13.1 萬調高至 13.6 萬",
+      "effectiveDate": "2026-01-01",
+      "announcedDate": "2025-11-27",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.115.standardSingle",
+      "before": "131000",
+      "after": "136000",
+      "unit": "元",
+      "whoIsAffected": "用標準扣除額申報的人，也就是絕大多數上班族。有配偶者加倍，由 26.2 萬變成 27.2 萬。",
+      "impact": {
+        "kind": "deduction",
+        "doubleIfMarried": true,
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 17 條第 1 項第 2 款；財政部 114-11-27 公告",
+      "sourceUrl": "https://www.mof.gov.tw/",
+      "confidence": "verified",
+      "note": ""
+    },
+    {
+      "id": "tax-115-salary-deduction",
+      "title": "115 年度薪資所得特別扣除額由 21.8 萬調高至 22.7 萬",
+      "effectiveDate": "2026-01-01",
+      "announcedDate": "2025-11-27",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.115.salaryDeduction",
+      "before": "218000",
+      "after": "227000",
+      "unit": "元／人",
+      "whoIsAffected": "有薪資所得的人。身心障礙特別扣除額同額調整。",
+      "impact": {
+        "kind": "deduction",
+        "perHead": "perEarner",
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 17 條第 1 項第 2 款第 3 目之 2；財政部 114-11-27 公告",
+      "sourceUrl": "https://www.mof.gov.tw/",
+      "confidence": "verified",
+      "note": ""
+    },
+    {
+      "id": "tax-115-brackets",
+      "title": "115 年度課稅級距整組上移",
+      "effectiveDate": "2026-01-01",
+      "announcedDate": "2025-11-27",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.115.brackets",
+      "before": "59／133／266／498 萬",
+      "after": "61／138／277／519 萬",
+      "unit": "元",
+      "whoIsAffected": "所有納稅人，尤其是所得剛好卡在級距邊緣的人。門檻上移代表同樣的所得可能掉到較低的稅率級距。",
+      "impact": {
+        "kind": "brackets",
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 5 條；財政部 114-11-27 公告",
+      "sourceUrl": "https://www.mof.gov.tw/",
+      "confidence": "verified",
+      "note": "115 年度平均消費者物價指數較 113 年度上漲 4.13%，達所得稅法的 3% 調整門檻。但只有 6 類項目隨物價調整，其餘扣除額是法定固定金額不會動。"
+    },
+    {
+      "id": "tax-114-longterm-care",
+      "title": "長期照顧特別扣除額由 12 萬提高至 18 萬",
+      "effectiveDate": "2025-01-01",
+      "announcedDate": "2024",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.114.longTermCare",
+      "before": "120000",
+      "after": "180000",
+      "unit": "元／人",
+      "whoIsAffected": "家裡有符合長期照顧資格受扶養者的家庭。115 年 5 月申報 114 年度時第一次適用。",
+      "impact": {
+        "kind": "deduction",
+        "perHead": "field",
+        "headField": "longTermCareCount",
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 17 條第 1 項第 2 款第 3 目之 7",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340003",
+      "confidence": "verified",
+      "note": "有排富規定：適用稅率達 20% 以上、選擇股利 28% 分開計稅、或基本所得額超過 750 萬者不得扣除。"
+    },
+    {
+      "id": "tax-113-rent-special",
+      "title": "房屋租金由列舉扣除額 12 萬改列特別扣除額 18 萬",
+      "effectiveDate": "2024-01-01",
+      "announcedDate": "2024-07-31",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.rentDeduction",
+      "before": "120000",
+      "after": "180000",
+      "unit": "元",
+      "whoIsAffected": "租屋的人。金額變大之外還有一個更關鍵的差別：改列特別扣除額之後可以跟標準扣除額併用，以前放在列舉扣除額時必須放棄標準扣除額才能用。",
+      "impact": {
+        "kind": "deduction",
+        "need": [
+          "salary",
+          "annualRent"
+        ],
+        "onlyIf": {
+          "annualRent": {
+            "min": 1
+          }
+        },
+        "onlyIfMiss": "你沒有填房租支出，這一條規範的是租屋族。"
+      },
+      "legalBasis": "所得稅法第 17 條第 1 項第 2 款第 3 目之 8（113-07-31 修正，自 113-01-01 施行）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340003",
+      "confidence": "verified",
+      "note": "實付租金須先減除政府補助。有排富規定。"
+    },
+    {
+      "id": "tax-113-preschool",
+      "title": "幼兒學前特別扣除額提高並取消排富",
+      "effectiveDate": "2024-01-01",
+      "announcedDate": "2024-07-31",
+      "status": "in-force",
+      "category": "tax",
+      "field": "tax.preschoolFirst",
+      "before": "120000",
+      "after": "150000",
+      "unit": "元／人",
+      "whoIsAffected": "有 6 歲以下子女的家庭。適用年齡由 5 歲以下放寬到 6 歲以下，第 2 名以上子女每人 22.5 萬，而且高所得者也可以扣了。",
+      "impact": {
+        "kind": "deduction",
+        "perHead": "field",
+        "headField": "children0to6",
+        "need": [
+          "salary"
+        ]
+      },
+      "legalBasis": "所得稅法第 17 條第 1 項第 2 款第 3 目之 6（113-07-31 修正）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340003",
+      "confidence": "verified",
+      "note": "很多舊版計算機仍對幼兒學前套用排富，那是錯的。現行排富只適用長照與房租兩項。"
+    },
+    {
+      "id": "nhi-annual-settlement-shelved",
+      "title": "二代健保補充保費「年度累計制」已被暫緩，沒有上路",
+      "effectiveDate": "2025-11-06",
+      "announcedDate": "2025-11-05",
+      "status": "shelved",
+      "category": "nhi",
+      "field": "nhi.annualSettlement",
+      "before": "單筆起扣制",
+      "after": "維持單筆起扣制（改制未上路）",
+      "unit": "",
+      "whoIsAffected": "領股利、利息、租金的人。網路上仍在流傳「以後股利要按年度累計課補充保費、上限提高到 5,000 萬」，那個版本目前沒有上路。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "全民健康保險法第 31 條（條文未修正，整編截止 115-07-24）",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0060001",
+      "confidence": "probable",
+      "note": "114-11-05 衛福部提出、114-11-06 行政院指示暫緩，此後未見法規預告、未送行政院審議、未函送立法院。政府沒有發布正式的「暫緩」公告文號，所以這一條標為 probable 而非 verified。現行制仍是單筆給付達 2 萬起扣、費率 2.11%、單次費基上限 1,000 萬。"
+    },
+    {
+      "id": "labor-115-insured-grade1",
+      "title": "勞保投保薪資第一級隨基本工資調高至 29,500",
+      "effectiveDate": "2026-01-01",
+      "announcedDate": "2025",
+      "status": "in-force",
+      "category": "pension",
+      "field": "pension.insuredSalary.grade1",
+      "before": "28590",
+      "after": "29500",
+      "unit": "元／月",
+      "whoIsAffected": "投保薪資落在最低級距的人：保費變多，但未來的年金給付也變多。同時這也是二代健保「兼職薪資」補充保費起扣門檻的依據，門檻跟著變成 29,500 而不是很多人以為的 2 萬。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "勞工保險投保薪資分級表；勞動部基本工資公告",
+      "sourceUrl": "https://www.bli.gov.tw/",
+      "confidence": "verified",
+      "note": "最高級距維持 45,800（職災保險最高 72,800）。投保薪資頂到上限的人，實際月薪再高也不會增加年金。"
+    },
+    {
+      "id": "labor-115-cpi-adjust",
+      "title": "勞保老年年金依物價指數調升 6.46%",
+      "effectiveDate": "2026-05-01",
+      "announcedDate": "2026",
+      "status": "in-force",
+      "category": "pension",
+      "field": "pension.cpiAdjust",
+      "before": "0",
+      "after": "6.46",
+      "unit": "%",
+      "whoIsAffected": "已經在領勞保老年年金的人。這不是每年調，是累計成長率達 5% 才調一次。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "勞工保險條例第 65 條之 4",
+      "sourceUrl": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001",
+      "confidence": "verified",
+      "note": "調整之後基期會跟著移動，下一次要再累計達 5% 才會調。用固定通膨率逐年外推年金是錯的。"
+    },
+    {
+      "id": "0050-split-4",
+      "title": "0050 進行 1 股換 4 股分割",
+      "effectiveDate": "2025-06-18",
+      "announcedDate": "2025",
+      "status": "in-force",
+      "category": "market",
+      "field": "market.0050.split",
+      "before": "188.65",
+      "after": "47.57",
+      "unit": "元",
+      "whoIsAffected": "持有 0050 的人，以及任何用歷史股價做回測的人。分割不是下跌，但臺灣證券交易所的除權除息計算結果表不含分割事件，所以沒有特別處理的還原股價序列會在 2025 年出現一次假的 -73% 崩盤。",
+      "impact": {
+        "kind": "info"
+      },
+      "legalBasis": "TWSE STOCK_DAY 民國 114 年 06 月 18 日收盤資料",
+      "sourceUrl": "https://www.twse.com.tw/",
+      "confidence": "verified",
+      "note": "本站的還原權息序列已人工登錄這次分割。未處理的話 2025 年度報酬會被算成 -65.8%、2026 年 +58.6%。"
+    }
+  ]
+}

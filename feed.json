@@ -1,0 +1,164 @@
+{
+ "version": "https://jsonfeed.org/version/1.1",
+ "title": "看得見的錢．法規變動",
+ "home_page_url": "https://fengfeng1021.github.io/visible-money-tw/",
+ "feed_url": "https://fengfeng1021.github.io/visible-money-tw/feed.json",
+ "description": "台灣理財相關法規變動時間軸。每一條都附生效日、變動前後值、影響對象與法源。",
+ "language": "zh-Hant-TW",
+ "items": [
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-qingan-3-launch",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-qingan-3-launch",
+   "title": "青安 3.0 上路，取代已截止的青安 2.0（已生效）",
+   "content_text": "房貸｜生效日 2026-08-01\n青安 2.0（受理至 115-07-31） → 青安 3.0（115-08-01 起受理）\n還沒申貸、打算用政策優惠貸款買第一間房的人。新增了三道舊制沒有的門檻：申貸時要未滿 50 歲且年齡加年限不超過 80、本人年所得不得超過 200 萬、購屋總價不得超過所在地區上限（北市 3,500 萬／新北與新竹縣市 2,500 萬／其他 2,000 萬）。同時取消二段式機動利率與混合式固定利率，只剩一段式。\n法源：財政部國庫署青年安心成家購屋優惠貸款方案\n註記：額度上限一般戶 1,000 萬、新婚 1,200 萬、育有子女 1,500 萬；最長 40 年、寬限期最長 5 年；撥貸 3 年內有效利率 1.775%，補貼逐年退場。青安貸款不受央行第 1／2 戶管制，仍可有寬限期。",
+   "date_published": "2026-07-31T16:00:00.000Z",
+   "tags": [
+    "房貸",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-labor-115-cpi-adjust",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-labor-115-cpi-adjust",
+   "title": "勞保老年年金依物價指數調升 6.46%（已生效）",
+   "content_text": "勞保勞退｜生效日 2026-05-01\n0% → 6.46%\n已經在領勞保老年年金的人。這不是每年調，是累計成長率達 5% 才調一次。\n法源：勞工保險條例第 65 條之 4\n註記：調整之後基期會跟著移動，下一次要再累計達 5% 才會調。用固定通膨率逐年外推年金是錯的。",
+   "date_published": "2026-04-30T16:00:00.000Z",
+   "tags": [
+    "勞保勞退",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-cbc-2nd-home-ltv-60",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-cbc-2nd-home-ltv-60",
+   "title": "央行第二戶貸款成數由 5 成放寬為 6 成（已生效）",
+   "content_text": "房貸｜生效日 2026-03-20\n0.5成數 → 0.6成數\n名下已經有一間房、想再買第二間的人。同樣的自備款可以買更貴的房子，或同樣的房子可以少準備自備款。\n法源：中央銀行(115)新聞發布第051號；115-06-18 理監事會確認未再調整\n註記：網路上絕大多數文章仍寫「第 2 戶 5 成」，那是 113-09-20 第七波的舊值。第二戶仍然不得有寬限期。",
+   "date_published": "2026-03-19T16:00:00.000Z",
+   "tags": [
+    "房貸",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-exemption",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-exemption",
+   "title": "115 年度免稅額由 9.7 萬調高至 10.1 萬（已生效）",
+   "content_text": "稅｜生效日 2026-01-01\n97000元／人 → 101000元／人\n所有要報綜合所得稅的人。扶養越多人，省越多。\n法源：所得稅法第 5 條之 1、第 17 條；財政部 114-11-27 公告\n註記：115 年度所得要到 116 年（2027 年）5 月才申報。年滿 70 歲的直系尊親屬由 14.55 萬調高至 15.15 萬。",
+   "date_published": "2025-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-standard",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-standard",
+   "title": "115 年度標準扣除額由 13.1 萬調高至 13.6 萬（已生效）",
+   "content_text": "稅｜生效日 2026-01-01\n131000元 → 136000元\n用標準扣除額申報的人，也就是絕大多數上班族。有配偶者加倍，由 26.2 萬變成 27.2 萬。\n法源：所得稅法第 17 條第 1 項第 2 款；財政部 114-11-27 公告",
+   "date_published": "2025-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-salary-deduction",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-salary-deduction",
+   "title": "115 年度薪資所得特別扣除額由 21.8 萬調高至 22.7 萬（已生效）",
+   "content_text": "稅｜生效日 2026-01-01\n218000元／人 → 227000元／人\n有薪資所得的人。身心障礙特別扣除額同額調整。\n法源：所得稅法第 17 條第 1 項第 2 款第 3 目之 2；財政部 114-11-27 公告",
+   "date_published": "2025-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-brackets",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-115-brackets",
+   "title": "115 年度課稅級距整組上移（已生效）",
+   "content_text": "稅｜生效日 2026-01-01\n59／133／266／498 萬元 → 61／138／277／519 萬元\n所有納稅人，尤其是所得剛好卡在級距邊緣的人。門檻上移代表同樣的所得可能掉到較低的稅率級距。\n法源：所得稅法第 5 條；財政部 114-11-27 公告\n註記：115 年度平均消費者物價指數較 113 年度上漲 4.13%，達所得稅法的 3% 調整門檻。但只有 6 類項目隨物價調整，其餘扣除額是法定固定金額不會動。",
+   "date_published": "2025-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-labor-115-insured-grade1",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-labor-115-insured-grade1",
+   "title": "勞保投保薪資第一級隨基本工資調高至 29,500（已生效）",
+   "content_text": "勞保勞退｜生效日 2026-01-01\n28590元／月 → 29500元／月\n投保薪資落在最低級距的人：保費變多，但未來的年金給付也變多。同時這也是二代健保「兼職薪資」補充保費起扣門檻的依據，門檻跟著變成 29,500 而不是很多人以為的 2 萬。\n法源：勞工保險投保薪資分級表；勞動部基本工資公告\n註記：最高級距維持 45,800（職災保險最高 72,800）。投保薪資頂到上限的人，實際月薪再高也不會增加年金。",
+   "date_published": "2025-12-31T16:00:00.000Z",
+   "tags": [
+    "勞保勞退",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-nhi-annual-settlement-shelved",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-nhi-annual-settlement-shelved",
+   "title": "二代健保補充保費「年度累計制」已被暫緩，沒有上路（已暫緩）",
+   "content_text": "健保｜生效日 2025-11-06\n單筆起扣制 → 維持單筆起扣制（改制未上路）\n領股利、利息、租金的人。網路上仍在流傳「以後股利要按年度累計課補充保費、上限提高到 5,000 萬」，那個版本目前沒有上路。\n法源：全民健康保險法第 31 條（條文未修正，整編截止 115-07-24）\n註記：114-11-05 衛福部提出、114-11-06 行政院指示暫緩，此後未見法規預告、未送行政院審議、未函送立法院。政府沒有發布正式的「暫緩」公告文號，所以這一條標為 probable 而非 verified。現行制仍是單筆給付達 2 萬起扣、費率 2.11%、單次費基上限 1,000 萬。\n查證狀態：高度可能，但無正式公告文號",
+   "date_published": "2025-11-05T16:00:00.000Z",
+   "tags": [
+    "健保",
+    "已暫緩"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-0050-split-4",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-0050-split-4",
+   "title": "0050 進行 1 股換 4 股分割（已生效）",
+   "content_text": "市場｜生效日 2025-06-18\n188.65元 → 47.57元\n持有 0050 的人，以及任何用歷史股價做回測的人。分割不是下跌，但臺灣證券交易所的除權除息計算結果表不含分割事件，所以沒有特別處理的還原股價序列會在 2025 年出現一次假的 -73% 崩盤。\n法源：TWSE STOCK_DAY 民國 114 年 06 月 18 日收盤資料\n註記：本站的還原權息序列已人工登錄這次分割。未處理的話 2025 年度報酬會被算成 -65.8%、2026 年 +58.6%。",
+   "date_published": "2025-06-17T16:00:00.000Z",
+   "tags": [
+    "市場",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-114-longterm-care",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-114-longterm-care",
+   "title": "長期照顧特別扣除額由 12 萬提高至 18 萬（已生效）",
+   "content_text": "稅｜生效日 2025-01-01\n120000元／人 → 180000元／人\n家裡有符合長期照顧資格受扶養者的家庭。115 年 5 月申報 114 年度時第一次適用。\n法源：所得稅法第 17 條第 1 項第 2 款第 3 目之 7\n註記：有排富規定：適用稅率達 20% 以上、選擇股利 28% 分開計稅、或基本所得額超過 750 萬者不得扣除。",
+   "date_published": "2024-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-cbc-specific-area-abolished",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-cbc-specific-area-abolished",
+   "title": "特定地區差別成數制度廢除，全國一體適用（已生效）",
+   "content_text": "房貸｜生效日 2024-09-20\n六都與特定地區另有較嚴成數 → 全國一體適用\n所有申請房貸的人。以前住在被列管的縣市會被套用較嚴的成數，現在沒有這個區分了。任何還要你先選「是否為特定地區」的試算工具都是過時的。\n法源：中央銀行第七波選擇性信用管制",
+   "date_published": "2024-09-19T16:00:00.000Z",
+   "tags": [
+    "房貸",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-113-rent-special",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-113-rent-special",
+   "title": "房屋租金由列舉扣除額 12 萬改列特別扣除額 18 萬（已生效）",
+   "content_text": "稅｜生效日 2024-01-01\n120000元 → 180000元\n租屋的人。金額變大之外還有一個更關鍵的差別：改列特別扣除額之後可以跟標準扣除額併用，以前放在列舉扣除額時必須放棄標準扣除額才能用。\n法源：所得稅法第 17 條第 1 項第 2 款第 3 目之 8（113-07-31 修正，自 113-01-01 施行）\n註記：實付租金須先減除政府補助。有排富規定。",
+   "date_published": "2023-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  },
+  {
+   "id": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-113-preschool",
+   "url": "https://fengfeng1021.github.io/visible-money-tw/#c-tax-113-preschool",
+   "title": "幼兒學前特別扣除額提高並取消排富（已生效）",
+   "content_text": "稅｜生效日 2024-01-01\n120000元／人 → 150000元／人\n有 6 歲以下子女的家庭。適用年齡由 5 歲以下放寬到 6 歲以下，第 2 名以上子女每人 22.5 萬，而且高所得者也可以扣了。\n法源：所得稅法第 17 條第 1 項第 2 款第 3 目之 6（113-07-31 修正）\n註記：很多舊版計算機仍對幼兒學前套用排富，那是錯的。現行排富只適用長照與房租兩項。",
+   "date_published": "2023-12-31T16:00:00.000Z",
+   "tags": [
+    "稅",
+    "已生效"
+   ]
+  }
+ ]
+}
