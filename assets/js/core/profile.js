@@ -130,7 +130,15 @@ export const FIELDS = {
   },
   sex: {
     group: '勞保勞退', label: '性別', type: 'enum', options: [['m', '男'], ['f', '女']], default: 'm',
-    ask: '生命表的平均餘命男女不同，你是？',
+    ask: '有些計算會用到平均餘命，而生命表男女不同。你是？',
+  },
+  pensionClaimAge: {
+    group: '勞保勞退', label: '打算幾歲開始領勞保年金', type: 'int', unit: '歲', default: 65, min: 55, max: 70,
+    ask: '你打算幾歲開始請領勞保老年年金？提前領每年減 4%、延後領每年增 4%，各以 5 年為限。',
+  },
+  laborPensionMonthly: {
+    group: '勞保勞退', label: '勞退月退休金（核定金額）', type: 'money', unit: '元／月', default: 0,
+    ask: '如果勞保局已經核定你的勞退月退休金，填那個數字；不知道就留白，會用專戶餘額換算。',
   },
   insuredSalary: {
     group: '勞保勞退', label: '最高 60 個月平均月投保薪資', type: 'money', unit: '元', default: 0,

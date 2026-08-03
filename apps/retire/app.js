@@ -60,6 +60,8 @@ const DEFAULTS = () => ({
   cpi: 2,
   cut: 100,
   penRetireManual: null,     // null = 由勞退專戶餘額換算
+  cpiLabor: true,            // 勞保條例 65-4：CPI 累計成長率達 5% 即調整
+  cpiRetire: false,          // 勞退條例 23：依年金生命表計算，條文未設物價連動
   stock: 55, bond: 30,
   strategy: 'fixed',
   infl: MODEL.infl,
@@ -488,7 +490,13 @@ function ageTicks(m) {
   return out;
 }
 
+/* 拖終齡游標時每一格都會重繪，但圖例與公式抽屜跟終齡無關；
+   重建它們只會把使用者剛剛展開的抽屜關掉，所以用簽章擋掉沒必要的重建。 */
+let legendSig = null;
 function renderLegend(m) {
+  const sig = `${m.legalAge}:${K.maxShiftYears}:${[...hidden].sort().join()}`;
+  if (sig === legendSig) return;
+  legendSig = sig;
   const host = $('#legend');
   host.replaceChildren();
   const labels = LABELS(m);
@@ -1135,7 +1143,12 @@ function scheduleSim(delay = 140) {
 /* --- 模組層級的共用旋鈕 --- */
 const sLife = bindSlider($('#s-life'), {
   format: (v) => `${v}<small>歲</small>`,
-  onInput: (v) => { P.set({ planToAge: v }); },
+  onInput: (v) => {
+    // 終齡不可能早於退休年齡，否則模擬期間是負的
+    const patch = { planToAge: v };
+    if (p('retireAge') >= v) patch.retireAge = v - 1;
+    P.set(patch);
+  },
 });
 
 /* --- 第一段 --- */
@@ -1175,7 +1188,11 @@ $('#raceInputs').addEventListener('submit', (e) => e.preventDefault());
 /* --- 第二段 --- */
 const sAgeRetire = bindSlider($('#s-ageRetire'), {
   format: (v) => `${v}<small>歲</small>`,
-  onInput: (v) => { P.set({ retireAge: v }); },
+  onInput: (v) => {
+    const patch = { retireAge: v };
+    if (p('planToAge') <= v) patch.planToAge = v + 1;
+    P.set(patch);
+  },
 });
 const sStock = bindSlider($('#s-stock'), {
   format: (v) => `${v}<small>%</small>`,
@@ -1275,7 +1292,7 @@ function selectTab(name, { focus = false } = {}) {
     } else {
       fan.resize(); plotRuin.resize(); plotSeq.resize(); plotIncome.resize();
       // 扇形的生長動效是這一段的招牌，第一次被看見時才播，不要在分頁藏著時浪費掉
-      if (lastSim && !fanSeen) { fanSeen = true; paintFan(lastSim, 'grow'); }
+      if (lastSim && !fanSeen) { fanSeen = true; firstFanPaint = false; paintFan(lastSim, 'grow'); }
     }
     if (focus) $(`#panel-${name}`).focus();
   });
@@ -1435,7 +1452,10 @@ function renderHeadline() {
       : '正在跑第二段的模擬…');
 
   const parts = [];
-  parts.push(`活到 ${life} 歲的話，${labels[win].split('（')[0]}領最多，比第二名多 ${int(Math.round(gap))} 元。`);
+  // 交叉點正好落在終齡上時兩條線是真的相等，這時說「多 0 元」會像壞掉，要講出它的意義
+  parts.push(Math.round(gap) === 0
+    ? `活到 ${life} 歲的話，${labels[totals[0].key].split('（')[0]}與${labels[totals[1].key].split('（')[0]}剛好打平，這一年就是它們的交叉點。`
+    : `活到 ${life} 歲的話，${labels[win].split('（')[0]}領最多，比第二名多 ${int(Math.round(gap))} 元。`);
   if (bestRow && bestRow.age !== m.claimAge) {
     parts.push(`你現在選的是 ${m.claimAge} 歲；改成 ${bestRow.age} 歲開始領，到 ${life} 歲為止可以多領 ${int(Math.round(m.bestTotal - m.picked.total))} 元。`);
   } else {
@@ -1582,8 +1602,13 @@ function renderLump(m) {
   $('#lumpNote').innerHTML = parts.join('<br><br>');
 }
 
+let raceFormulaSig = null;
 function renderRaceFormula() {
   const m = raceModel;
+  const s = S();
+  const sig = [m.salary, m.Y, m.claimAge, m.legalAge, m.cut, s.cpiOn, s.cpi, s.system, m.salary36].join('|');
+  if (sig === raceFormulaSig) return;
+  raceFormulaSig = sig;
   const host = $('#raceFormula');
   host.replaceChildren();
   const labels = LABELS(m);
@@ -1763,7 +1788,8 @@ function renderFloorRows() {
   const rows = [
     [
       '勞保老年年金',
-      `${m.claimAge} 歲開始領，來自上一段的賽跑`,
+      `${m.claimAge} 歲開始領，來自上一段的賽跑`
+        + (isDemo('insuredSalary') || isDemo('laborYears') ? '（用的是範例投保薪資與年資）' : ''),
       m.eligible ? int(Math.round(f.penLabor)) : '0',
       m.eligible ? '' : '年資未滿 15 年，沒有月退',
     ],
@@ -1772,7 +1798,8 @@ function renderFloorRows() {
       f.manual != null
         ? '你自己填的核定金額'
         : (f.auto.row
-          ? `專戶 ${money(p('pensionAccount'), { compact: true })}元 ÷ ${f.auto.row.age} 歲平均餘命 ${dec(f.auto.row.years, 2)} 年`
+          ? `${isDemo('pensionAccount') ? '範例：' : ''}專戶 ${money(p('pensionAccount'), { compact: true })}元`
+            + ` ÷ ${f.auto.row.age} 歲平均餘命 ${dec(f.auto.row.years, 2)} 年`
           : '沒有生命表，算不出來'),
       int(Math.round(f.penRetire)),
       f.penRetireAge > p('retireAge') ? `${f.penRetireAge} 歲才開始領` : '',
@@ -1990,14 +2017,18 @@ function renderIncomePlot(m) {
   ]);
   const s = S();
   const f = floorOf(raceModel);
-  const first = m.income[0], lastRow = m.income[m.income.length - 1];
-  const erosion = first && lastRow && first.pension > 0 ? (1 - lastRow.pension / first.pension) : 0;
+  // 磨損要單獨看勞退那一層。整層年金的實質金額會因為勞保中途才開始領而上升，
+  // 拿總額前後相除算出來的會是一個看起來像 0% 的假數字。
+  const cpi = s.inflMode === 'cpi' ? cpiPool() : null;
+  const piMean = cpi ? mean(cpi.values) / 100 : s.infl / 100;
+  const erosion = 1 - 1 / Math.pow(1 + piMean, m.n);
   $('#incomeDesc').textContent =
     '中位路徑的收入組成，全部換算成今日購買力。'
     + (f.penLaborFrom > 0 ? `前 ${f.penLaborFrom} 年還沒開始領勞保，地板那一層是矮的。` : '')
     + (s.cpiRetire || f.penRetire === 0
       ? '你設定的年金全部隨物價調整，所以地板那一層在圖上維持水平。'
-      : `勞退月退不隨物價調整，${m.n} 年後年金那一層的實質購買力被磨掉 ${pct(Math.max(0, erosion), 0)}，缺口只能由投資部位補上。`);
+      : `勞退月退不隨物價調整，${m.n} 年後那 ${int(Math.round(f.penRetire))} 元的實質購買力`
+        + `會被通膨磨掉 ${pct(Math.max(0, erosion), 0)}${cpi ? '（以 CPI 序列的平均值估）' : ''}，缺口只能由投資部位補上。`);
 }
 
 function renderFanFormula(m, rounded) {
@@ -2176,8 +2207,10 @@ function renderProfileNote() {
   const mine = PROFILE_KEYS.filter((k) => P.has(k)).length;
   const note = $('#profileNote');
   if (mine) {
+    const demo = PROFILE_KEYS.filter(isDemo).map((k) => P.FIELDS[k].label);
     note.innerHTML = `這些數字用的是你在首頁填過的資料：這一頁需要的 ${PROFILE_KEYS.length} 格裡你已經填了 <b>${mine}</b> 格`
-      + `（整份檔案 ${c.filled} 格）。剩下的只會在需要它的那一段就地問你。`;
+      + `（整份檔案 ${c.filled} 格）。`
+      + (demo.length ? `還沒填的是 ${demo.join('、')}，目前用範例值代替。` : '這一頁需要的都齊了。');
   } else {
     note.textContent = '你還沒有財務檔案，下面每一個數字都是範例值。改動任何一格就會存進這台裝置，其他工具不會再問你一次。';
   }
@@ -2219,18 +2252,8 @@ function renderAll() {
   renderRace();
   renderFloorRows();
   renderRaceFormula();
-  renderFloorHints();
   renderHeadline();
 }
-
-function renderFloorHints() {
-  // 專戶餘額還沒填時，勞退那一層是 0，這件事要說出來而不是靜靜當成 0
-  const has = P.has('pensionAccount');
-  $('#askAccount').hidden = false;
-  const note = $('#floorRows');
-  if (!has && !isDemoSilent) note.dataset.demo = '1';
-}
-const isDemoSilent = true;
 
 /* ==========================================================================
    18. 啟動

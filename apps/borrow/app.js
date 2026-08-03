@@ -26,7 +26,7 @@ import { askBox, fieldControl } from '../../assets/js/core/profile-ui.js';
    0. 法規常數
    一律讀 assets/data/*.json。買房那一段還需要交易成本與各縣市房價所得比，
    目前只存在 apps/afford-ceiling/rules.json，尚未搬進共用資料層（見 NEEDS.md）。
-   讀不到就拒答，不在程式碼裡放一份寫死的備份 —— 寫死的法規常數等同慢性錯誤。
+   讀不到就拒答，不在程式碼裡放一份寫死的備份：寫死的法規常數等同慢性錯誤。
    ========================================================================== */
 let RC = null;   // 交易成本、各縣市統計、DSR 三檔（暫時來源）
 let RL = null;   // assets/data/tw-lending.json：央行成數、DBR、房價負擔能力
@@ -99,7 +99,7 @@ const DEFAULTS = {
 };
 const SCEN = () => ({ grace: null, shock: 0, method: 'annuity', rates: null, extras: [], amount: null, months: null, preset: null, label: null });
 
-const store = createStore('vm:borrow', structuredClone(DEFAULTS));
+const store = createStore('vm:borrow', JSON.parse(JSON.stringify(DEFAULTS)));
 
 // createPlies 每次載入都從一聯開始，所以保存多聯會讓分頁與資料對不起來。
 // 情境比較是同一次造訪之內的動作，載入時只留使用中的那一聯。
@@ -159,9 +159,11 @@ function showTab(id, { animate = true, remember = false } = {}) {
   // 否則第一次造訪就把選擇鎖死，之後填了房貸資料也不會再自動帶到斷崖那一段。
   if (remember) store.set({ tab: activeTab });
   if (!RC) return;
-  // 面板剛顯示時畫布寬度才量得到，兩張圖都要重畫一次
-  if (activeTab === 'ceiling') { computeCeiling(); }
-  else { computeCliff(); }
+  // 面板剛顯示時畫布寬度才量得到。這裡先同步量一次，
+  // 等一下 ResizeObserver 補送的那一次就會算出一模一樣的尺寸、不再動到版面，
+  // 瀏覽器也就不會丟「ResizeObserver loop completed with undelivered notifications」。
+  if (activeTab === 'ceiling') { fall.resize(); plotSavings.resize(); computeCeiling(); }
+  else { plotPay.resize(); plotSplit.resize(); computeCliff(); }
   if (animate) printRows($$(`#sec-${activeTab === 'ceiling' ? 'ceiling' : 'cliff'} .readout`), { stagger: 0.05 });
 }
 $$('#tabs .segmented__opt').forEach((b) => {
@@ -180,7 +182,15 @@ class Waterfall {
     this.ctx = canvas.getContext('2d');
     this.bars = [];
     this.dom = { y0: 0, y1: 1 };
-    this._ro = new ResizeObserver(() => this.resize());
+    // resize() 會改 canvas 的 style.height，在 ResizeObserver 的回呼裡直接做，
+    // 瀏覽器會判定成同一輪觀察迴圈裡又動了版面，丟出
+    // 「ResizeObserver loop completed with undelivered notifications」。
+    // 切換分段時面板從 hidden 變成可見，剛好每次都會踩到。挪到下一幀就沒事。
+    this._rafId = 0;
+    this._ro = new ResizeObserver(() => {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => this.resize());
+    });
     this._ro.observe(canvas.parentElement || canvas);
     this._mq = window.matchMedia('(prefers-color-scheme: dark)');
     this._mq.addEventListener('change', () => this.render());

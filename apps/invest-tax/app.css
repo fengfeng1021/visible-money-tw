@@ -18,6 +18,8 @@
   max-width: var(--measure);
 }
 .sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+/* 這一頁的徽章要同時放稅與市場兩個版本，375px 上必須能折行 */
+#dataver { white-space: normal; max-width: 100%; }
 
 /* 回時間軸的那一行。左邊是連結，右邊是「這些數字是你自己填的」的憑據。 */
 .app-back {

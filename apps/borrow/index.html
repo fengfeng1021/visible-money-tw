@@ -42,8 +42,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     </div>
 
     <p class="app-lede">
-      同一個人的兩個時刻：還沒買的時候，你能買多貴；已經背著的時候，你的月付金會不會爆。
-      兩段用的是同一份收入、負債與自備款，只問你還沒填過的那幾格。
+      還沒買的時候，你能買多貴；已經背著的時候，月付金會不會爆。
+      兩段共用同一份資料，只問你還沒填過的那幾格。
     </p>
 
     <p class="app-from" id="fromLine"></p>
@@ -79,11 +79,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <section id="sec-ceiling" class="mod" aria-label="能買多貴">
 
     <p class="mod__lede">
-      不算「這間房月付多少」，反過來算：以你的收入與自備款，安全的上限在哪。
-      算完之後，用升息兩碼、失業半年、多一個小孩三種壞事，一鈕一鈕壓下去看它撐不撐得住。
+      不算「這間房月付多少」，反過來算：安全的上限在哪，再用三種壞事壓下去看它撐不撐得住。
     </p>
-
-    <div class="mod__ask" id="askCeiling"></div>
 
     <div class="workbench">
 
@@ -192,6 +189,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
               <div class="readout"><span class="readout__label">月付／所得比</span><span class="readout__value" data-live id="c-r-dsr">-</span><span class="readout__delta" data-dir="flat" id="c-r-dsrline"></span></div>
               <div class="readout"><span class="readout__label">交屋後撐得住</span><span class="readout__value" data-live id="c-r-runway">-</span></div>
             </div>
+
+            <!-- 先給結論，再問缺的那幾格。問完就地換成他自己的數字。 -->
+            <div class="mod__ask" id="askCeiling"></div>
           </div>
         </section>
 
@@ -361,10 +361,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
     <p class="mod__lede">
       寬限期結束的那一個月，月付金會跳多高？把期數拖一下，那道斷崖就會自己長出來。
-      分段利率、額外還本、升息壓力都算在同一條時間軸上，三個情境可以擺在一起比。
     </p>
-
-    <div class="mod__ask" id="askCliff"></div>
 
     <div class="plies plies--mod" id="m-plies"></div>
 
@@ -470,6 +467,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
               <div class="readout"><span class="readout__label">跳升幅度</span><span class="readout__value" data-live id="m-r-jump">-</span><span class="readout__delta" data-dir="up" id="m-r-jumpx"></span></div>
               <div class="readout"><span class="readout__label">總利息支出</span><span class="readout__value" data-live id="m-r-interest">-</span></div>
             </div>
+
+            <!-- 先給結論，再問缺的那幾格。問完就地換成他自己的數字。 -->
+            <div class="mod__ask" id="askCliff"></div>
           </div>
         </section>
 

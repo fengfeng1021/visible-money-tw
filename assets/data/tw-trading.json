@@ -1,0 +1,61 @@
+{
+  "version": "2026-08",
+  "verifiedAt": "2026-08-04",
+  "note": "台股交易成本。數值本身沒有爭議，有爭議的是它的法律地位，而那會改變使用者能不能把它當成不可協商的下限。所以這裡把兩種說法並列，不替使用者選邊。",
+
+  "brokerFeeRate": {
+    "value": 0.001425,
+    "unit": "ratio",
+    "confidence": "unverified",
+    "conflictingClaims": [
+      {
+        "claim": "這是券商受託買賣的手續費費率『上限』",
+        "source": "臺灣證券交易所受託買賣費率標準",
+        "implication": "券商不得收更高，打折是券商自願讓利"
+      },
+      {
+        "claim": "這是牌告『基準』費率，自金管會 97 年金管證二字第 0970019212 號函開放後已非法定上限",
+        "source": "金管會 97 年函釋（本站未取得原文）",
+        "implication": "費率由券商自訂，1.425‰ 只是市場慣用的計算基準"
+      }
+    ],
+    "note": "兩種說法對數值 0.1425% 沒有分歧，所有試算結果不受影響。本站未能取得該函釋原文，因此兩種說法一律標為未查證並原文並列。"
+  },
+
+  "brokerFeeMin": {
+    "value": 20,
+    "unit": "TWD",
+    "confidence": "unverified",
+    "conflictingClaims": [
+      {
+        "claim": "無法源，是券商普遍慣例",
+        "source": "apps/etf-lottery 的原始查證",
+        "implication": "各券商可自訂，實務上零股與定期定額常有更低的最低收費"
+      },
+      {
+        "claim": "有規章依據",
+        "source": "證交所規章資料庫 FE064320（本站未逐字核對）",
+        "implication": "有一致的下限"
+      }
+    ],
+    "note": "定期定額每月扣款金額小的時候，這 20 元的侵蝕率會非常高（月扣 1,000 元時手續費率達 2%），所以它是否為硬性下限對長期回測結果有實質影響。"
+  },
+
+  "securitiesTransactionTax": {
+    "etf": { "value": 0.001, "unit": "ratio", "confidence": "verified", "legalBasis": "證券交易稅條例第 2 條（受益憑證 1‰）" },
+    "stock": { "value": 0.003, "unit": "ratio", "confidence": "verified", "legalBasis": "證券交易稅條例第 2 條（股票 3‰）" },
+    "note": "賣出時課徵，買進不課。當沖減半的落日日期另見時間軸。"
+  },
+
+  "traps": [
+    "手續費是買進與賣出各收一次，證交稅只有賣出收。試算把證交稅算在買進那一邊是常見錯誤。",
+    "定期定額的手續費常有專案優惠（例如最低 1 元），與一般委託不同，不能混用同一組參數。",
+    "1.425‰ 究竟是上限還是基準，兩份既有資料的認定衝突且都自評已查證。本站不替使用者選邊，兩種說法並列並一律降級為未查證，直到取得金管會函釋原文為止。"
+  ],
+
+  "sources": [
+    { "label": "證券交易稅條例", "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=G0340076" },
+    { "label": "臺灣證券交易所", "url": "https://www.twse.com.tw/" },
+    { "label": "金融監督管理委員會", "url": "https://www.fsc.gov.tw/" }
+  ]
+}

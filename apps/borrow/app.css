@@ -28,8 +28,9 @@
 .app-from__own { color: var(--accent); font-weight: 700; }
 .app-from__demo { color: var(--stamp-void); font-weight: 700; }
 
-/* 模組層級的問格：只問兩段都要用到的那幾格 */
-.app-ask:not(:empty) { padding: 0 var(--s-4) var(--s-4); }
+/* 模組層級的問格：只問兩段都要用到的那幾格。
+   全部填過時 askbox 會自己 hidden，這時整條連留白都不該留。 */
+.app-ask:has(> .askbox:not([hidden])) { padding: 0 var(--s-4) var(--s-4); }
 .app-ask .askbox { container-type: inline-size; }
 
 /* 共用檔案抽屜。收起來的時候只是一行字，不是頁面頂端的大表單。 */
@@ -66,7 +67,8 @@
   max-width: var(--measure);
   margin: 0 0 var(--s-4);
 }
-.mod__ask:not(:empty) { margin-bottom: var(--s-5); }
+/* 結論之後才問缺的那幾格：論點先出現，輸入是為了把它換成你的 */
+.mod__ask:has(> .askbox:not([hidden])) { margin-top: var(--s-5); }
 .mod__ask .askbox { container-type: inline-size; }
 
 .plies--mod {
