@@ -58,7 +58,44 @@ const STATUS_LABEL = { 'in-force': '已生效', scheduled: '將生效', shelved:
 
 let DATA = { changes: [], version: '—' };
 let RULES = {};
-let filter = 'all';
+let filter = 'recent';
+let showAll = false;
+
+/* 一頁 107 條沒有人會讀完。預設只給兩種入口：
+   有填資料的人看「影響我的」，沒填的人看「最近一年」。
+   其餘按類別，全部要按一下才展開。 */
+const VIEWS = [
+  { key: 'mine', label: '影響我的' },
+  { key: 'recent', label: '最近一年' },
+  { key: 'all', label: '全部' },
+];
+
+
+/* 不同單位的金額不能相加。
+   「每年少繳的稅」「一次性的可貸額度變化」「剩餘貸款期間的利息差」「一生的年金差」
+   是四種不同的東西，把它們加起來會得到一個看起來很大但沒有任何意義的數字，
+   而那正是本站聲稱不做的假精確。所以只給分項小計，不給總計。 */
+const UNIT_LABEL = {
+  perYear: '每年',
+  oneOff: '一次性',
+  loanTerm: '剩餘貸款期間合計',
+  lifetime: '一生合計',
+};
+
+function tallyByUnit() {
+  const bucket = {};
+  let pending = 0;
+  for (const ch of DATA.changes) {
+    const r = evaluate(ch, rulesFor(ch));
+    if (r.state === 'affected') {
+      const k = r.unitClass || 'oneOff';
+      bucket[k] = bucket[k] || { sum: 0, n: 0 };
+      bucket[k].sum += r.amount;
+      bucket[k].n++;
+    } else if (r.state === 'need-more') pending++;
+  }
+  return { bucket, pending };
+}
 
 /* ==========================================================================
    時間軸
@@ -132,8 +169,9 @@ function renderTimeline() {
   });
   const host = $('#tl');
   host.replaceChildren();
-  const list = sortChanges(DATA.changes)
-    .filter((c) => filter === 'all' || c.category === filter);
+  const full = visibleChanges();
+  const CAP = 20;
+  const list = showAll ? full : full.slice(0, CAP);
 
   for (const c of list) {
     const item = el('li', { class: 'tl__item', id: 'c-' + c.id });
@@ -182,8 +220,33 @@ function renderTimeline() {
     host.appendChild(item);
   }
 
+  if (!showAll && full.length > list.length) {
+    const more = el('li', { class: 'tl__item', style: 'grid-template-columns:1fr' });
+    more.appendChild(el('button', {
+      type: 'button',
+      class: 'btn btn--ghost btn--block',
+      text: `再顯示 ${full.length - list.length} 條`,
+      onclick: () => { showAll = true; renderTimeline(); },
+    }));
+    host.appendChild(more);
+  }
+
+  if (!list.length) {
+    host.appendChild(el('li', { class: 'tl__item', style: 'grid-template-columns:1fr' }, [
+      el('div', { class: 'state' }, [
+        el('h3', { class: 'state__title', text: filter === 'mine' ? '還沒有一條算得出對你的金額' : '這個分類目前沒有條目' }),
+        el('p', {
+          class: 'state__body',
+          text: filter === 'mine'
+            ? '往上填幾格，或先看「最近一年」那一欄有哪些跟你有關。'
+            : '換一個分類看看。',
+        }),
+      ]),
+    ]));
+  }
+
   $('#tlFoot').textContent =
-    `目前收錄 ${DATA.changes.length} 條變動，資料版本 ${DATA.version}。`
+    `目前顯示 ${list.length} 條，收錄合計 ${DATA.changes.length} 條，資料版本 ${DATA.version}。`
     + `已暫緩的條目代表該修法沒有上路，不要據以規劃。`;
 
   printRows($$('.tl__item', host), { stagger: 0.035 });
@@ -192,17 +255,41 @@ function renderTimeline() {
 function renderFilters() {
   const host = $('#filters');
   host.replaceChildren();
-  const cats = ['all', ...new Set(DATA.changes.map((c) => c.category))];
-  for (const k of cats) {
-    host.appendChild(el('button', {
-      type: 'button',
-      class: 'segmented__opt',
-      style: 'border:1px solid var(--rule-strong)',
-      'aria-pressed': String(filter === k),
-      text: k === 'all' ? `全部 ${DATA.changes.length}` : `${CAT_LABEL[k] || k} ${DATA.changes.filter((c) => c.category === k).length}`,
-      onclick: () => { filter = k; renderFilters(); renderTimeline(); },
-    }));
+
+  const counts = {
+    mine: DATA.changes.filter((c) => evaluate(c, rulesFor(c)).state === 'affected').length,
+    recent: DATA.changes.filter(inLastYear).length,
+    all: DATA.changes.length,
+  };
+
+  const add = (key, label, n) => host.appendChild(el('button', {
+    type: 'button',
+    class: 'segmented__opt',
+    style: 'border:1px solid var(--rule-strong)',
+    'aria-pressed': String(filter === key),
+    text: n === null ? label : `${label} ${n}`,
+    onclick: () => { filter = key; showAll = false; renderFilters(); renderTimeline(); },
+  }));
+
+  for (const v of VIEWS) add(v.key, v.label, counts[v.key]);
+  for (const k of [...new Set(DATA.changes.map((c) => c.category))]) {
+    add(k, CAT_LABEL[k] || k, DATA.changes.filter((c) => c.category === k).length);
   }
+}
+
+function inLastYear(c) {
+  const d = new Date(String(c.effectiveDate));
+  return Number.isFinite(+d) && (Date.now() - +d) < 400 * 86400000;
+}
+
+function visibleChanges() {
+  const sorted = sortChanges(DATA.changes);
+  if (filter === 'mine') {
+    return sorted.filter((c) => evaluate(c, rulesFor(c)).state === 'affected');
+  }
+  if (filter === 'recent') return sorted.filter(inLastYear);
+  if (filter === 'all') return sorted;
+  return sorted.filter((c) => c.category === filter);
 }
 
 /* ==========================================================================
@@ -224,11 +311,14 @@ function renderNewSince() {
       ? `你上次來之後有 ${s.count} 條新變動，其中 ${s.items.length} 條影響你。`
       : `你上次來之後有 ${s.count} 條新變動。`,
   }));
+  const parts = Object.entries(s.byUnit || {})
+    .filter(([, v]) => Math.abs(v.sum) >= 1)
+    .map(([k, v]) => `${UNIT_LABEL[k] || k}${v.sum > 0 ? '有利' : '不利'} ${int(Math.abs(v.sum))} 元`);
   box.appendChild(el('p', {
     class: 'newsince__body',
-    text: s.items.length
-      ? `以你目前填的資料估算，合計 ${s.total > 0 ? '對你有利' : '對你不利'} ${int(Math.abs(s.total))} 元。`
-      : '沒有一條需要你的資料才能判斷，往下看有沒有跟你有關的。',
+    text: parts.length
+      ? `以你目前填的資料估算：${parts.join('、')}。`
+      : '沒有一條算得出對你的金額，往下看有沒有跟你有關的。',
   }));
   host.appendChild(box);
   stampIn(box);
@@ -248,22 +338,26 @@ function renderCover() {
   const proof = $('#proof');
   if (!c.filled) { proof.hidden = true; return; }
 
-  // 已經有檔案：算出全部變動對他的合計影響，這就是首屏的證明
-  let total = 0, hit = 0, pending = 0;
-  for (const ch of DATA.changes) {
-    const r = evaluate(ch, rulesFor(ch));
-    if (r.state === 'affected') { total += r.amount; hit++; }
-    else if (r.state === 'need-more') pending++;
-  }
+  // 已經有檔案：分項小計就是首屏的證明。不給總計，因為單位不同不能相加。
+  const { bucket, pending } = tallyByUnit();
+  const parts = Object.entries(bucket)
+    .filter(([, v]) => Math.abs(v.sum) >= 1)
+    .sort((a, b) => Math.abs(b[1].sum) - Math.abs(a[1].sum));
+  const hit = Object.values(bucket).reduce((n, v) => n + v.n, 0);
+
   proof.hidden = false;
   $('#proofLabel').textContent = `以你填的 ${c.filled} 格資料算出來的`;
-  $('#proofLine').innerHTML = hit
-    ? `目前收錄的 ${DATA.changes.length} 條變動裡，有 <em>${hit}</em> 條影響你，`
-      + `合計 <b>${total > 0 ? '有利' : '不利'} ${int(Math.abs(total))} 元</b>`
+  $('#proofLine').innerHTML = parts.length
+    ? parts.map(([k, v]) =>
+        `<em>${UNIT_LABEL[k] || k}</em>${v.sum > 0 ? '有利' : '不利'} <b>${int(Math.abs(v.sum))}</b> 元`
+      ).join('　／　')
     : `目前收錄的 ${DATA.changes.length} 條變動裡，還沒有一條算得出對你的金額`;
-  $('#proofNote').textContent = pending
-    ? `另外有 ${pending} 條需要你再填幾格才算得出來，往下捲會就地問你。`
-    : '往下捲可以看到每一條的算法與法源。';
+  $('#proofNote').textContent =
+    (hit
+      ? `共 ${hit} 條算得出金額。這幾個數字的時間單位不同，所以分開列、不加總：`
+        + `把每年省的稅跟一次性的可貸額度加在一起會得到一個沒有意義的數字。`
+      : '')
+    + (pending ? `另外有 ${pending} 條需要你再填幾格才算得出來，往下捲會就地問你。` : '');
 }
 
 /* ==========================================================================

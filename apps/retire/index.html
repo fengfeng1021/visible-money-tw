@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>退休｜看得見的錢</title>
+<meta name="description" content="幾歲開始領勞保年金最划算，以及這筆錢撐不撐得到終齡。三條累積領取曲線在人生軸上賽跑，交叉的那一年就是答案；賽跑算出的月領金額直接變成退休模擬的地板，數百條退休金人生同時往前跑，看有幾條會歸零。純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="退休｜看得見的錢">
+<meta property="og:description" content="幾歲開始領，以及錢夠不夠。同一條時間線上的兩個問題，用同一份資料算完。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者帶著首頁填過的財務檔案進來，第一眼就看到一句合起來的結論：幾歲開始領、月領多少、這筆錢撐到終齡的機率是多少。他先在第一段把三條累積領取曲線跑一次，親手把終齡游標拖到自己相信的地方，選定一個請領年齡；那個月領金額不必抄寫，直接變成第二段退休模擬的地板，扇形當場重畫。缺的格子在需要它的那一段就地問，填過的不再問第二次。
+FIRST VIEWPORT: 單據抬頭（名稱＋資料版本徽章）在最上，其下一行是回法規變動時間軸的連結與「這些數字用的是你在首頁填過的資料」；接著就是合併後的結論卡與硃砂章，四個讀數並排；再下面是共用的終齡游標，然後才是「幾歲開始領／錢夠不夠」兩個分頁。載入即有結論，沒有空白表單。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">退休</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      同一條時間線上的兩個問題：幾歲開始領勞保年金最划算，以及這筆錢撐不撐得到終齡。
+      前一題算出來的月領金額就是後一題的地板，中間不用你再抄一次。
+    </p>
+    <p class="app-crumb">
+      <a class="app-crumb__back" href="../../index.html">回法規變動時間軸</a>
+      <span class="app-crumb__note" id="profileNote"></span>
+    </p>
+  </section>
+
+  <!-- ============ 首屏就是論點：兩段合起來的結論 ============ -->
+  <section class="sheet headline" aria-labelledby="verdict-h">
+    <div class="sheet__body">
+      <div class="verdict" id="verdict">
+        <span class="verdict__stamp" id="verdictStamp" hidden></span>
+        <h2 class="verdict__lead" id="verdict-h">正在算…</h2>
+        <p class="verdict__body" id="verdictBody">數百條退休金人生正在往未來長。</p>
+      </div>
+
+      <div class="readout-row" id="readouts">
+        <div class="readout">
+          <span class="readout__label" id="lb-claim">打算開始領的年齡</span>
+          <span class="readout__value" data-live id="r-claim">-</span>
+          <span class="readout__delta" data-dir="flat" id="r-claimd"></span>
+        </div>
+        <div class="readout">
+          <span class="readout__label">勞保老年年金月領</span>
+          <span class="readout__value" data-live id="r-labor">-</span>
+          <span class="readout__delta" data-dir="flat" id="r-labord"></span>
+        </div>
+        <div class="readout">
+          <span class="readout__label">每月地板合計</span>
+          <span class="readout__value" data-live id="r-floor">-</span>
+          <span class="readout__delta" data-dir="flat" id="r-floord"></span>
+        </div>
+        <div class="readout">
+          <span class="readout__label" id="lb-live">撐到終齡的機率</span>
+          <span class="readout__value" data-live id="r-success">-</span>
+          <span class="readout__delta" data-dir="flat" id="r-err"></span>
+        </div>
+      </div>
+
+      <p class="model-caveat">
+        左邊兩格是法規算出來的，右邊那一格是模型假設的產物，不是預測。
+      </p>
+
+      <div id="askModule"></div>
+
+      <div class="dials" id="dials">
+        <div class="slider" id="s-life">
+          <div class="slider__top">
+            <span class="slider__label" id="l-life">你想讓這筆錢撐到幾歲</span>
+            <span class="slider__value" aria-hidden="true">90<small>歲</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="70" max="105" step="1" value="90" aria-labelledby="l-life">
+          </div>
+          <div class="slider__ticks"><span>70</span><span>80</span><span>90</span><span>100</span><span>105</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">計畫終齡（歲，數字輸入）</span>
+            <input type="text" inputmode="numeric" value="90">
+            <span class="field__unit">歲</span>
+          </label>
+          <p class="field__hint" id="lifeHint">
+            兩段共用同一個數字：它同時是賽跑圖上的終齡游標，也是退休模擬要撐到的年齡。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 這一頁包含哪兩件事 ============ -->
+  <nav class="tabbar" aria-label="這一頁包含兩件事">
+    <div class="segmented segmented--block" id="tabs" role="tablist">
+      <button type="button" class="segmented__opt" role="tab" id="tab-race"
+              aria-controls="panel-race" aria-selected="true">
+        幾歲開始領<span class="tabbar__sub">三條曲線的交叉點</span>
+      </button>
+      <button type="button" class="segmented__opt" role="tab" id="tab-fan"
+              aria-controls="panel-fan" aria-selected="false" tabindex="-1">
+        錢夠不夠<span class="tabbar__sub">數百條人生的存活率</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ======================================================================
+       第一段：幾歲開始領
+       ====================================================================== -->
+  <section id="panel-race" class="panel" role="tabpanel" aria-labelledby="tab-race" tabindex="0">
+    <div class="workbench">
+
+      <form class="workbench__inputs sheet" id="raceInputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">勞保這一段要填的</h2></div>
+        <div class="sheet__body">
+
+          <div id="askRace"></div>
+
+          <div class="slider" id="s-claim">
+            <div class="slider__top">
+              <span class="slider__label" id="l-claim">你打算幾歲開始領</span>
+              <span class="slider__value" aria-hidden="true">65<small>歲</small></span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="60" max="70" step="1" value="65" aria-labelledby="l-claim">
+            </div>
+            <div class="slider__ticks" id="claimTicks"></div>
+            <label class="slider__twin">
+              <span class="sr-only">開始請領年齡（歲，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="65">
+              <span class="field__unit">歲</span>
+            </label>
+            <p class="field__hint" id="claimHint"></p>
+          </div>
+
+          <details class="helper" id="advRace">
+            <summary>進階假設（預設全部關閉）</summary>
+            <div class="helper__body">
+
+              <fieldset class="fieldset">
+                <legend class="field__label">適用制度</legend>
+                <div class="segmented segmented--block" id="seg-system" role="group">
+                  <button type="button" class="segmented__opt" data-value="legacy" aria-pressed="true">98 年前已有勞保年資</button>
+                  <button type="button" class="segmented__opt" data-value="annuity" aria-pressed="false">98 年後才初次加保</button>
+                </div>
+                <p class="field__hint">
+                  98 年 1 月 1 日勞保年金施行前已有年資者，才可以「一次請領老年給付」（月數規則完全不同）。
+                  98 年後初次加保者只有年金制。
+                </p>
+              </fieldset>
+
+              <label class="field" id="f-salary36">
+                <span class="field__label">一次請領適用之平均月投保薪資</span>
+                <span class="field__control">
+                  <input type="text" inputmode="numeric" value="45,800">
+                  <span class="field__unit">元</span>
+                </span>
+                <span class="field__hint">一次請領老年給付採「退保前 36 個月」平均，與年金的「最高 60 個月」平均是兩個數字，通常前者較低。</span>
+              </label>
+
+              <label class="switch" id="sw-cpi">
+                <input type="checkbox">
+                <span class="switch__box"></span>
+                <span>套用物價調整（累計成長率達 5% 才調）</span>
+              </label>
+              <label class="field field--tight" id="f-cpi">
+                <span class="field__label">假設年通膨率</span>
+                <span class="field__control">
+                  <input type="text" inputmode="decimal" value="2">
+                  <span class="field__unit">%</span>
+                </span>
+                <span class="field__hint">這是你自己設的假設，不是官方預測。法規是累計達 5% 才依該成長率調整，不是每年調。</span>
+              </label>
+
+              <fieldset class="fieldset">
+                <legend class="field__label">勞保財務壓力情境</legend>
+                <div class="segmented segmented--block" id="seg-cut" role="group">
+                  <button type="button" class="segmented__opt" data-value="100" aria-pressed="true">不打折</button>
+                  <button type="button" class="segmented__opt" data-value="90" aria-pressed="false">9 折</button>
+                  <button type="button" class="segmented__opt" data-value="80" aria-pressed="false">8 折</button>
+                </div>
+                <p class="field__hint">
+                  <b>使用者自選假設，非官方預測。</b>目前沒有任何法律規定年金會被打折；這個開關只是讓你看見「如果」的形狀。
+                </p>
+              </fieldset>
+
+            </div>
+          </details>
+
+          <div class="btnrow">
+            <button type="button" class="btn btn--quiet btn--sm" id="raceReset">回到這一段的預設假設</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="workbench__out stack-lg">
+
+        <!-- 招牌視覺一：三條累積曲線在人生軸上賽跑 -->
+        <section class="plot" id="plotCard">
+          <div class="plot__head">
+            <h2 class="plot__title">累積已領總額，在同一條人生軸上賽跑</h2>
+            <div class="legend" id="legend"></div>
+          </div>
+          <canvas class="plot__canvas" id="chart" role="img" aria-labelledby="chartDesc"></canvas>
+          <div class="plot__foot">
+            <p id="chartDesc" class="plot__desc">
+              橫軸是年齡，縱軸是從開始請領那天算起、累積已經領到手的總金額。
+            </p>
+            <div class="btnrow plot__actions">
+              <button type="button" class="btn btn--ghost btn--sm" id="raceBtn">再跑一次</button>
+              <span class="chip" id="lifeChip">終齡游標 90 歲</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 年資未滿 15 年：整個介面換成一次金，不算出一個不存在的月退 -->
+        <section class="sheet" id="lumpCard" hidden>
+          <div class="sheet__head">
+            <h2 class="sheet__title">你的情況：老年一次金</h2>
+          </div>
+          <div class="sheet__body stack">
+            <div class="state state--refuse">
+              <h3 class="state__title">這個問題現在回答不了：你沒有月退可以比</h3>
+              <p class="state__body" id="refuseBody">
+                勞保年資未滿 15 年，依法不能請領老年年金，只能請領老年一次金。
+              </p>
+            </div>
+            <div class="readout-row" id="lumpReadouts">
+              <div class="readout"><span class="readout__label">老年一次金</span><span class="readout__value" id="r-lump">-</span></div>
+              <div class="readout"><span class="readout__label">給付月數</span><span class="readout__value" id="r-lumpm">-</span></div>
+              <div class="readout"><span class="readout__label">可請領年齡</span><span class="readout__value" id="r-lumpage">-</span></div>
+            </div>
+            <p class="note" id="lumpNote"></p>
+          </div>
+        </section>
+
+        <section class="sheet" id="tableCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">法定年齡前後 5 歲，每一格的月領金額</h2>
+            <span class="topbar__spacer"></span>
+            <span class="chip">點一列就選定那個年齡</span>
+          </div>
+          <div class="ledger-wrap" id="ledgerWrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">請領年齡</th>
+                <th scope="col">增減</th>
+                <th scope="col">月領金額</th>
+                <th scope="col">到終齡為止總額</th>
+                <th scope="col">與最佳差額</th>
+              </tr></thead>
+              <tbody id="ageBody"></tbody>
+            </table>
+          </div>
+          <div class="sheet__foot" id="tableFoot"></div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="raceFormula"></div>
+        </section>
+
+        <p class="disclaimer">
+          <b>正式金額以勞保局核定為準</b>，請以
+          <a href="https://www.bli.gov.tw/0014162.html" rel="noopener">勞保局官方試算</a>
+          與你的個人年資資料核對。本段以「年資與投保薪資已固定」為前提，未模擬你之後繼續投保會增加的年資；
+          未涵蓋特殊性質工作提前請領、國民年金年資併計、失能年金與遺屬年金的競合，
+          也未套用「逾 60 歲後年資最多採計 5 年」的一次金上限。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       第二段：錢夠不夠
+       ====================================================================== -->
+  <section id="panel-fan" class="panel" role="tabpanel" aria-labelledby="tab-fan" tabindex="0" hidden>
+    <div class="workbench">
+
+      <form class="workbench__inputs sheet" id="fanInputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">退休模擬要填的</h2></div>
+        <div class="sheet__body">
+
+          <div id="askFan"></div>
+
+          <div class="slider" id="s-ageRetire">
+            <div class="slider__top">
+              <span class="slider__label" id="l-ageRetire">退休年齡</span>
+              <span class="slider__value" aria-hidden="true">65<small>歲</small></span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="45" max="75" step="1" value="65" aria-labelledby="l-ageRetire">
+            </div>
+            <div class="slider__ticks"><span>45</span><span>55</span><span>65</span><span>75</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">退休年齡（歲，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="65">
+              <span class="field__unit">歲</span>
+            </label>
+            <p class="field__hint" id="retireHint"></p>
+          </div>
+
+          <fieldset class="fieldset floor-set">
+            <legend class="field__label">每月保底年金（你的地板）</legend>
+            <p class="field__hint fieldset__hint">
+              這兩個數字不用你填：勞保那一層來自上一段的賽跑，勞退那一層由專戶餘額換算。
+              勞保會跟上通膨、勞退不會，所以分開處理。
+            </p>
+            <dl class="floor" id="floorRows"></dl>
+
+            <label class="switch pension-switch">
+              <input type="checkbox" id="cpiLabor" checked>
+              <span class="switch__box"></span>
+              <span>勞保隨物價調整（勞保條例 65-4）</span>
+            </label>
+            <label class="switch pension-switch">
+              <input type="checkbox" id="cpiRetire">
+              <span class="switch__box"></span>
+              <span>勞退隨物價調整（條文未設此機制）</span>
+            </label>
+
+            <div id="askAccount"></div>
+
+            <details class="helper" id="penOverride">
+              <summary>勞保局給了你一個不一樣的數字？改掉它</summary>
+              <div class="helper__body">
+                <label class="field" id="f-pRetire">
+                  <span class="field__label">勞退月退休金（留白就用專戶餘額換算）</span>
+                  <span class="field__control">
+                    <input type="text" inputmode="numeric" placeholder="留白＝自動換算">
+                    <span class="field__unit">元／月</span>
+                  </span>
+                  <span class="field__hint">勞保局用的是勞退年金生命表，本站沒有那張表，換算值只是估計。查得到核定金額就填進來。</span>
+                </label>
+              </div>
+            </details>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">資產配置</legend>
+            <div class="slider" id="s-stock">
+              <div class="slider__top">
+                <span class="slider__label" id="l-stock">股票</span>
+                <span class="slider__value" aria-hidden="true">55<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="100" step="5" value="55" aria-labelledby="l-stock">
+              </div>
+              <label class="slider__twin">
+                <span class="sr-only">股票配置比重（%，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="55">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+            <div class="slider" id="s-bond">
+              <div class="slider__top">
+                <span class="slider__label" id="l-bond">債券</span>
+                <span class="slider__value" aria-hidden="true">30<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="100" step="5" value="30" aria-labelledby="l-bond">
+              </div>
+              <label class="slider__twin">
+                <span class="sr-only">債券配置比重（%，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="30">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+            <p class="alloc-rest">現金 <b id="cashPct">15%</b>　組合期望報酬 <b id="muPct">-</b>　波動 <b id="sigPct">-</b></p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">提領策略</legend>
+            <div class="segmented segmented--block" id="seg-strategy" role="group">
+              <button type="button" class="segmented__opt" data-value="fixed" aria-pressed="true">固定實質金額</button>
+              <button type="button" class="segmented__opt" data-value="guardrail" aria-pressed="false">動態護欄</button>
+            </div>
+            <p class="field__hint" id="strategyHint">
+              固定實質金額：不管市值漲跌，每年都領到同樣的購買力。這就是 4% 法則的本質。
+            </p>
+          </fieldset>
+
+          <fieldset class="fieldset" id="inflSet">
+            <legend class="field__label">通膨</legend>
+            <div class="segmented segmented--block" id="seg-infl" role="group">
+              <button type="button" class="segmented__opt" data-value="fixed" aria-pressed="true">固定值</button>
+              <button type="button" class="segmented__opt" data-value="cpi" aria-pressed="false">抽台灣 CPI</button>
+            </div>
+            <div class="slider" id="s-infl">
+              <div class="slider__top">
+                <span class="slider__label" id="l-infl">通膨假設</span>
+                <span class="slider__value" aria-hidden="true">2.0<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="6" step="0.1" value="2" aria-labelledby="l-infl">
+              </div>
+              <div class="slider__ticks"><span>0</span><span>2</span><span>4</span><span>6%</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">通膨假設（%，數字輸入）</span>
+                <input id="t-infl" type="text" inputmode="decimal" value="2">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+            <p class="field__hint" id="inflHint"></p>
+          </fieldset>
+
+          <fieldset class="fieldset crash-set">
+            <legend class="field__label">順序風險</legend>
+            <label class="switch crash-switch">
+              <input type="checkbox" id="crashOn">
+              <span class="switch__box"></span>
+              <span>退休前五年遇到大跌</span>
+            </label>
+            <div class="slider" id="s-crash">
+              <div class="slider__top">
+                <span class="slider__label" id="l-crash">五年累計跌幅</span>
+                <span class="slider__value" aria-hidden="true">跌 45<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="-70" max="-10" step="5" value="-45" aria-labelledby="l-crash">
+              </div>
+              <label class="slider__twin">
+                <span class="sr-only">五年累計跌幅（%，填負數，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="-45">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+            <p class="field__hint" id="crashHint">
+              這不是某一段真實歷史，是一個你可以調整幅度的壓力情境。同樣的平均報酬，只要壞的年份排在最前面，結局就完全不同。
+            </p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">模擬方式</legend>
+            <div class="segmented segmented--block" id="seg-mode" role="group">
+              <button type="button" class="segmented__opt" data-value="normal" aria-pressed="true">參數化常態</button>
+              <button type="button" class="segmented__opt" data-value="bootstrap" aria-pressed="false">歷史區塊拔靴法</button>
+            </div>
+            <p class="field__hint" id="modeHint"></p>
+
+            <div class="pool-set" id="poolSet" data-on="false">
+              <span class="field__label" id="l-pool">抽樣池</span>
+              <div class="segmented segmented--block" id="seg-pool" role="group" aria-labelledby="l-pool">
+                <button type="button" class="segmented__opt" data-value="taiex" aria-pressed="true">台股 22 年</button>
+                <button type="button" class="segmented__opt" data-value="sp500" aria-pressed="false">S&amp;P 500 98 年</button>
+              </div>
+              <p class="field__hint" id="poolHint"></p>
+            </div>
+
+            <label class="switch mode-switch">
+              <input type="checkbox" id="preciseOn">
+              <span class="switch__box"></span>
+              <span>精確模式（1000 次，只畫百分位帶）</span>
+            </label>
+          </fieldset>
+
+          <details class="formula" id="advFan">
+            <summary>攤開改：報酬假設 μ 與 σ</summary>
+            <div class="formula__body" id="advBody"></div>
+          </details>
+
+          <div class="btnrow">
+            <button type="button" class="btn btn--quiet btn--sm" id="fanReset">回到這一段的預設假設</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="workbench__out stack-lg">
+
+        <div class="state state--refuse" id="refuse" hidden>
+          <h2 class="state__title">這個問題現在回答不了</h2>
+          <p class="state__body" id="refuseWhy"></p>
+          <p class="state__body" id="refuseCan"></p>
+          <button type="button" class="btn btn--ghost btn--sm" id="backToNormal">回到參數化常態模式</button>
+        </div>
+
+        <section class="note note--warn boot-note" id="bootNote" hidden aria-labelledby="bootNote-h">
+          <h2 class="boot-note__title" id="bootNote-h">這一組結果是從 <b id="bootN">-</b> 個歷史年度重抽出來的</h2>
+          <p class="boot-note__lead" id="bootLead"></p>
+          <blockquote class="boot-note__quote" id="bootCaveat"></blockquote>
+          <dl class="boot-note__stats" id="bootStats"></dl>
+          <p class="boot-note__more" id="bootBond"></p>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body">
+            <div class="readout-row" id="fanReadouts">
+              <div class="readout"><span class="readout__label">中位破產年齡</span><span class="readout__value" data-live id="r-ruin">-</span></div>
+              <div class="readout"><span class="readout__label">首年淨提領率</span><span class="readout__value" data-live id="r-wr">-</span></div>
+              <div class="readout"><span class="readout__label">最差 10% 的終值</span><span class="readout__value" data-live id="r-worst">-</span></div>
+              <div class="readout"><span class="readout__label">投資部位每月要扛</span><span class="readout__value" data-live id="r-gap">-</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 招牌視覺二：蒙地卡羅資產路徑扇形 -->
+        <section class="plot" id="fanCard">
+          <div class="plot__head">
+            <h2 class="plot__title">數百條人生同時往前跑</h2>
+            <div class="fan-ring">
+              <canvas id="ring" width="128" height="128" aria-hidden="true"></canvas>
+              <span class="fan-ring__num" id="ringNum">-</span>
+              <span class="fan-ring__cap">存活</span>
+            </div>
+          </div>
+          <div class="fan-host">
+            <canvas class="plot__canvas" id="fan" role="img" aria-labelledby="fanDesc"></canvas>
+            <div class="fan-progress" id="fanProgress" hidden><span id="fanProgressBar"></span></div>
+          </div>
+          <div class="plot__head fan-tools">
+            <div class="legend" id="fanLegend"></div>
+            <span class="topbar__spacer"></span>
+            <button type="button" class="btn btn--ghost btn--sm" id="playBtn">重播</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="worstBtn" aria-pressed="false">只看最差 10%</button>
+          </div>
+          <p class="plot__foot" id="fanDesc">
+            橫軸是年齡，縱軸是資產餘額（換算成今日購買力）。深帶是中間五成的路徑，淺帶是 10% 到 90%。
+            紅線是在終齡前歸零的路徑，它們落到地面堆成一座小丘，丘越高代表越多條人生在那個年齡花光。
+          </p>
+        </section>
+
+        <section class="plot" id="ruinCard">
+          <div class="plot__head">
+            <h2 class="plot__title">如果會歸零，會是幾歲歸零</h2>
+          </div>
+          <canvas class="plot__canvas" id="chartRuin" role="img" aria-labelledby="ruinDesc"></canvas>
+          <p class="plot__foot" id="ruinDesc">破產年齡分佈。沒有失敗路徑時這張圖是空的，那是好事。</p>
+        </section>
+
+        <section class="plot" id="seqCard">
+          <div class="plot__head">
+            <h2 class="plot__title">同一組報酬率，把順序倒過來</h2>
+          </div>
+          <canvas class="plot__canvas" id="chartSeq" role="img" aria-labelledby="seqDesc"></canvas>
+          <p class="plot__foot" id="seqDesc">
+            兩條線用的是完全相同的一組年報酬率，只有先後順序不同，平均報酬一模一樣。分岔的幅度就是報酬順序風險本身。
+          </p>
+        </section>
+
+        <section class="plot" id="incomeCard">
+          <div class="plot__head">
+            <h2 class="plot__title">每年的錢從哪裡來</h2>
+            <div class="legend" id="incomeLegend"></div>
+          </div>
+          <canvas class="plot__canvas" id="chartIncome" role="img" aria-labelledby="incomeDesc"></canvas>
+          <p class="plot__foot" id="incomeDesc">
+            中位路徑的收入組成，全部換算成今日購買力。
+          </p>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="fanFormula"></div>
+        </section>
+
+        <p class="disclaimer">
+          蒙地卡羅模擬的輸出是模型假設的產物，不是預測，也不是投資建議。
+          報酬假設一旦換掉，成功率就會跟著換，所以請把它當成「我離翻轉點多遠」的量尺，不要當成一個承諾。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 法源與模型假設 ============ -->
+  <section class="sheet" id="sourceCard">
+    <div class="sheet__head">
+      <h2 class="sheet__title">法源與模型假設</h2>
+      <span class="chip" id="unverifiedBadge">-</span>
+      <span class="topbar__spacer"></span>
+      <span class="datestamp" id="dataver2">-</span>
+    </div>
+    <div class="ledger-wrap sources-wrap">
+      <table class="ledger">
+        <thead><tr>
+          <th scope="col">項目</th><th scope="col">值</th><th scope="col">狀態</th><th scope="col">依據</th>
+        </tr></thead>
+        <tbody id="sourceRows"></tbody>
+      </table>
+    </div>
+    <div class="sheet__foot">
+      標「已查證」的是查得到條號或公告的硬事實；標「未查證」的是這個模擬器的假設，不是事實，全部可以在左欄改掉。
+    </div>
+  </section>
+
+  <p class="disclaimer">
+    本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+    勞保年金與勞退月退的實際金額以勞動部勞工保險局核定為準。
+  </p>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

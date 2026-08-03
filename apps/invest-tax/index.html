@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>投資與稅｜看得見的錢</title>
+<meta name="description" content="我買的這些東西，扣掉稅與費用之後真正剩下什麼。股利兩制交叉點地圖、台股 ETF 起始月報酬分布、除息填息機，三件事共用同一份財務檔案：股利金額、配息筆數、券商折數、課稅方式與所得級距只填一次。純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="投資與稅｜看得見的錢">
+<meta property="og:description" content="五月要勾哪一個、換一個起始月差多少、配息到底有沒有讓我變有錢。同一份資料算三件事。">
+<meta property="og:type" content="website">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者帶著首頁填過的財務檔案進來，第一眼就看到結論：他的股利扣掉稅與補充保費之後真正剩下多少。三張聯單掛在同一份資料上，他撕開第一聯看自己在課稅地圖上離翻轉點多遠，撕開第二聯看同一筆錢換一個起始月會差多少，撕開第三聯親手按下除息、看那一塊從股價飛進錢包。全程沒有人再問他一次薪資、股利或折數。
+FIRST VIEWPORT: 單據抬頭（模組名＋資料版本徽章）在最上；其下一行回首頁時間軸的連結與「這些數字用的是你在首頁填過的資料」；接著是只問缺格的填寫盒與一條共用參數帶（課稅方式、邊際稅率、每筆配息、手續費折數）；再來是三聯的聯籤；然後就是結論卡與硃砂章，四格讀數把「兩制稅額、股利實拿、實質稅負率」直接攤在首屏。手機改單欄，聯籤橫向捲動。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">投資與稅</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+
+    <p class="app-lede">
+      我買的這些東西，扣掉稅與費用之後真正剩下什麼。三件事掛在同一份資料上：
+      五月報稅那一格要勾哪一個、換一個起始月買結果差多少、配息到底有沒有讓你變有錢。
+    </p>
+
+    <p class="app-back">
+      <a href="../../index.html">回法規變動時間軸</a>
+      <span class="app-back__note" id="profileNote"></span>
+    </p>
+
+    <div class="app-ask" id="askHost"></div>
+
+    <div class="strip" id="strip">
+      <div class="strip__row">
+        <span class="strip__item"><span class="strip__k">課稅方式</span><b class="strip__v" id="sTax">-</b></span>
+        <span class="strip__item"><span class="strip__k">綜所稅邊際稅率</span><b class="strip__v" id="sRate">-</b></span>
+        <span class="strip__item"><span class="strip__k">每筆配息</span><b class="strip__v" id="sPer">-</b></span>
+        <span class="strip__item"><span class="strip__k">手續費折數</span><b class="strip__v" id="sDisc">-</b></span>
+      </div>
+      <div class="strip__ctl">
+        <span class="field__label" id="l-taxmode">下面三段都用這個課稅方式</span>
+        <div class="segmented segmented--block segmented--wrap" id="seg-taxmode" role="group" aria-labelledby="l-taxmode">
+          <button type="button" class="segmented__opt" data-value="auto" aria-pressed="true">依地圖的結論</button>
+          <button type="button" class="segmented__opt" data-value="combined" aria-pressed="false">一律合併計稅</button>
+          <button type="button" class="segmented__opt" data-value="separate" aria-pressed="false">一律分開 28%</button>
+        </div>
+        <p class="field__hint" id="stripHint"></p>
+      </div>
+    </div>
+
+    <div class="plies" id="tabs" role="tablist" aria-label="這一張單子的三聯">
+      <button class="ply" type="button" role="tab" id="tab-map" data-ply="1" data-panel="p-map"
+              aria-controls="p-map" aria-selected="true">
+        <span class="ply__swatch"></span><span>五月要勾哪一個</span>
+      </button>
+      <button class="ply" type="button" role="tab" id="tab-etf" data-ply="2" data-panel="p-etf"
+              aria-controls="p-etf" aria-selected="false" tabindex="-1">
+        <span class="ply__swatch"></span><span>換一個起始月差多少</span>
+      </button>
+      <button class="ply" type="button" role="tab" id="tab-ex" data-ply="3" data-panel="p-ex"
+              aria-controls="p-ex" aria-selected="false" tabindex="-1">
+        <span class="ply__swatch"></span><span>配息有沒有讓我變有錢</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ 模組結論：首屏就是論點 ============ -->
+  <section class="sheet" id="verdictCard" aria-labelledby="verdict-h">
+    <div class="sheet__body">
+      <div class="verdict" id="verdict">
+        <span class="verdict__stamp" id="verdictStamp" hidden></span>
+        <h2 class="verdict__lead" id="verdict-h">正在讀取法規常數</h2>
+        <p class="verdict__body" id="verdictBody">
+          稅率級距、扣除額與補充保費費率都從有版本標記的常數檔載入，載入完成就會算給你看。
+        </p>
+      </div>
+      <div class="readout-row" id="readouts">
+        <div class="readout"><span class="readout__label">合併計稅應納</span><span class="readout__value" data-live id="r-combined">-</span></div>
+        <div class="readout"><span class="readout__label">分開計稅應納</span><span class="readout__value" data-live id="r-separate">-</span></div>
+        <div class="readout"><span class="readout__label">股利實拿</span><span class="readout__value" data-live id="r-take">-</span><span class="readout__delta" data-dir="flat" id="r-takeNote"></span></div>
+        <div class="readout"><span class="readout__label">股利實質稅負率</span><span class="readout__value" data-live id="r-eff">-</span><span class="readout__delta" data-dir="flat" id="r-effNote">含補充保費</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       第一聯：股利課稅交叉點地圖
+       ================================================================== -->
+  <div class="panel" id="p-map" role="tabpanel" aria-labelledby="tab-map" tabindex="0">
+    <div class="workbench">
+
+      <form class="workbench__inputs sheet" id="mapInputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">這一段還要問的</h2></div>
+        <div class="sheet__body">
+          <div id="mapAsk"></div>
+
+          <div class="slider" id="s-dividend">
+            <div class="slider__top">
+              <span class="slider__label" id="l-dividend">全年股利所得</span>
+              <span class="slider__value" aria-hidden="true">-</span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="0" max="3000000" step="10000" value="300000" aria-labelledby="l-dividend">
+            </div>
+            <div class="slider__ticks"><span>0</span><span>100萬</span><span>200萬</span><span>300萬</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">全年股利所得（元，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="300000">
+              <span class="field__unit">元</span>
+            </label>
+            <span class="field__hint">拖這一支會直接改寫你的檔案，另外兩聯跟著變。</span>
+          </div>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">申報年度</legend>
+            <div class="segmented segmented--block" id="seg-year" role="group">
+              <button type="button" class="segmented__opt" data-value="114" aria-pressed="true">114 年度</button>
+              <button type="button" class="segmented__opt" data-value="115" aria-pressed="false">115 年度</button>
+            </div>
+            <p class="field__hint" id="yearHint"></p>
+          </fieldset>
+
+          <details class="formula" id="fineTune">
+            <summary>更精確：再減幾項扣除額</summary>
+            <div class="formula__body askbox__grid" id="fineHost"></div>
+          </details>
+          <p class="field__hint">
+            這幾格也記在同一份檔案裡，其他模組要用到時不會再問你。
+          </p>
+        </div>
+      </form>
+
+      <div class="workbench__out stack-lg">
+
+        <section class="plot" id="mapCard">
+          <div class="plot__head">
+            <h2 class="plot__title">哪一區比較省：一張地圖，不是一個數字</h2>
+            <div class="legend" id="mapLegend"></div>
+          </div>
+          <canvas class="plot__canvas" id="map" role="img" aria-labelledby="mapDesc"></canvas>
+          <div class="state" id="mapEmpty" hidden>
+            <h3 class="state__title">股利是 0，這張地圖退化了</h3>
+            <p class="state__body">
+              沒有股利就沒有兩制可選，地圖上只剩一個點。把左邊的股利拉起來，分界線才會長出來。
+            </p>
+          </div>
+          <p class="plot__foot" id="mapDesc">
+            橫軸是全年股利所得，縱軸是其他所得淨額。淡藍區合併計稅較省，淡黃區分開計稅較省。
+          </p>
+        </section>
+
+        <section class="plot" id="marginCard">
+          <div class="plot__head">
+            <h2 class="plot__title">再多領 1 元股利，實際會被拿走多少</h2>
+            <div class="legend" id="marginLegend"></div>
+          </div>
+          <canvas class="plot__canvas" id="margin" role="img" aria-labelledby="marginDesc"></canvas>
+          <p class="plot__foot" id="marginDesc">橫軸是全年股利所得，縱軸是邊際實質稅負率。</p>
+        </section>
+
+        <section class="sheet" id="nhiCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">補充保費逐筆判定</h2>
+            <span class="topbar__spacer"></span>
+            <span class="chip" id="nhiChip">-</span>
+          </div>
+          <div class="ledger-wrap" id="nhiWrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">筆次</th><th scope="col">金額</th><th scope="col">是否起扣</th><th scope="col">補充保費</th>
+              </tr></thead>
+              <tbody id="nhiBody"></tbody>
+              <tfoot><tr id="nhiFootRow"></tr></tfoot>
+            </table>
+          </div>
+          <div class="sheet__foot" id="nhiFoot"></div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="mapFormula"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       第二聯：台股 ETF 起始日樂透
+       ================================================================== -->
+  <div class="panel" id="p-etf" role="tabpanel" aria-labelledby="tab-etf" tabindex="0" hidden>
+    <div class="workbench">
+
+      <form class="workbench__inputs sheet" id="etfInputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">這一段還要問的</h2></div>
+        <div class="sheet__body">
+          <div id="etfAsk"></div>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">標的（可複選）</legend>
+            <div id="tickerList" class="tickers"></div>
+            <p class="field__error rows__error" id="tickerError"></p>
+          </fieldset>
+
+          <div class="slider" id="s-years">
+            <div class="slider__top">
+              <span class="slider__label" id="l-years">持有年數</span>
+              <span class="slider__value" aria-hidden="true">3<small>年</small></span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="1" max="15" step="1" value="3" aria-labelledby="l-years">
+            </div>
+            <div class="slider__ticks"><span>1</span><span>5</span><span>10</span><span>15</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">持有年數（年，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="3">
+              <span class="field__unit">年</span>
+            </label>
+          </div>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">投入方式</legend>
+            <div class="segmented segmented--block" id="seg-mode" role="group">
+              <button type="button" class="segmented__opt" data-value="lump" aria-pressed="true">單筆</button>
+              <button type="button" class="segmented__opt" data-value="dca" aria-pressed="false">每月定期定額</button>
+            </div>
+          </fieldset>
+
+          <label class="field" id="f-amount">
+            <span class="field__label" id="l-amount">單筆金額</span>
+            <span class="field__control">
+              <input type="text" inputmode="numeric" value="600,000" aria-describedby="h-amount">
+              <span class="field__unit">元</span>
+            </span>
+            <span class="field__hint" id="h-amount">金額只影響最低手續費的侵蝕程度與絕對金額，不影響報酬率的形狀。</span>
+            <span class="field__error"></span>
+          </label>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">配息處理</legend>
+            <div class="segmented segmented--block" id="seg-div" role="group">
+              <button type="button" class="segmented__opt" data-value="reinvest" aria-pressed="true">再投入</button>
+              <button type="button" class="segmented__opt" data-value="cash" aria-pressed="false">領現金</button>
+            </div>
+          </fieldset>
+
+          <p class="field__hint" id="etfTaxHint"></p>
+        </div>
+      </form>
+
+      <div class="workbench__out stack-lg">
+
+        <section class="sheet" id="etfHeadCard">
+          <div class="sheet__body">
+            <p class="app-sub" id="etfLead">正在讀取市場資料。</p>
+            <div class="readout-row" id="etfReadouts">
+              <div class="readout"><span class="readout__label">年化中位數</span><span class="readout__value" data-live id="r-median">-</span></div>
+              <div class="readout"><span class="readout__label">最差起始月</span><span class="readout__value" data-live id="r-worst">-</span></div>
+              <div class="readout"><span class="readout__label">最好起始月</span><span class="readout__value" data-live id="r-best">-</span></div>
+              <div class="readout"><span class="readout__label">正報酬比例</span><span class="readout__value" data-live id="r-win">-</span><span class="readout__delta" data-dir="flat" id="r-winnote"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="plot" id="distCard">
+          <div class="plot__head">
+            <h2 class="plot__title">所有可能的起始月，各跑一次的結果</h2>
+            <div class="legend" id="distLegend"></div>
+          </div>
+          <div class="plot__stack">
+            <canvas class="plot__canvas" id="chartDist" role="img" aria-labelledby="distDesc"></canvas>
+          </div>
+          <p class="plot__foot" id="distDesc">
+            橫軸是扣完成本與稅之後的年化報酬率，縱軸是有幾個起始月落在那一格。
+            上方橫條由左至右是最差、P10、P25、中位、P75、P90、最好。
+          </p>
+        </section>
+
+        <div class="state state--refuse" id="refuse" hidden>
+          <h3 class="state__title" id="refuseTitle">資料不足以回答這個問題</h3>
+          <p class="state__body" id="refuseBody"></p>
+          <button type="button" class="btn btn--ghost btn--sm" id="refuseFix">改成可回答的最長視窗</button>
+        </div>
+
+        <section class="sheet" id="sampleCard">
+          <div class="sheet__head"><h2 class="sheet__title">這張圖背後有幾個樣本</h2></div>
+          <div class="sheet__body">
+            <div class="readout-row readout-row--tight" id="sampleRow">
+              <div class="readout"><span class="readout__label">滾動起始月</span><span class="readout__value" data-live id="r-n">-</span></div>
+              <div class="readout"><span class="readout__label">有效獨立樣本數</span><span class="readout__value" data-live id="r-neff">-</span></div>
+              <div class="readout"><span class="readout__label">資料涵蓋期間</span><span class="readout__value" data-live id="r-span">-</span></div>
+            </div>
+            <p class="note note--warn" id="sampleNote"></p>
+          </div>
+        </section>
+
+        <section class="sheet" id="tableCard">
+          <div class="sheet__head"><h2 class="sheet__title">分位數逐檔對照</h2></div>
+          <div class="ledger-wrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">標的</th><th scope="col">最差</th><th scope="col">P10</th>
+                <th scope="col">P25</th><th scope="col">中位</th><th scope="col">P75</th>
+                <th scope="col">P90</th><th scope="col">最好</th><th scope="col">正報酬</th>
+              </tr></thead>
+              <tbody id="qBody"></tbody>
+            </table>
+          </div>
+          <div class="sheet__foot" id="etfTableFoot"></div>
+        </section>
+
+        <section class="plot" id="costCard">
+          <div class="plot__head">
+            <h2 class="plot__title">成本侵蝕：毛獲利走到淨獲利，中間掉了什麼</h2>
+          </div>
+          <canvas class="plot__canvas" id="chartCost" role="img" aria-labelledby="costDesc"></canvas>
+          <p class="plot__foot" id="costDesc">以中位數那一個起始月為例。</p>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="etfFormula"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       第三聯：除息填息機
+       ================================================================== -->
+  <div class="panel" id="p-ex" role="tabpanel" aria-labelledby="tab-ex" tabindex="0" hidden>
+    <div class="workbench">
+
+      <form class="workbench__inputs sheet" id="exInputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">這一段還要問的</h2></div>
+        <div class="sheet__body">
+
+          <fieldset class="fieldset fieldset--star">
+            <legend class="field__label">填息</legend>
+            <div class="slider" id="s-fill">
+              <div class="slider__top">
+                <span class="slider__label" id="l-fill">填息率</span>
+                <span class="slider__value" aria-hidden="true">70<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="100" step="1" value="70" aria-labelledby="l-fill">
+              </div>
+              <div class="slider__ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">填息率（%，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="70">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+            <p class="field__hint">
+              填息率是「價格缺口被補回多少」。100% 表示股價回到除息前那個價位。
+              <b>填息是市場給的，不是配息帶來的</b>：同一家公司少配一點，價格缺口本來就小一點。
+            </p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">持股</legend>
+            <div class="fieldgrid fieldgrid--2">
+              <label class="field" id="f-price">
+                <span class="field__label">起始股價</span>
+                <span class="field__control">
+                  <input type="text" inputmode="decimal" value="20">
+                  <span class="field__unit">元</span>
+                </span>
+                <span class="field__error"></span>
+              </label>
+              <label class="field" id="f-yield">
+                <span class="field__label">年化配息率</span>
+                <span class="field__control">
+                  <input type="text" inputmode="decimal" value="7">
+                  <span class="field__unit">%</span>
+                </span>
+                <span class="field__hint">對當時股價，不是對成本</span>
+                <span class="field__error"></span>
+              </label>
+            </div>
+
+            <div class="slider" id="s-lots">
+              <div class="slider__top">
+                <span class="slider__label" id="l-lots">持股張數</span>
+                <span class="slider__value" aria-hidden="true">-</span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="1" max="600" step="1" value="15" aria-labelledby="l-lots">
+              </div>
+              <div class="slider__ticks"><span>1</span><span>200</span><span>400</span><span>600</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">持股張數（張，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="15">
+                <span class="field__unit">張</span>
+              </label>
+              <span class="field__hint" id="lotsHint"></span>
+            </div>
+            <div class="btnrow">
+              <button type="button" class="btn btn--ghost btn--sm" id="lotsSync">用我檔案裡的股利金額回推張數</button>
+            </div>
+
+            <div class="slider" id="s-exyears">
+              <div class="slider__top">
+                <span class="slider__label" id="l-exyears">持有年數</span>
+                <span class="slider__value" aria-hidden="true">10<small>年</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="1" max="30" step="1" value="10" aria-labelledby="l-exyears">
+              </div>
+              <div class="slider__ticks"><span>1</span><span>10</span><span>20</span><span>30</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">持有年數（年，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="10">
+                <span class="field__unit">年</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">配息組成與趨勢</legend>
+            <div class="slider" id="s-qual">
+              <div class="slider__top">
+                <span class="slider__label" id="l-qual">配息中屬股利所得的比例</span>
+                <span class="slider__value" aria-hidden="true">100<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="100" step="5" value="100" aria-labelledby="l-qual">
+              </div>
+              <div class="slider__ticks"><span>0</span><span>50</span><span>100</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">配息中屬股利所得的比例（%，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="100">
+                <span class="field__unit">%</span>
+              </label>
+              <span class="field__hint">
+                ETF 配息未必都來自股利。來自收益平準金或已實現資本利得的那一部分不是股利所得，
+                不課補充保費、也不併入綜所稅。預設 100% 是把稅費算到最滿。
+              </span>
+            </div>
+
+            <div class="fieldgrid fieldgrid--2">
+              <label class="field" id="f-trend">
+                <span class="field__label">除息以外的年化價格趨勢</span>
+                <span class="field__control">
+                  <input type="text" inputmode="decimal" value="1.5">
+                  <span class="field__unit">%</span>
+                </span>
+                <span class="field__error"></span>
+              </label>
+              <label class="field" id="f-mkt">
+                <span class="field__label">市值型年化總報酬</span>
+                <span class="field__control">
+                  <input type="text" inputmode="decimal" value="8.5">
+                  <span class="field__unit">%</span>
+                </span>
+                <span class="field__error"></span>
+              </label>
+            </div>
+            <p class="field__hint" id="mktHint"></p>
+
+            <div class="slider" id="s-bear">
+              <div class="slider__top">
+                <span class="slider__label" id="l-bear">空頭年跌幅（用來看另一面）</span>
+                <span class="slider__value" aria-hidden="true">30<small>%</small></span>
+              </div>
+              <div class="slider__track">
+                <input type="range" min="0" max="60" step="5" value="30" aria-labelledby="l-bear">
+              </div>
+              <div class="slider__ticks"><span>0</span><span>30</span><span>60</span></div>
+              <label class="slider__twin">
+                <span class="sr-only">空頭年跌幅（%，數字輸入）</span>
+                <input type="text" inputmode="numeric" value="30">
+                <span class="field__unit">%</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">你的做法</legend>
+            <div class="segmented segmented--block" id="seg-exmode" role="group" aria-label="配息處理方式">
+              <button type="button" class="segmented__opt" data-value="reinvest" aria-pressed="true">配息再投入</button>
+              <button type="button" class="segmented__opt" data-value="spend" aria-pressed="false">配息領現金</button>
+            </div>
+            <p class="field__hint" id="exTaxHint"></p>
+          </fieldset>
+        </div>
+      </form>
+
+      <div class="workbench__out stack-lg">
+
+        <section class="plot" id="stageCard">
+          <div class="plot__head">
+            <h2 class="plot__title">按下除息：股價掉的那一塊，就是進你錢包的那一塊</h2>
+            <span class="stage__counter num" id="stageCounter">第 0／10 次</span>
+          </div>
+          <canvas class="plot__canvas" id="stage" role="img" aria-labelledby="stageDesc"></canvas>
+          <div class="transport" role="group" aria-label="除息動畫控制">
+            <button type="button" class="btn btn--ghost btn--sm" id="tRewind">回到起點</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="tPrev">上一次</button>
+            <button type="button" class="btn btn--sm" id="tPlay">播放</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="tNext">單步除息</button>
+          </div>
+          <p class="plot__foot" id="stageDesc">
+            左邊那根柱子是股價，右邊那個方框是你的錢包。按「單步除息」看一次完整過程。
+          </p>
+        </section>
+
+        <div class="state state--refuse" id="exRefuse" hidden>
+          <h3 class="state__title">這組假設下，這個問題回答不了</h3>
+          <p class="state__body" id="exRefuseBody"></p>
+        </div>
+
+        <section class="sheet" id="exHeadCard">
+          <div class="sheet__body">
+            <div class="readout-row" id="exReadouts">
+              <div class="readout"><span class="readout__label">期末總價值</span><span class="readout__value" data-live id="r-final">-</span></div>
+              <div class="readout"><span class="readout__label">累計配息（毛）</span><span class="readout__value" data-live id="r-cumdiv">-</span></div>
+              <div class="readout"><span class="readout__label">總價值實際增加</span><span class="readout__value" data-live id="r-gain">-</span><span class="readout__delta" data-dir="flat" id="r-cagr"></span></div>
+              <div class="readout"><span class="readout__label">摩擦：稅＋保費＋手續費</span><span class="readout__value" data-live id="r-leak">-</span><span class="readout__delta" data-dir="down" id="r-leakpct"></span></div>
+            </div>
+            <p class="app-sub" id="exLead"></p>
+          </div>
+        </section>
+
+        <section class="plot" id="raceCard">
+          <div class="plot__head">
+            <h2 class="plot__title">三個組合，同一條時間軸</h2>
+            <div class="legend" id="raceLegend"></div>
+          </div>
+          <canvas class="plot__canvas" id="race" role="img" aria-labelledby="raceDesc"></canvas>
+          <p class="plot__foot" id="raceDesc">
+            橫軸是年，縱軸是總價值（市值＋已領現金）。實線畫到目前的播放位置，虛線是後面還沒跑到的部分。
+          </p>
+        </section>
+
+        <section class="sheet" id="compareCard">
+          <div class="sheet__head"><h2 class="sheet__title">期末對照</h2></div>
+          <div class="sheet__body">
+            <div class="compare" id="compare"></div>
+            <p class="note note--warn compare__note" id="compareNote"></p>
+          </div>
+        </section>
+
+        <section class="plot" id="senseCard">
+          <div class="plot__head">
+            <h2 class="plot__title">填息率差一點，終值差多少</h2>
+          </div>
+          <canvas class="plot__canvas" id="sense" role="img" aria-labelledby="senseDesc"></canvas>
+          <p class="plot__foot" id="senseDesc">橫軸是填息率 0 到 100%，縱軸是期末總價值。</p>
+        </section>
+
+        <section class="sheet" id="thresholdCard">
+          <div class="sheet__head"><h2 class="sheet__title">2 萬元門檻</h2></div>
+          <div class="sheet__body">
+            <div class="threshold" id="thresholdNote"></div>
+            <div class="compose">
+              <div class="compose__bar" id="composeBar" role="img" aria-labelledby="composeNote">
+                <span class="compose__seg compose__seg--qual" id="segQual"></span>
+                <span class="compose__seg compose__seg--other" id="segOther"></span>
+              </div>
+              <p class="compose__note" id="composeNote"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="sheet" id="otherSideCard">
+          <div class="sheet__head"><h2 class="sheet__title">另一面：下跌那一年</h2></div>
+          <div class="sheet__body">
+            <p class="app-sub" id="otherSideLead"></p>
+            <div class="readout-row" id="otherSide">
+              <div class="readout"><span class="readout__label">高股息：那年入帳現金</span><span class="readout__value" data-live id="o-cash">-</span></div>
+              <div class="readout"><span class="readout__label">市值型：要賣掉的股數</span><span class="readout__value" data-live id="o-sell">-</span></div>
+              <div class="readout"><span class="readout__label">＝ 永久少掉的持股</span><span class="readout__value" data-live id="o-pct">-</span></div>
+            </div>
+            <p class="note" id="otherSideNote"></p>
+          </div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="exFormula"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 三聯共用的成本與費用說明 ============ -->
+  <section class="sheet" id="feeCard">
+    <div class="sheet__head">
+      <h2 class="sheet__title">交易成本：兩份既有資料互相矛盾，所以這裡兩邊都列</h2>
+      <span class="topbar__spacer"></span>
+      <span class="chip" id="feeChip">未查證</span>
+    </div>
+    <div class="sheet__body" id="feeHost"></div>
+  </section>
+
+  <p class="disclaimer">
+    本模組為獨立試算，所有計算都在你的瀏覽器內完成，你填入的所得、股利與持股不會離開這台裝置，
+    沒有任何資料被送到伺服器。實際稅額以稽徵機關核定為準。
+    ETF 那一段的報酬以離線建置的還原權息序列計算，未還原的收盤價不參與任何運算；
+    歷史報酬不代表未來結果，本頁呈現的是「歷史上這段期間發生過什麼」的計數，不是機率也不是預測。
+    除息那一段的配息率、填息率、價格趨勢與市值型報酬全部是你自己填的假設，本模組不引用任何標的的歷史報酬。
+    補充保費依現行單筆起扣制計算，年度累計制修法已暫緩、尚未上路。
+  </p>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

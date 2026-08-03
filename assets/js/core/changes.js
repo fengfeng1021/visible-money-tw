@@ -53,6 +53,7 @@ const KINDS = {
        single     薪資特扣這種「本人（與配偶）各自適用」的 → 有配偶時加倍
   */
   deduction: {
+    unitClass: 'perYear',
     need: ['salary'],
     calc(ch, rules) {
       const before = num(ch.before), after = num(ch.after);
@@ -91,13 +92,17 @@ const KINDS = {
 
   /* 課稅級距門檻整組移動 → 用前後兩組級距各算一次稅 */
   brackets: {
+    unitClass: 'perYear',
     need: ['salary'],
     calc(ch, rules, prev) {
-      if (!rules?.brackets || !prev?.brackets) return null;
-      const { net } = taxableIncome(null, rules);
+      // 條目自己帶的級距優先：時間軸涵蓋好幾個年度，常數檔只放得下最近兩年
+      const bBefore = ch.impact?.beforeBrackets || prev?.brackets;
+      const bAfter = ch.impact?.afterBrackets || rules?.brackets;
+      if (!bBefore || !bAfter) return null;
+      const { net } = taxableIncome(null, { ...rules, brackets: bAfter });
       if (!net) return { amount: 0, explain: '你的課稅所得淨額是 0，這一條不影響你。' };
-      const a = progressiveTax(net, prev.brackets).tax;
-      const b = progressiveTax(net, rules.brackets).tax;
+      const a = progressiveTax(net, bBefore).tax;
+      const b = progressiveTax(net, bAfter).tax;
       return {
         amount: a - b,
         explain: `以你的課稅所得淨額 ${fmt(net)} 元，舊級距要繳 ${fmt(a)} 元、新級距要繳 ${fmt(b)} 元，`
@@ -108,6 +113,7 @@ const KINDS = {
 
   /* 貸款成數上限改變 → 可多貸的金額 */
   ltv: {
+    unitClass: 'oneOff',
     need: ['savings'],
     calc(ch) {
       const before = num(ch.before), after = num(ch.after);
@@ -127,6 +133,7 @@ const KINDS = {
 
   /* 貸款利率改變 → 月付金與總利息的差 */
   mortgageRate: {
+    unitClass: 'loanTerm',
     need: ['mortgageBalance', 'mortgageMonthsLeft'],
     calc(ch) {
       const before = num(ch.before), after = num(ch.after);
@@ -147,6 +154,7 @@ const KINDS = {
 
   /* 投保薪資上限改變 → 勞保年金月領差 × 預估請領年數 */
   insuredSalary: {
+    unitClass: 'lifetime',
     need: ['insuredSalary', 'laborYears'],
     calc(ch, rules) {
       const before = num(ch.before), after = num(ch.after);
@@ -172,6 +180,7 @@ const KINDS = {
 
   /* 補充保費費率或門檻改變 → 全年多扣或少扣的錢 */
   nhi: {
+    unitClass: 'perYear',
     need: ['annualDividend'],
     calc(ch, rules, prev) {
       const div = P.getOr('annualDividend', 0);
@@ -246,6 +255,7 @@ export function evaluate(change, { rules, prevRules } = {}) {
     state: 'affected',
     amount: out.amount,
     monthly: out.monthly ?? null,
+    unitClass: kind.unitClass || 'oneOff',
     explain: out.explain,
     missing: [],
   };
@@ -270,14 +280,20 @@ export function sortChanges(list) {
 export function sinceLastSeen(list, lastSeenISO, evalOpts) {
   if (!lastSeenISO) return null;
   const fresh = list.filter((c) => String(c.effectiveDate) > lastSeenISO);
-  if (!fresh.length) return { count: 0, total: 0, items: [] };
-  let total = 0;
+  if (!fresh.length) return { count: 0, byUnit: {}, items: [] };
+  // 分單位小計，不給總計 —— 每年省的稅跟一次性的額度變化不是同一種東西
+  const byUnit = {};
   const items = [];
   for (const c of fresh) {
     const r = evaluate(c, evalOpts);
-    if (r.state === 'affected') { total += r.amount; items.push({ change: c, result: r }); }
+    if (r.state !== 'affected') continue;
+    const k = r.unitClass || 'oneOff';
+    byUnit[k] = byUnit[k] || { sum: 0, n: 0 };
+    byUnit[k].sum += r.amount;
+    byUnit[k].n++;
+    items.push({ change: c, result: r });
   }
-  return { count: fresh.length, total, items };
+  return { count: fresh.length, byUnit, items };
 }
 
 /* ==========================================================================

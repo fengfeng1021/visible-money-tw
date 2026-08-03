@@ -1,0 +1,474 @@
+/* 退休模組：勞保年金請領年齡賽跑 ＋ 退休提領存活扇形。
+   只放這個模組專有的版面，視覺語彙一律繼承共用系統。 */
+
+/* .state、.fan-progress、.boot-note 都自帶 display，會蓋掉 hidden 屬性。
+   分頁面板與拒答面板必須真的能收起來，所以在這一頁把 hidden 拉回最高優先。 */
+[hidden] { display: none !important; }
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-4); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+/* 回首頁時間軸 ＋ 檔案來源說明 */
+.app-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-4);
+  margin: 0;
+  padding: var(--s-2) var(--s-4) var(--s-3);
+  border-top: 1px dashed var(--rule);
+  font-size: var(--t-sm);
+  max-width: none;
+}
+.app-crumb__back { font-weight: 600; }
+.app-crumb__note { color: var(--ink-3); font-size: var(--t-xs); }
+.app-crumb__note b { color: var(--ink-2); }
+
+/* ==========================================================================
+   首屏結論：兩段合起來的一句話
+   ========================================================================== */
+.headline { margin-bottom: var(--s-4); }
+.model-caveat {
+  margin: var(--s-3) 0 0;
+  padding-top: var(--s-2);
+  border-top: 1px dashed var(--rule);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-weight: 600;
+  max-width: none;
+}
+
+/* 模組層級的共用旋鈕：兩段都在用同一個數字 */
+.dials {
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+}
+.dials .slider { margin-bottom: 0; }
+.dials .field__hint { margin-top: var(--s-2); }
+
+/* 缺什麼問什麼：askbox 在結論卡裡要有自己的上緣間距 */
+#askModule:not(:empty), #askRace:not(:empty), #askFan:not(:empty), #askAccount:not(:empty) {
+  margin-top: var(--s-4);
+}
+#askRace .askbox, #askFan .askbox, #askAccount .askbox { padding: var(--s-3); }
+
+/* 已經填過的那幾格：不再問，但要看得到、改得到 */
+.filled { margin: var(--s-3) 0 var(--s-4); }
+.filled > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  padding: var(--s-2) 0;
+  border-top: 1px solid var(--rule-faint);
+  border-bottom: 1px solid var(--rule-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.filled > summary::-webkit-details-marker { display: none; }
+.filled > summary::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-2) var(--ease-out);
+  flex: 0 0 auto;
+}
+.filled[open] > summary::before { transform: rotate(45deg); }
+.filled__vals {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.filled__body { padding-top: var(--s-3); }
+
+/* ==========================================================================
+   分頁：讓使用者知道這一頁包含哪兩件事
+   ========================================================================== */
+.tabbar { margin-bottom: var(--s-4); }
+.tabbar .segmented__opt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: var(--s-3);
+  font-size: var(--t-md);
+  white-space: normal;
+}
+.tabbar .segmented__opt[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.tabbar__sub {
+  font-size: var(--t-xs);
+  font-weight: 500;
+  opacity: 0.78;
+}
+.panel:focus { outline: none; }
+.panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* ==========================================================================
+   共用的填寫版面
+   ========================================================================== */
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); min-width: 0; }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: 0; margin-bottom: var(--s-3); }
+.field--tight { margin-top: var(--s-3); }
+.field[data-disabled] .field__hint { color: var(--ink-3); }
+.slider .field__hint { margin-top: var(--s-2); }
+
+/* 折疊式輔助區 */
+.helper {
+  border: 1px solid var(--rule-faint);
+  border-top: 1px solid var(--rule);
+  background: var(--sheet-sunk);
+  margin-bottom: var(--s-5);
+}
+.helper > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.helper > summary::-webkit-details-marker { display: none; }
+.helper > summary::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-2) var(--ease-out);
+  flex: 0 0 auto;
+}
+.helper[open] > summary::before { transform: rotate(45deg); }
+.helper__body {
+  padding: var(--s-3);
+  border-top: 1px dashed var(--rule);
+  background: var(--sheet);
+}
+.helper__body > :last-child { margin-bottom: 0; }
+
+/* ==========================================================================
+   第一段：賽跑圖上的交叉點標籤與終齡游標
+   ========================================================================== */
+.plot { position: relative; }
+.plot__canvas { display: block; width: 100%; }
+
+.cross-tag {
+  position: absolute;
+  z-index: 3;
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  padding: 2px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--lift-1);
+  opacity: 0;
+}
+.cross-tag[data-lead="true"] { background: var(--accent); color: var(--accent-ink); }
+
+.life-tag {
+  position: absolute;
+  z-index: 4;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: var(--lift-1);
+}
+
+#plotCard .plot__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  align-items: center;
+  justify-content: space-between;
+}
+.plot__desc { margin: 0; font-size: var(--t-xs); color: var(--ink-3); max-width: 44em; }
+.plot__actions { flex: 0 0 auto; }
+
+/* 圖面本身就是終齡游標的拖曳區 */
+#chart { cursor: ew-resize; touch-action: pan-y; }
+
+/* 年齡表：勝出那一列、選定那一列 */
+.ledger tbody tr[data-best] td { background: var(--accent-wash); }
+.ledger tbody tr[data-best] td:first-child { font-weight: 700; color: var(--accent); }
+.ledger tbody tr[data-legal] td:first-child::after {
+  content: " 法定";
+  font-family: var(--font-cjk);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+.ledger tbody tr[data-pick] td { box-shadow: inset 0 0 0 2px var(--accent); }
+.ledger tbody tr[data-pick] td:first-child::before {
+  content: "▸ ";
+  color: var(--accent);
+}
+#ageBody tr { cursor: pointer; }
+
+.chip--unverified { border-style: dashed; color: var(--stamp-void); }
+
+/* ==========================================================================
+   第二段：地板、配置、順序風險
+   ========================================================================== */
+.floor-set {
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--accent);
+  padding: var(--s-3);
+}
+.floor-set legend { margin-left: 0; padding-inline: 0; }
+
+.floor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0;
+  margin: 0 0 var(--s-3);
+  border-top: 1px solid var(--rule);
+}
+.floor dt {
+  padding: var(--s-2) var(--s-2) var(--s-2) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  line-height: 1.4;
+  min-width: 0;
+}
+.floor dt small { display: block; color: var(--ink-3); font-size: 0.6875rem; }
+.floor dd {
+  margin: 0;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+.floor dd small { font-weight: 400; color: var(--ink-3); }
+
+.pension-switch {
+  display: flex;
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.mode-switch { display: flex; margin-top: var(--s-3); font-size: var(--t-xs); color: var(--ink-2); }
+
+.alloc-rest {
+  margin: calc(var(--s-2) * -1) 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+.alloc-rest b {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.crash-set {
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--warn);
+  padding: var(--s-3);
+}
+.crash-set legend { margin-left: 0; padding-inline: 0; }
+.crash-switch { font-size: var(--t-base); margin-bottom: var(--s-3); }
+.crash-set .slider { margin-bottom: var(--s-2); }
+.crash-set[data-on="false"] .slider { opacity: 0.45; }
+.crash-set[data-hist="true"] .slider { opacity: 0.45; }
+
+.pool-set {
+  margin-top: var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--rule);
+  min-width: 0;
+}
+.pool-set[data-on="false"] { opacity: 0.45; }
+.pool-set > .field__label { display: block; margin-bottom: var(--s-2); }
+.pool-set .segmented { margin-bottom: var(--s-2); }
+
+#advBody .field { margin-bottom: var(--s-3); }
+#advBody .field__label { font-size: var(--t-xs); }
+#advBody .fieldgrid { gap: 0 var(--s-3); }
+#advBody .adv-note { font-family: var(--font-cjk); font-size: var(--t-xs); color: var(--ink-3); margin-top: var(--s-2); }
+
+/* ==========================================================================
+   招牌視覺二：扇形圖與成功率環
+   ========================================================================== */
+.fan-host { position: relative; }
+
+.fan-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  display: block;
+}
+.fan-ring canvas { width: 64px; height: 64px; display: block; }
+.fan-ring__num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-base);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  transform: translateY(-4px);
+}
+.fan-ring__cap {
+  position: absolute;
+  left: 0; right: 0; bottom: 6px;
+  text-align: center;
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.fan-progress {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: var(--sheet-sunk);
+}
+.fan-progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+}
+
+.fan-tools { padding-top: 0; padding-bottom: var(--s-3); align-items: center; }
+.fan-tools .btn { min-height: 32px; }
+
+.plot[data-stale="true"] { opacity: 0.35; }
+.legend__key--band { height: 10px; opacity: 0.35; }
+
+/* ==========================================================================
+   歷史模式的揭露面板
+   ========================================================================== */
+.boot-note { display: block; }
+.boot-note__title {
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-base);
+  font-weight: 700;
+  color: var(--ink);
+}
+.boot-note__title b {
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+}
+.boot-note__lead { margin: 0 0 var(--s-3); max-width: var(--measure); }
+.boot-note__quote {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--warn);
+  background: var(--sheet);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: var(--measure);
+}
+.boot-note__quote-src {
+  display: block;
+  font-weight: 700;
+  color: var(--warn);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.boot-note__stats {
+  display: grid;
+  grid-template-columns: minmax(6rem, auto) minmax(0, 1fr);
+  gap: 0;
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-xs);
+  border-top: 1px solid var(--rule);
+}
+.boot-note__stats dt {
+  padding: var(--s-1) var(--s-2) var(--s-1) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  color: var(--ink-3);
+}
+.boot-note__stats dd {
+  margin: 0;
+  padding: var(--s-1) 0;
+  border-bottom: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.boot-note__more { margin: 0; font-size: var(--t-xs); line-height: 1.7; max-width: var(--measure); }
+
+/* 法源表：第一欄留給文字，不要被等寬數字擠掉 */
+.sources-wrap { max-height: 22rem; }
+.sources-wrap .ledger td { white-space: normal; height: auto; padding-block: var(--s-2); line-height: 1.5; }
+.sources-wrap .ledger td:first-child { font-family: var(--font-cjk); color: var(--ink); font-weight: 600; min-width: 8rem; }
+.sources-wrap .ledger td:nth-child(4) { font-family: var(--font-cjk); font-size: var(--t-xs); color: var(--ink-3); min-width: 14rem; }
+.sources-wrap .ledger td a { word-break: break-all; }
+
+.state--refuse .btn { margin-top: var(--s-1); }
+
+#sourceCard { margin-top: var(--s-6); }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .readout__label { font-size: var(--t-xs); }
+  .plot__title { font-size: var(--t-sm); }
+  .fan-tools { gap: var(--s-2); }
+  #plotCard .plot__foot { flex-direction: column; align-items: flex-start; }
+  .tabbar .segmented__opt { font-size: var(--t-base); padding-inline: var(--s-2); }
+}

@@ -49,6 +49,15 @@ try {
   const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
   await send('Page.enable', {}, sessionId);
   await send('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 2, mobile: width < 700 }, sessionId);
+
+  // 第五個參數：在頁面載入「之前」執行的程式碼。
+  // 要驗證「使用者已經有財務檔案時的行為」就得先種好 localStorage，
+  // 載入之後才寫已經來不及，模組早就讀完快照了。
+  const seed = process.argv[5];
+  if (seed) {
+    await send('Page.addScriptToEvaluateOnNewDocument', { source: seed }, sessionId);
+  }
+
   await send('Page.navigate', { url }, sessionId);
   await sleep(2200);
   const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true }, sessionId);

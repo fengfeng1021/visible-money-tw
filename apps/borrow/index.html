@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>借款｜看得見的錢</title>
+<meta name="description" content="還沒買的時候，你能買多貴；已經背著的時候，月付金會不會爆。買房預算天花板壓力測試與房貸懸崖模擬器合併成一頁，共用同一份收入、負債與自備款，只問你還沒填過的那幾格。純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="借款｜看得見的錢">
+<meta property="og:description" content="我能買多貴，以及我背的這筆會不會爆。同一份資料，兩段計算。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 把每一個財務決策做成一張能逐行核對的複寫聯單據，拒絕本品類固定端出的兩盤菜：深色霓虹儀表板，以及米色圓角的理財小幫手。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色（白／淡黃／淡粉／淡藍）承載四個並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者在首頁填過的收入、負債、自備款直接被拿來用，不必再填一次；他先在「能買多貴」按下三個壓力鈕，看見瀑布裡的剩餘那一段被擠到零線以下，再切到「會不會爆」拖動寬限期滑桿，親手把那道斷崖做出來；缺哪一格就在該段落就地問，填完立刻重算，最後把這張單子傳給伴侶或行員。
+FIRST VIEWPORT: 單據抬頭（借款＋資料版本徽章）在最上；其下一句話說明這一頁包含哪兩件事，以及「這些數字用的是你在首頁填過的資料」；再來是兩段的切換勾選格；切換之下立刻是硃砂章落定的結論與四個讀數，緊接著就是招牌視覺。載入即有結論，沒有空白表單；沒有檔案的人看到的是標示為範例的一組數字。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <!-- ============ 單據抬頭 ============ -->
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">借款</h1>
+      <span class="datestamp" id="dataver">資料版本 -</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+
+    <p class="app-lede">
+      同一個人的兩個時刻：還沒買的時候，你能買多貴；已經背著的時候，你的月付金會不會爆。
+      兩段用的是同一份收入、負債與自備款，只問你還沒填過的那幾格。
+    </p>
+
+    <p class="app-from" id="fromLine"></p>
+
+    <div class="app-ask" id="askShared"></div>
+
+    <details class="formula app-file" id="fileDrawer">
+      <summary>這一頁用到你檔案裡的哪幾格</summary>
+      <div class="formula__body">
+        <p class="app-file__lead">
+          這些是兩段共用的資料。在這裡改，兩段一起跟著變，其他工具也會用同一份，不會再問你第二次。
+        </p>
+        <div class="askbox__grid" id="fileGrid"></div>
+        <p class="app-file__note">
+          沒填的欄位一律當成 0（沒有配偶收入、沒有無擔保負債）。填進去只存在這台裝置上。
+        </p>
+      </div>
+    </details>
+
+    <div class="segmented segmented--block app-tabs" id="tabs" role="group" aria-label="選擇要看這一頁的哪一段">
+      <button type="button" class="segmented__opt" data-value="ceiling" aria-pressed="true" aria-controls="sec-ceiling">
+        我還沒買：能買多貴
+      </button>
+      <button type="button" class="segmented__opt" data-value="cliff" aria-pressed="false" aria-controls="sec-cliff">
+        我已經背著：會不會爆
+      </button>
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- ============ 第一段：買房預算天花板壓力測試 ============ -->
+  <!-- ==================================================================== -->
+  <section id="sec-ceiling" class="mod" aria-label="能買多貴">
+
+    <p class="mod__lede">
+      不算「這間房月付多少」，反過來算：以你的收入與自備款，安全的上限在哪。
+      算完之後，用升息兩碼、失業半年、多一個小孩三種壞事，一鈕一鈕壓下去看它撐不撐得住。
+    </p>
+
+    <div class="mod__ask" id="askCeiling"></div>
+
+    <div class="workbench">
+
+      <!-- 只屬於這一段的假設 -->
+      <form class="workbench__inputs sheet" id="c-inputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">這一段自己的假設</h2></div>
+        <div class="sheet__body">
+
+          <p class="field__hint fieldset__hint" id="c-sharedHint"></p>
+
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="c-f-years">
+              <span class="field__label">想貸年限</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="30">
+                <span class="field__unit">年</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="c-f-rate">
+              <span class="field__label">預估年利率</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="2.318">
+                <span class="field__unit">%</span>
+              </span>
+              <span class="field__hint" id="c-rateHint"></span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+
+          <label class="switch bonus-switch">
+            <input type="checkbox" id="c-ck-bonus">
+            <span class="switch__box"></span>
+            <span>把年終 <b id="c-bonusM">2</b> 個月攤進月收入</span>
+          </label>
+          <p class="field__hint" id="c-bonusHint">預設不攤。銀行多以固定薪資認列，把年終攤進去會系統性高估上限。</p>
+
+          <div class="slider" id="c-s-dsr">
+            <div class="slider__top">
+              <span class="slider__label" id="c-l-dsr">月付／所得比上限</span>
+              <span class="slider__value" aria-hidden="true">40<small>%</small></span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="20" max="70" step="1" value="40" aria-labelledby="c-l-dsr">
+            </div>
+            <div class="slider__ticks"><span>20</span><span>33</span><span>40</span><span>60</span><span>70</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">月付／所得比上限（%，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="40">
+              <span class="field__unit">%</span>
+            </label>
+            <span class="field__hint">這不是法規門檻，是你自己畫的線。40% 以上銀行實務上會開始猶豫。</span>
+          </div>
+
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="c-f-keep">
+              <span class="field__label">每月至少留下</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="10,000">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="c-f-reno">
+              <span class="field__label">裝潢與家具預留</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="600,000">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" id="c-ck-grace">
+            <span class="switch__box"></span>
+            <span>試算 3 年寬限期</span>
+          </label>
+          <p class="field__hint">寬限期不會讓上限往上一塊錢。開啟只會多顯示期滿後的月付跳升。</p>
+
+          <div class="btnrow app-reset">
+            <button type="button" class="btn btn--quiet btn--sm" id="c-resetBtn">這一段的假設回到預設</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- 輸出 -->
+      <div class="workbench__out stack-lg">
+
+        <section class="sheet" aria-labelledby="c-verdict-h">
+          <div class="sheet__body">
+            <div class="verdict" id="c-verdict">
+              <span class="verdict__stamp" id="c-stamp" hidden></span>
+              <h2 class="verdict__lead" id="c-verdict-h">正在計算你的上限</h2>
+              <p class="verdict__body" id="c-verdictBody">把下面缺的那幾格填好，這裡會告訴你上限在哪、是被什麼卡住的。</p>
+            </div>
+
+            <div class="state state--refuse" id="c-refuse" hidden>
+              <h3 class="state__title">這個問題現在回答不了</h3>
+              <p class="state__body" id="c-refuseBody"></p>
+            </div>
+
+            <div class="readout-row" id="c-readouts">
+              <div class="readout"><span class="readout__label">安全房價上限</span><span class="readout__value" data-live id="c-r-price">-</span></div>
+              <div class="readout"><span class="readout__label">對應可貸金額</span><span class="readout__value" data-live id="c-r-loan">-</span></div>
+              <div class="readout"><span class="readout__label">月付／所得比</span><span class="readout__value" data-live id="c-r-dsr">-</span><span class="readout__delta" data-dir="flat" id="c-r-dsrline"></span></div>
+              <div class="readout"><span class="readout__label">交屋後撐得住</span><span class="readout__value" data-live id="c-r-runway">-</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 招牌視覺：安全房價上限量表 + 三個壓力鈕 + 月現金流瀑布 -->
+        <section class="plot" id="c-plotCard">
+          <div class="plot__head">
+            <h2 class="plot__title">你的錢每個月怎麼流掉，以及還剩多少</h2>
+            <div class="legend" id="c-legend"></div>
+          </div>
+
+          <div class="gauge" id="c-gauge">
+            <div class="gauge__top">
+              <span class="gauge__label">安全房價上限</span>
+              <span class="gauge__value num" id="c-gaugeValue">-</span>
+            </div>
+            <div class="gauge__track">
+              <div class="gauge__fill" id="c-gaugeFill"></div>
+              <div class="gauge__median" id="c-gaugeMedian"><span class="gauge__medianLabel">全國中位數</span></div>
+            </div>
+            <div class="gauge__scale" id="c-gaugeScale"></div>
+          </div>
+
+          <div class="stressbar" role="group" aria-labelledby="c-stress-h">
+            <span class="stressbar__label" id="c-stress-h">壓力情境</span>
+            <button type="button" class="stress" data-stress="rate" aria-pressed="false">升息 2 碼</button>
+            <button type="button" class="stress" data-stress="jobless" aria-pressed="false">失業 6 個月</button>
+            <button type="button" class="stress" data-stress="child" aria-pressed="false">多一個小孩</button>
+          </div>
+
+          <canvas class="plot__canvas" id="c-fall" role="img" aria-labelledby="c-fallDesc"></canvas>
+          <p class="plot__foot" id="c-fallDesc">
+            第一段是收入（流入為紅），中間每一段是被扣掉的錢（流出為綠），最後一段是剩餘。
+          </p>
+        </section>
+
+        <!-- 誠信核心：DBR 22 倍的糾正 -->
+        <section class="sheet" id="dbrCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">DBR 22 倍檢核（只算無擔保負債）</h2>
+          </div>
+          <div class="sheet__body">
+            <div class="readout-row dbr-row">
+              <div class="readout"><span class="readout__label">你的 DBR 倍數</span><span class="readout__value" data-live id="c-r-dbr">-</span></div>
+              <div class="readout"><span class="readout__label">距離 22 倍上限</span><span class="readout__value" data-live id="c-r-dbrgap">-</span></div>
+            </div>
+            <div class="note note--warn" id="dbrNote">
+              <p><b>網路上把 DBR 22 倍套在房貸上，是錯的。</b></p>
+              <p>
+                金管會函釋規範的是「無擔保債務歸戶後之總餘額（<b>信用卡、現金卡、信用貸款</b>）除以平均月收入，
+                不宜超過 22 倍」。房貸是<b>有擔保</b>債務，有房子當抵押品，<b>不在這個 22 倍的計算範圍內</b>。
+              </p>
+              <p>
+                所以「月收入 5 萬 × 22 = 1,100 萬，我可以貸 1,100 萬房貸」這句話，從法源上就不成立。
+                房貸端真正卡住你的是三件事：<b>月付佔所得的比率</b>、<b>貸款成數上限</b>、
+                以及<b>央行選擇性信用管制</b>（第幾戶、能不能有寬限期）。本頁兩段都是照這三件事算的，
+                DBR 只在這一張卡片裡獨立檢核，從來沒有進過任何一條房價上限或月付金的算式。
+              </p>
+              <p id="c-dbrVerdict"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 三檔上限對照 -->
+        <section class="sheet" id="levelCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">保守／一般／銀行極限，三條線的上限</h2>
+          </div>
+          <div class="ledger-wrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">月付佔所得</th><th scope="col">房價上限</th><th scope="col">可貸金額</th>
+                <th scope="col">月付</th><th scope="col">卡住它的是</th>
+              </tr></thead>
+              <tbody id="c-levelBody"></tbody>
+            </table>
+          </div>
+          <div class="sheet__foot">
+            這三個百分比不是法規門檻，是實務上常被引用的參考帶。銀行實際核貸取決於個別授信政策與鑑價結果，本表只是啟發式估計。
+          </div>
+        </section>
+
+        <!-- 自備款要多少才夠 -->
+        <section class="plot" id="savingsCard">
+          <div class="plot__head">
+            <h2 class="plot__title">再多存一點自備款，上限會往上多少</h2>
+            <div class="legend" id="c-legend2"></div>
+          </div>
+          <canvas class="plot__canvas" id="c-chart2" role="img" aria-labelledby="c-chart2Desc"></canvas>
+          <p class="plot__foot" id="c-chart2Desc">
+            橫軸是自備款，縱軸是房價上限。兩條限制線的轉折點，就是「再存下去也沒用了」的位置。
+          </p>
+        </section>
+
+        <!-- 自備款拆解 -->
+        <section class="sheet" id="costCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">自備款拆解：頭期只是其中一項</h2>
+          </div>
+          <div class="ledger-wrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">項目</th><th scope="col">金額</th><th scope="col">依據</th>
+              </tr></thead>
+              <tbody id="c-costBody"></tbody>
+              <tfoot><tr><td>合計需求</td><td id="c-costTotal">-</td><td></td></tr></tfoot>
+            </table>
+          </div>
+          <div class="sheet__foot" id="c-costFoot"></div>
+        </section>
+
+        <!-- 房價所得比對照 -->
+        <section class="sheet" id="pirCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">你的上限，換算成房價所得比</h2>
+            <span class="topbar__spacer"></span>
+            <span class="datestamp" id="c-pirQuarter">-</span>
+          </div>
+          <div class="sheet__body">
+            <p class="field__hint" id="c-pirLede"></p>
+          </div>
+          <div class="ledger-wrap ledger-wrap--short">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">縣市</th><th scope="col">房價所得比</th><th scope="col">房貸負擔率</th><th scope="col">與你的上限</th>
+              </tr></thead>
+              <tbody id="c-pirBody"></tbody>
+            </table>
+          </div>
+          <div class="sheet__foot" id="c-pirFoot"></div>
+        </section>
+
+        <!-- 沒有納入模型的東西 -->
+        <section class="sheet">
+          <div class="sheet__body">
+            <div class="note">
+              <p><b>這個模型沒有算進去的東西，一項一項講清楚：</b></p>
+              <ul class="plainlist">
+                <li>銀行的<b>鑑價</b>。成數是乘在「鑑價與買賣金額孰低」上，鑑價低於成交價時你要多拿現金出來。</li>
+                <li><b>保證人</b>與雙薪合併申貸的實際認列方式，各行政策不同，本工具一律當成家庭收入直接相加。</li>
+                <li><b>房貸壽險</b>、火險地震險、地價稅與房屋稅等持有成本。</li>
+                <li>你的<b>聯徵信用評分</b>與往來實績。同樣的數字，不同的人拿到的成數與利率不一樣。</li>
+                <li><b>利率是機動的</b>。填進去的年利率只是起點，超過 5 年之後請當成區間而不是預測。</li>
+                <li>青安 3.0（115-08-01 起受理，取代已於 115-07-31 截止的青安 2.0）等政策性貸款的資格、額度上限與補貼退場時程。</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="c-formulaHost"></div>
+        </section>
+
+        <p class="disclaimer">
+          本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置，也不會被送到任何伺服器。
+          這裡算出來的是<b>啟發式估計</b>，不是核貸承諾；銀行實際核貸取決於個別授信政策、聯徵紀錄與鑑價結果，
+          上方的量表只表示相對位置，不要當成「銀行會借我這麼多」的保證。
+          法規與統計會變動，請對照畫面上的資料版本徽章；標示「未查證」的項目表示本工具查不到官方全文，請自行向承貸銀行或主管機關確認。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- ============ 第二段：房貸懸崖模擬器 ============ -->
+  <!-- ==================================================================== -->
+  <section id="sec-cliff" class="mod" aria-label="會不會爆" hidden>
+
+    <p class="mod__lede">
+      寬限期結束的那一個月，月付金會跳多高？把期數拖一下，那道斷崖就會自己長出來。
+      分段利率、額外還本、升息壓力都算在同一條時間軸上，三個情境可以擺在一起比。
+    </p>
+
+    <div class="mod__ask" id="askCliff"></div>
+
+    <div class="plies plies--mod" id="m-plies"></div>
+
+    <div class="workbench">
+
+      <!-- 只屬於這一段的填寫 -->
+      <form class="workbench__inputs sheet" id="m-inputs" autocomplete="off">
+        <div class="sheet__head"><h2 class="sheet__title">這一段自己的填寫</h2></div>
+        <div class="sheet__body">
+
+          <div class="askbox__grid" id="m-loanGrid"></div>
+          <p class="field__hint fieldset__hint" id="m-loanHint"></p>
+
+          <div class="slider" id="m-s-grace">
+            <div class="slider__top">
+              <span class="slider__label" id="m-l-grace">寬限期剩餘</span>
+              <span class="slider__value" aria-hidden="true">36<small>期</small></span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="0" max="60" step="1" value="36" aria-labelledby="m-l-grace">
+            </div>
+            <div class="slider__ticks"><span>0</span><span>12</span><span>24</span><span>36</span><span>48</span><span>60</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">寬限期剩餘（期，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="36">
+              <span class="field__unit">期</span>
+            </label>
+            <span class="field__hint" id="m-graceHint"></span>
+          </div>
+
+          <div class="slider" id="m-s-shock">
+            <div class="slider__top">
+              <span class="slider__label" id="m-l-shock">升息壓力</span>
+              <span class="slider__value" aria-hidden="true">不變</span>
+            </div>
+            <div class="slider__track">
+              <input type="range" min="-2" max="6" step="1" value="0" aria-labelledby="m-l-shock">
+            </div>
+            <div class="slider__ticks"><span>降2</span><span></span><span>0</span><span></span><span></span><span></span><span></span><span></span><span>升6碼</span></div>
+            <label class="slider__twin">
+              <span class="sr-only">升息壓力（碼，可填負數表示降息，數字輸入）</span>
+              <input type="text" inputmode="numeric" value="0">
+              <span class="field__unit">碼</span>
+            </label>
+          </div>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">還款方式</legend>
+            <div class="segmented segmented--block" id="m-seg-method" role="group">
+              <button type="button" class="segmented__opt" data-value="annuity" aria-pressed="true">本息平均</button>
+              <button type="button" class="segmented__opt" data-value="equalPrincipal" aria-pressed="false">本金平均</button>
+              <button type="button" class="segmented__opt" data-value="interestOnly" aria-pressed="false">到期還本</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">利率時間軸</legend>
+            <p class="field__hint fieldset__hint">
+              台灣多為機動利率，會隨央行重訂；青安 3.0 的補貼也會分段退場。分段填寫比填一個固定利率誠實。
+            </p>
+            <div id="m-rateRows" class="rows"></div>
+            <button type="button" class="btn btn--ghost btn--sm" id="m-addRate">新增一段利率</button>
+            <p class="field__error rows__error" id="m-rateError"></p>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">額外還本</legend>
+            <div id="m-extraRows" class="rows"></div>
+            <button type="button" class="btn btn--ghost btn--sm" id="m-addExtra">新增一筆還本</button>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="field__label">拿官方方案來比</legend>
+            <div class="segmented segmented--block" id="m-seg-preset" role="group"></div>
+            <p class="field__hint" id="m-presetHint">
+              套用會把目前這一聯換成該方案的金額、期數與利率，你檔案裡的房貸不受影響。
+            </p>
+          </fieldset>
+
+          <div class="btnrow app-reset">
+            <button type="button" class="btn btn--quiet btn--sm" id="m-resetBtn">這一聯回到你的檔案</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- 輸出 -->
+      <div class="workbench__out stack-lg">
+
+        <section class="sheet" aria-labelledby="m-verdict-h">
+          <div class="sheet__body">
+            <div class="verdict" id="m-verdict">
+              <span class="verdict__stamp" id="m-stamp" hidden></span>
+              <h2 class="verdict__lead" id="m-verdict-h">正在算你的斷崖</h2>
+              <p class="verdict__body" id="m-verdictBody">把下面缺的那幾格填好，這裡就會告訴你那個月會發生什麼事。</p>
+            </div>
+            <div class="state state--refuse" id="m-refuse" hidden>
+              <h3 class="state__title">這個問題現在回答不了</h3>
+              <p class="state__body" id="m-refuseBody"></p>
+            </div>
+            <div class="readout-row" id="m-readouts">
+              <div class="readout"><span class="readout__label">寬限期內月付</span><span class="readout__value" data-live id="m-r-grace">-</span></div>
+              <div class="readout"><span class="readout__label">期滿後月付</span><span class="readout__value" data-live id="m-r-after">-</span></div>
+              <div class="readout"><span class="readout__label">跳升幅度</span><span class="readout__value" data-live id="m-r-jump">-</span><span class="readout__delta" data-dir="up" id="m-r-jumpx"></span></div>
+              <div class="readout"><span class="readout__label">總利息支出</span><span class="readout__value" data-live id="m-r-interest">-</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 招牌視覺：月付金時間軸上的那道斷崖 -->
+        <section class="plot" id="m-plotCard">
+          <div class="plot__head">
+            <h2 class="plot__title">每月要繳多少，從這一期到最後一期</h2>
+            <div class="legend" id="m-legend"></div>
+          </div>
+          <canvas class="plot__canvas" id="m-chart" role="img" aria-labelledby="m-chartDesc"></canvas>
+          <p class="plot__foot" id="m-chartDesc">
+            橫軸是期數，縱軸是每月應繳金額。虛線是月付占所得的警戒線。
+          </p>
+        </section>
+
+        <section class="plot" id="m-splitCard">
+          <div class="plot__head">
+            <h2 class="plot__title">同一筆錢，有多少變成本金、多少蒸發成利息</h2>
+          </div>
+          <canvas class="plot__canvas" id="m-chart2" role="img" aria-labelledby="m-chart2Desc"></canvas>
+          <p class="plot__foot" id="m-chart2Desc">
+            每一期的繳款被拆成本金與利息兩段。寬限期內本金那一段是零，這就是它真正的代價。
+          </p>
+        </section>
+
+        <section class="sheet" id="m-tableCard">
+          <div class="sheet__head">
+            <h2 class="sheet__title">逐期攤還表</h2>
+            <span class="topbar__spacer"></span>
+            <button type="button" class="btn btn--quiet btn--sm" id="m-jumpCliff">跳到斷崖那一期</button>
+          </div>
+          <div class="ledger-wrap" id="m-ledgerWrap">
+            <table class="ledger">
+              <thead><tr>
+                <th scope="col">期別</th><th scope="col">月付</th><th scope="col">本金</th>
+                <th scope="col">利息</th><th scope="col">額外還本</th><th scope="col">剩餘本金</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="sheet__foot" id="m-tableFoot"></div>
+        </section>
+
+        <section class="sheet">
+          <div class="sheet__body" id="m-formulaHost"></div>
+        </section>
+
+        <p class="disclaimer">
+          本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+          實際核貸條件、利率與月付金以承貸銀行核定為準。機動利率會隨央行政策重訂，
+          超過 5 年之後的月付金請以區間理解，不要當成精確預測。
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

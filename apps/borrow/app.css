@@ -1,0 +1,312 @@
+/* 借款模組：房貸懸崖模擬器 + 買房預算天花板壓力測試合併成一頁。
+   只放這一頁專有的版面，視覺語彙一律繼承共用系統。 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-2);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+/* 抬頭下方那一行：回時間軸，以及「這些數字是你自己填的」 */
+.app-from {
+  padding: 0 var(--s-4) var(--s-3);
+  margin: 0;
+  font-size: var(--t-sm);
+  color: var(--ink-3);
+  max-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  align-items: baseline;
+}
+.app-from__own { color: var(--accent); font-weight: 700; }
+.app-from__demo { color: var(--stamp-void); font-weight: 700; }
+
+/* 模組層級的問格：只問兩段都要用到的那幾格 */
+.app-ask:not(:empty) { padding: 0 var(--s-4) var(--s-4); }
+.app-ask .askbox { container-type: inline-size; }
+
+/* 共用檔案抽屜。收起來的時候只是一行字，不是頁面頂端的大表單。 */
+.app-file { border-top: 1px solid var(--rule); }
+.app-file .formula__body { container-type: inline-size; }
+.app-file__lead {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin: 0 0 var(--s-3);
+}
+.app-file__note {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  margin: var(--s-2) 0 0;
+  max-width: none;
+}
+
+/* 兩段的切換。用勾選格的語彙，因為它就是「選一個」。 */
+.app-tabs {
+  border-top: 1px solid var(--rule);
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.app-tabs .segmented__opt {
+  min-height: 46px;
+  font-size: var(--t-base);
+  font-weight: 700;
+}
+
+.mod__lede {
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin: 0 0 var(--s-4);
+}
+.mod__ask:not(:empty) { margin-bottom: var(--s-5); }
+.mod__ask .askbox { container-type: inline-size; }
+
+.plies--mod {
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  background: var(--sheet-sunk);
+  padding: 0 var(--s-2);
+  margin-bottom: var(--s-5);
+}
+
+/* ==========================================================================
+   填寫區
+   ========================================================================== */
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: var(--s-1); margin-bottom: var(--s-3); }
+
+/* 自備款與貸款餘額是七、八位數，共用的 5.5ch 放不下，這裡加寬到 8ch。 */
+.slider .slider__twin input { width: 8ch; }
+.slider .field__hint { margin-top: var(--s-1); }
+
+.bonus-switch { margin-bottom: var(--s-1); }
+#c-bonusHint { margin-bottom: var(--s-5); }
+.app-reset { margin-top: var(--s-5); }
+
+/* 可重複列：利率分段、額外還本 */
+.rows { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-2); }
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-end;
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+}
+.row .field { flex: 1 1 7rem; min-width: 0; margin-bottom: 0; }
+.row > .switch { flex: 1 0 100%; }
+.row .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.row .field__control { padding: var(--s-1) var(--s-2); background: var(--sheet); }
+.row .field input { font-size: var(--t-sm); }
+.row__del {
+  appearance: none; border: 1px solid var(--rule-strong); background: var(--sheet);
+  color: var(--ink-3); cursor: pointer; height: 30px; width: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.row__del:hover { color: var(--up); border-color: var(--up); background: var(--up-wash); }
+.rows__error { display: block; }
+.rows__error:empty { display: none; }
+
+/* 房貸那一段的貸款欄位：從檔案來的三格，就地可改 */
+#m-loanGrid { margin-bottom: var(--s-2); }
+
+/* ==========================================================================
+   招牌視覺 1：安全房價上限量表
+   長度＝上限金額。顏色不編碼任何東西，一律強調色。
+   ========================================================================== */
+.gauge {
+  padding: var(--s-3) var(--s-4) var(--s-2);
+  border-top: 1px solid var(--rule-faint);
+  overflow: hidden;
+}
+.gauge__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.gauge__label { font-size: var(--t-sm); font-weight: 600; color: var(--ink-2); }
+.gauge__value {
+  font-size: var(--t-3xl);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--accent);
+}
+.gauge__value small { font-size: var(--t-lg); font-weight: 600; margin-left: 0.1em; }
+
+.gauge__track {
+  position: relative;
+  height: 22px;
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+}
+.gauge__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--accent);
+  border-right: 2px solid var(--ink);
+}
+/* 全國中位數住宅價格的騎縫標記 */
+.gauge__median {
+  position: absolute;
+  top: -1px; bottom: -1px;
+  width: 0;
+  border-left: 1px dashed var(--ink-2);
+}
+.gauge__median--flip .gauge__medianLabel { left: auto; right: 3px; }
+.gauge__medianLabel {
+  position: absolute;
+  left: 3px; top: 100%;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.gauge__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-4);
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: 0.625rem;
+  color: var(--ink-3);
+  letter-spacing: -0.02em;
+}
+
+/* ==========================================================================
+   招牌視覺 2：三個壓力情境鈕。方形、無圓角，按下就是壓力被施加。
+   ========================================================================== */
+.stressbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-4) var(--s-3);
+}
+.stressbar__label {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-right: var(--s-1);
+}
+.stress {
+  appearance: none;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  color: var(--ink-2);
+  font-family: var(--font-cjk);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  padding: var(--s-1) var(--s-3);
+  min-height: 34px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-1) var(--ease-out),
+              color var(--dur-1) var(--ease-out),
+              border-color var(--dur-1) var(--ease-out);
+}
+.stress:hover { background: var(--sheet); color: var(--ink); border-color: var(--ink-3); }
+/* 按下＝選取，跟全站的勾選格同一個狀態語彙，用強調色。
+   紅色在這套系統裡只代表「增加／流入」，不能拿來當開關的開啟狀態。 */
+.stress[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================================================
+   招牌視覺 3：斷崖標註在月付金時間軸上的浮動標籤
+   ========================================================================== */
+.cliff-tag {
+  position: absolute;
+  z-index: 3;
+  background: var(--up);
+  /* 固定寫死 #fff 在夜間會壓在淺紅上，只有 3.17:1。
+     --ink-inv 會跟著日夜翻面，兩種模式都在 5.8:1 以上。 */
+  color: var(--ink-inv);
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding: 2px var(--s-2);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--lift-1);
+}
+.plot { position: relative; }
+
+/* ==========================================================================
+   表格與說明
+   ========================================================================== */
+/* 這幾張圖的圖例不可切換，不要給假的可點手勢 */
+.legend .legend__item { cursor: default; }
+
+.ledger-wrap--short { max-height: 20rem; }
+.ledger .is-est { color: var(--ink-3); }
+/* 「到得了」用唯一的強調色，不用紅綠燈：紅綠在本站只表示流入與流出 */
+.ledger .is-reach { color: var(--accent); font-weight: 700; }
+.ledger td.cell-note {
+  text-align: left;
+  color: var(--ink-3);
+  font-family: var(--font-cjk);
+  font-size: var(--t-xs);
+  white-space: normal;
+  min-width: 8rem;
+}
+.ledger tr[data-you] td { background: var(--accent-wash); font-weight: 700; }
+.ledger tr[data-you] td:first-child { color: var(--accent); }
+
+.dbr-row { border-top: 0; padding-top: 0; margin-bottom: var(--s-4); }
+#dbrNote p { margin-bottom: var(--s-2); }
+#dbrNote p:last-child { margin-bottom: 0; }
+
+.plainlist { margin: 0; padding-left: 1.15em; }
+.plainlist li { margin-bottom: var(--s-1); max-width: var(--measure); }
+.plainlist li:last-child { margin-bottom: 0; }
+
+.state--refuse { margin-bottom: var(--s-4); }
+/* .state 是 display:flex，會蓋掉瀏覽器對 [hidden] 的預設樣式 */
+.state[hidden] { display: none; }
+
+/* 範例數字的標記：使用者還沒填檔案時，畫面上每一個結論都要標出來 */
+.demo-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--stamp-void);
+  border: 1px solid currentColor;
+  padding: 0 var(--s-2);
+  margin-left: var(--s-2);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* 行動裝置：讀數兩欄、量表數字收小，避免六位數把版面撐破 */
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .gauge__value { font-size: var(--t-2xl); }
+  .gauge__value small { font-size: var(--t-md); }
+  .stressbar { gap: var(--s-1); }
+  .stress { flex: 1 1 auto; padding-inline: var(--s-2); font-size: var(--t-xs); }
+  .app-tabs .segmented__opt { font-size: var(--t-sm); padding-inline: var(--s-2); }
+}

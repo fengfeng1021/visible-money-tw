@@ -1,0 +1,264 @@
+/* 投資與稅：三聯合成一張單子。
+   只放這個模組專有的版面，視覺語彙一律繼承共用系統（tokens / base / components）。 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-2);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.app-sub {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin: var(--s-3) 0 0;
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+
+/* 回時間軸的那一行。左邊是連結，右邊是「這些數字是你自己填的」的憑據。 */
+.app-back {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-3);
+  align-items: baseline;
+  margin: 0;
+  padding: 0 var(--s-4) var(--s-3);
+  font-size: var(--t-sm);
+}
+.app-back__note { color: var(--ink-3); font-size: var(--t-xs); }
+.app-back__note:empty { display: none; }
+
+.app-ask { padding: 0 var(--s-4) var(--s-4); container-type: inline-size; }
+.app-ask:empty { display: none; }
+
+/* --- 共用參數帶：三聯都吃這一條，所以它長在抬頭裡，不長在任何一聯 -------- */
+.strip {
+  border-top: 1px solid var(--rule);
+  background: var(--sheet-sunk);
+  padding: var(--s-3) var(--s-4);
+}
+.strip__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3) var(--s-4);
+}
+@container (min-width: 40rem) { .strip__row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 48rem) { .strip__row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.strip__item { display: block; min-width: 0; }
+.strip__k {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+.strip__v {
+  display: block;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-base);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.strip__ctl { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px dashed var(--rule); }
+.strip__ctl .field__label { display: block; margin-bottom: var(--s-2); }
+.strip__ctl .field__hint { margin-top: var(--s-2); }
+
+/* 四個以上的選項在 375px 上必須能換行，否則分段鈕會把抬頭撐破 */
+.segmented--wrap { flex-wrap: wrap; }
+.segmented--wrap .segmented__opt { flex: 1 1 8rem; }
+
+/* --- 三聯的聯籤與面板 ---------------------------------------------------- */
+.plies { padding: 0 var(--s-4) 0; }
+.panel { margin-bottom: var(--s-6); }
+.panel:focus { outline: none; }
+.panel:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* --- 填寫區的分組 -------------------------------------------------------- */
+.fieldset { border: 0; padding: 0 0 var(--s-4); margin: 0 0 var(--s-4); min-width: 0;
+  border-bottom: 1px dashed var(--rule); }
+.fieldset:last-of-type { border-bottom: 0; }
+.fieldset legend { padding: 0 0 var(--s-2); }
+/* 填息是第三聯的主角，用騎縫線把它框出來 */
+.fieldset--star {
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-strong);
+  padding: var(--s-3);
+}
+.fieldset--star legend { padding-inline: var(--s-1); }
+.slider .field__hint { margin-top: var(--s-2); display: block; }
+.slider__top { flex-wrap: wrap; }
+.slider__label { min-width: 0; }
+.rows__error { display: block; }
+.rows__error:empty { display: none; }
+
+/* --- 第二聯：標的清單 ---------------------------------------------------- */
+.tickers { display: flex; flex-direction: column; gap: 1px; margin-bottom: var(--s-2); }
+.tk {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+  cursor: pointer; user-select: none; min-width: 0;
+}
+.tk:hover { border-color: var(--rule-strong); }
+.tk input { position: absolute; opacity: 0; width: 0; height: 0; }
+.tk__box {
+  width: 16px; height: 16px; flex: 0 0 auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  position: relative;
+}
+.tk input:checked + .tk__box { background: var(--accent); border-color: var(--accent); }
+.tk input:checked + .tk__box::after {
+  content: ""; position: absolute; left: 4px; top: 0;
+  width: 6px; height: 11px;
+  border-right: 2px solid var(--accent-ink);
+  border-bottom: 2px solid var(--accent-ink);
+  transform: rotate(42deg);
+}
+.tk input:focus-visible + .tk__box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tk__key { width: 3px; align-self: stretch; flex: 0 0 auto; background: var(--rule); }
+.tk__id {
+  font-family: var(--font-mono); font-stretch: 75%; font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm); font-weight: 700; letter-spacing: -0.03em; flex: 0 0 auto;
+}
+.tk__name {
+  font-size: var(--t-xs); color: var(--ink-2);
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tk__span {
+  font-family: var(--font-mono); font-stretch: 75%;
+  font-size: 0.625rem; color: var(--ink-3);
+  flex: 0 0 auto; white-space: nowrap;
+}
+.tk[data-short="1"] .tk__span { color: var(--warn); font-weight: 700; }
+
+.plot { position: relative; }
+.plot__stack { position: relative; }
+.readout-row--tight { border-top: 0; padding-top: 0; }
+.state--refuse { background: var(--sheet); }
+#mapCard .state { margin: var(--s-4); }
+
+/* 圖例上的色塊代表「一整區」，所以比線段厚，並帶邊框才看得出紙色 */
+.legend__key--area { height: 12px; width: 16px; border: 1px solid var(--rule-strong); }
+.legend__key--hatch {
+  background-image: repeating-linear-gradient(45deg, transparent 0 3px, var(--rule) 3px 4px);
+}
+#raceLegend .legend__item, #distLegend .legend__item { cursor: default; }
+
+/* 分位表在窄螢幕上靠 .ledger-wrap 自己的 overflow 捲動，不外溢 */
+#tableCard .ledger td:first-child {
+  font-weight: 700; color: var(--ink);
+  position: sticky; left: 0;
+  background: var(--sheet);
+  border-right: 1px solid var(--rule-faint);
+}
+#tableCard .ledger tbody tr:hover td:first-child { background: var(--accent-wash); }
+.q-key { display: inline-block; width: 8px; height: 8px; margin-right: 4px; vertical-align: 0; }
+
+/* 補充保費表：起扣與未起扣兩種列的區別要在灰階下也讀得出來 */
+.ledger tbody tr[data-off] td { color: var(--ink-3); }
+.ledger tbody tr[data-off] td:nth-child(3) { font-weight: 700; }
+
+/* --- 第三聯：播放控制 ---------------------------------------------------- */
+.transport {
+  display: flex; flex-wrap: wrap; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--rule-faint);
+}
+.transport .btn { flex: 1 1 auto; min-width: 7rem; }
+.stage__counter {
+  font-size: var(--t-xs); color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+}
+
+/* --- 期末對照 ------------------------------------------------------------ */
+.compare { display: grid; gap: 1px; background: var(--rule-faint); border: 1px solid var(--rule); }
+.compare__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--s-2) var(--s-3);
+  align-items: baseline;
+  background: var(--sheet);
+  padding: var(--s-2) var(--s-3);
+}
+.compare__row--head { background: var(--sheet-sunk); font-size: var(--t-xs); color: var(--ink-2); font-weight: 700; }
+.compare__name { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-sm); font-weight: 600; min-width: 0; }
+.compare__key { width: 14px; height: 3px; flex: 0 0 auto; }
+.compare__val, .compare__cagr {
+  font-family: var(--font-mono); font-stretch: 75%; font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm); letter-spacing: -0.02em; text-align: right; white-space: nowrap;
+}
+.compare__val { font-weight: 700; }
+.compare__cagr { color: var(--ink-2); min-width: 5.5ch; }
+.compare__note { margin-top: var(--s-4); }
+.compare__note:empty { display: none; }
+
+/* --- 2 萬元門檻 ---------------------------------------------------------- */
+.threshold {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink-3);
+  background: var(--sheet);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--s-4);
+}
+.threshold b { color: var(--ink); }
+.threshold[data-over="true"] { border-top-color: var(--warn); background: var(--warn-wash); }
+.threshold__big {
+  display: block;
+  font-family: var(--font-mono); font-stretch: 75%; font-variant-numeric: tabular-nums;
+  font-size: var(--t-xl); font-weight: 700; letter-spacing: -0.04em;
+  color: var(--ink); margin-bottom: var(--s-1);
+}
+.compose__bar {
+  display: flex; height: 22px;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  overflow: hidden;
+}
+.compose__seg { display: block; height: 100%; }
+.compose__seg--qual { background: var(--accent); }
+.compose__seg--other {
+  background-image: repeating-linear-gradient(45deg, var(--rule-strong) 0 4px, transparent 4px 8px);
+}
+.compose__note { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--ink-3); }
+
+/* --- 矛盾的兩種說法：並排，不選邊 ---------------------------------------- */
+.claims { display: grid; gap: var(--s-3); }
+@media (min-width: 44rem) { .claims { grid-template-columns: 1fr 1fr; } }
+.claim {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--stamp-void);
+  background: var(--sheet-sunk);
+  padding: var(--s-3);
+  min-width: 0;
+}
+.claim__who { display: block; font-size: var(--t-xs); color: var(--ink-3); margin-bottom: var(--s-1); }
+.claim__what { display: block; font-size: var(--t-sm); font-weight: 700; color: var(--ink); margin-bottom: var(--s-2); }
+.claim__why { margin: 0; font-size: var(--t-xs); color: var(--ink-2); overflow-wrap: anywhere; }
+.claim__why a { overflow-wrap: anywhere; }
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .app-lede { padding-inline: var(--s-3); }
+  .app-back { padding-inline: var(--s-3); }
+  .app-ask { padding-inline: var(--s-3); }
+  .strip { padding-inline: var(--s-3); }
+  .plies { padding-inline: var(--s-3); }
+  .transport .btn { min-width: 0; flex: 1 1 45%; padding-inline: var(--s-2); }
+  .compare__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .compare__cagr { grid-column: 2; }
+}
