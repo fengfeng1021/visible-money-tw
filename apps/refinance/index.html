@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>房貸轉貸試算｜扣掉違約金與代書費之後到底省不省、幾個月回本｜看得見的錢</title>
+<meta name="description" content="轉貸省的是利息，付的是違約金、代書費與設定登記費。這裡把三條路並排算：不動、回原行議價、轉去別家。給你月付金差、總利息差、一次性成本，以及最重要的那個數字——第幾個月才真的回本。純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="轉貸到底幾個月回本？">
+<meta property="og:description" content="降 0.3% 聽起來很多，違約金與代書費一扣可能要兩年才回本。三條路並排算給你看。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 轉貸的文章都在比利率，但利率差只是分子。真正決定值不值得的是「一次性成本要幾個月的月付差才賺得回來」，
+        而那筆成本裡最大的一項——提前清償違約金——只有使用者自己的契約知道，沒有任何一篇文章能替他填。
+        所以這一頁不預填任何區間值，違約金與代書費空白就不給判決；而且一定要有第三條路：
+        回原行議價。原行議價成本是零，是絕大多數人該先走的那一步，而所有導流型網站都不會告訴你。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色承載並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；
+        全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者填完餘額、期數、現在的利率，再填一個他被開出的新利率，看見三條路並排；
+        接著被要求填違約金與代書費（空白就不給答案），填完那一刻回本曲線出現，
+        他看見自己在第幾個月穿過零線，以及年限如果拉長，那條線會在後段怎麼掉回去。
+FIRST VIEWPORT: 單據抬頭與資料版本在最上；一句話說明這裡在算什麼；
+        左欄是現況三格，右欄最上方就是三聯判決與「第幾個月回本」。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">房貸轉貸試算</h1>
+      <span class="datestamp" id="dataver">資料版本 —</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      轉貸省的是利息，付的是<b>違約金、代書費與設定登記費</b>。
+      利率降 0.3% 聽起來很多，但一次性成本要幾個月的月付差才賺得回來，那才是決定值不值得的數字。
+      這一頁把三條路並排算：<b>不動</b>、<b>回原行議價</b>、<b>轉去別家</b>——
+      中間那條成本是零，而且是多數人該先走的一步。
+    </p>
+    <div class="plies" id="plies"></div>
+  </section>
+
+  <div class="workbench">
+
+    <!-- ============ 輸入 ============ -->
+    <form class="workbench__inputs sheet" id="inputs" autocomplete="off">
+      <div class="sheet__head"><h2 class="sheet__title">填寫</h2></div>
+      <div class="sheet__body">
+
+        <fieldset class="fieldset">
+          <legend class="field__label">你現在這一筆</legend>
+          <p class="field__hint fieldset__hint" id="fromLine"></p>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-balance">
+              <span class="field__label">未償餘額</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="6,000,000">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-months">
+              <span class="field__label">剩餘期數</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="240">
+                <span class="field__unit">期</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-rate">
+              <span class="field__label">目前年利率</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="2.35">
+                <span class="field__unit">%</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-grace">
+              <span class="field__label">寬限期剩餘</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">期</span>
+              </span>
+              <span class="field__hint">沒有就填 0</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">乙案：回原行議價</legend>
+          <p class="field__hint fieldset__hint">
+            原行降碼不用重新設定抵押權、不用代書、也沒有違約金，成本結構上就贏轉貸一大段。
+            拿別家的核准條件回去談，是這一頁存在的主要理由。
+          </p>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-rateB">
+              <span class="field__label">議價後年利率</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="2.20">
+                <span class="field__unit">%</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-costB">
+              <span class="field__label">議價要付的費用</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">多半是 0；有些行收帳管費</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">丙案：轉去別家</legend>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field" id="f-rateC">
+              <span class="field__label">新的年利率</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="2.06">
+                <span class="field__unit">%</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-monthsC">
+              <span class="field__label">新的貸款期數</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="240">
+                <span class="field__unit">期</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-graceC">
+              <span class="field__label">新的寬限期</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">期</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ck-align" checked>
+            <span class="switch__box"></span>
+            <span>用相同期數比較</span>
+          </label>
+          <p class="field__hint" id="alignHint"></p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">轉貸的一次性成本</legend>
+          <p class="field__hint fieldset__hint">
+            這兩格<b>本站不預填</b>。網路上那些「違約金大約 X 萬」的區間值是最容易誤導人的東西，
+            因為它們一定看起來比你的合約便宜。翻你的契約，或打去問，然後填真的數字。
+          </p>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field field--required" id="f-penalty">
+              <span class="field__label">提前清償違約金</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="" placeholder="翻你的合約">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">綁約期外通常是 0，但 0 也要自己確認過再填</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field field--required" id="f-agent">
+              <span class="field__label">代書／地政士費</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="" placeholder="跟行員問">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">非法定費用，各家報價不同</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-multiple">
+              <span class="field__label">擔保債權倍數</span>
+              <span class="field__control">
+                <input type="text" inputmode="decimal" value="1.2">
+                <span class="field__unit">倍</span>
+              </span>
+              <span class="field__hint">看你的設定契約，通常 1.2</span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field" id="f-misc">
+              <span class="field__label">其他規費與雜支</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__hint">開辦、鑑價、書狀費、火險差額</span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="btnrow">
+          <button type="button" class="btn btn--quiet btn--sm" id="resetBtn">全部清空重填</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- ============ 輸出 ============ -->
+    <div class="workbench__out stack-lg">
+
+      <section class="sheet" aria-labelledby="verdict-h">
+        <div class="sheet__body">
+          <div class="verdict" id="verdict">
+            <span class="verdict__stamp" id="verdictStamp" hidden></span>
+            <h2 class="verdict__lead" id="verdict-h">先把違約金跟代書費填了</h2>
+            <p class="verdict__body" id="verdictBody">
+              這兩格空著的話，任何「轉貸省 X 萬」的數字都是假的。
+            </p>
+          </div>
+          <div class="readout-row" id="readouts">
+            <div class="readout"><span class="readout__label">轉貸幾個月回本</span><span class="readout__value" data-live id="r-payback">—</span></div>
+            <div class="readout"><span class="readout__label">一次性成本合計</span><span class="readout__value" data-live id="r-cost">—</span></div>
+            <div class="readout"><span class="readout__label">月付金變化</span><span class="readout__value" data-live id="r-pmt">—</span></div>
+            <div class="readout"><span class="readout__label">扣完成本淨省</span><span class="readout__value" data-live id="r-net">—</span><span class="readout__delta" id="r-netNote"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="plot" id="paybackCard">
+        <div class="plot__head">
+          <h2 class="plot__title">累計淨省：第幾個月穿過零線</h2>
+          <div class="legend" id="legend"></div>
+        </div>
+        <canvas class="plot__canvas" id="payback" role="img" aria-labelledby="paybackDesc"></canvas>
+        <p class="plot__foot" id="paybackDesc">
+          縱軸是「到這個月為止，比不動總共少付了多少錢」，一開始是負的，因為成本先付出去。
+          線穿過零線那一刻才是真的開始賺。
+        </p>
+      </section>
+
+      <section class="sheet" id="threeCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">三聯並排</h2>
+          <span class="topbar__spacer"></span>
+          <span class="datestamp" id="alignNote"></span>
+        </div>
+        <div class="ledger-wrap">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">項目</th>
+              <th scope="col">甲：不動</th>
+              <th scope="col">乙：原行議價</th>
+              <th scope="col">丙：轉去別家</th>
+            </tr></thead>
+            <tbody id="threeRows"></tbody>
+          </table>
+        </div>
+        <div class="sheet__foot" id="threeFoot"></div>
+      </section>
+
+      <section class="sheet" id="costCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">成本明細</h2>
+        </div>
+        <div class="sheet__body" id="costBody"></div>
+      </section>
+
+      <section class="sheet" id="trapCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">這一頁不會替你講好話的地方</h2>
+        </div>
+        <div class="sheet__body" id="trapBody"></div>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet__body" id="formulaHost"></div>
+      </section>
+
+      <div id="discloseHost"></div>
+
+      <p class="disclaimer">
+        本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+        本頁不提供、也不內建任何金融機構的房貸利率或方案；畫面上的利率、費用與違約金全部是你自己填的。
+        實際核貸利率、加碼、綁約條款、提前清償違約金與各項費用，一律以承貸金融機構的契約與核定為準。
+        抵押權設定登記費依土地法第 76 條按權利價值千分之一計收，塗銷登記依同法第 78 條免納登記費；
+        代書費與地政士報酬非法定費用，由當事人約定。
+        本頁不是貸款媒合、不代辦、不轉介，也不會把你填的任何數字傳出這台裝置。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      <a href="../../index.html">回到看得見的錢</a>．<a href="../borrow/">想看借款的全貌</a>．<a href="../../disclosure.html">合作與揭露</a>
+    </p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

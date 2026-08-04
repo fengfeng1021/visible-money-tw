@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>存款利息實拿試算｜數位帳戶高利上限、拆單、補充保費起扣點｜看得見的錢</title>
+<meta name="description" content="數位帳戶的高利率都有金額上限，超過的部分利率直接掉回牌告。填你自己看到的牌告利率，這裡算出你的第二塊錢利率是多少、錢該怎麼拆才拿最多，以及利息單筆滿 2 萬會被扣 2.11% 補充保費的那道斷崖。純前端計算，資料不離開瀏覽器。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="你的第二塊錢，利率是多少？">
+<meta property="og:description" content="高利上限之後，錢就自動降息了。拆單能多拿多少、利息滿 2 萬那道斷崖有多寬，一次算給你看。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 存款利率不是一個數字，是一條會塌陷的階梯。所有理財媒體都在比「哪一家利率最高」，
+        但真正決定你拿多少的是「你的第 100,001 塊錢利率是多少」，以及「利息單筆滿 2 萬那一刻你倒賠多少」。
+        這一頁不提供任何一家銀行的牌告——牌告會過期，過期的牌告就是引人錯誤的表示——
+        使用者自己填他正在看的數字，這一頁只負責把階梯、斷崖與稅算對。
+OWN-WORLD: 台灣多聯式複寫單據。四種紙色承載並存情境；台灣制漲紅跌綠為語意色，印泥靛藍是唯一強調色；
+        全站圓角 0；髮絲格線、騎縫虛線、底線式填寫格、硃砂印記；等寬數字全站對齊到同一條格線。
+STORY: 使用者把手上兩三家帳戶的高利上限與利率抄進來，看見階梯圖上那一階塌下去的位置，
+        拿到一份「哪一筆錢該放哪」的配置單，再往下看見補充保費那道 431 元寬的死區。
+FIRST VIEWPORT: 單據抬頭與資料版本在最上；一句話說明這裡在算什麼；
+        左欄是總金額與帳戶級距，右欄最上方就是「拆單比單押多拿多少」與那張塌陷的階梯圖。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap app-main">
+
+  <section class="sheet sheet--raised app-head">
+    <div class="sheet__head">
+      <h1 class="sheet__title">存款利息實拿試算</h1>
+      <span class="datestamp" id="dataver">資料版本 —</span>
+      <span class="topbar__spacer"></span>
+      <span class="sheet-actions" id="sheetActions"></span>
+    </div>
+    <p class="app-lede">
+      數位帳戶的高利率幾乎都有金額上限，超過的那一塊錢直接掉回牌告活儲。
+      所以「哪一家利率最高」是錯的問題，該問的是<b>你的第二塊錢利率是多少</b>。
+      把你正在看的牌告抄進來，這裡算出錢該怎麼拆、拆完多拿多少，
+      以及利息單筆滿 2 萬那一刻會發生什麼事。
+    </p>
+    <div class="plies" id="plies"></div>
+  </section>
+
+  <div class="workbench">
+
+    <!-- ============ 輸入 ============ -->
+    <form class="workbench__inputs sheet" id="inputs" autocomplete="off">
+      <div class="sheet__head"><h2 class="sheet__title">填寫</h2></div>
+      <div class="sheet__body">
+
+        <label class="field" id="f-total">
+          <span class="field__label">要放的錢</span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="1,000,000" aria-describedby="h-total">
+            <span class="field__unit">元</span>
+          </span>
+          <span class="field__hint" id="h-total">填過的會記在這台裝置上，其他工具也看得到</span>
+          <span class="field__error"></span>
+        </label>
+
+        <div class="slider" id="s-total">
+          <div class="slider__top">
+            <span class="slider__label" id="l-total">拖著看階梯怎麼塌</span>
+            <span class="slider__value" aria-hidden="true">100<small>萬</small></span>
+          </div>
+          <div class="slider__track">
+            <input type="range" min="0" max="1000" step="5" value="100" aria-labelledby="l-total">
+          </div>
+          <div class="slider__ticks"><span>0</span><span>250萬</span><span>500萬</span><span>750萬</span><span>1000萬</span></div>
+          <label class="slider__twin">
+            <span class="sr-only">要放的錢（萬元，數字輸入）</span>
+            <input type="text" inputmode="numeric" value="100">
+            <span class="field__unit">萬</span>
+          </label>
+        </div>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">你的帳戶</legend>
+          <p class="field__hint fieldset__hint">
+            這一頁<b>刻意不內建任何一家銀行的利率</b>。牌告每個月都在動，
+            內建的那一刻就開始過期，而拿過期的牌告排名次是引人錯誤的表示。
+            你正在看哪一家就抄哪一家，數字留在你的裝置裡。
+          </p>
+          <div id="acctRows" class="rows"></div>
+          <div class="btnrow">
+            <button type="button" class="btn btn--ghost btn--sm" id="addAcct">再加一家</button>
+            <button type="button" class="btn btn--quiet btn--sm" id="addShape">套一個常見的級距形狀</button>
+          </div>
+          <p class="field__error rows__error" id="acctError"></p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">利息什麼時候入帳</legend>
+          <div class="segmented segmented--block" id="seg-freq" role="group">
+            <button type="button" class="segmented__opt" data-value="12" aria-pressed="false">每月</button>
+            <button type="button" class="segmented__opt" data-value="4" aria-pressed="false">每季</button>
+            <button type="button" class="segmented__opt" data-value="2" aria-pressed="true">半年</button>
+            <button type="button" class="segmented__opt" data-value="1" aria-pressed="false">一次</button>
+          </div>
+          <p class="field__hint" id="freqHint">
+            活儲多半是每年 6/20、12/20 結息兩次。這一格會改變補充保費的結果，
+            因為補充保費是按<b>單次給付</b>認定的，不是按全年累計。
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="field__label">報稅時才用得到的兩格</legend>
+          <div class="fieldgrid fieldgrid--2">
+            <label class="field field--compact" id="f-otherInterest">
+              <span class="field__label">其他利息所得（全年）</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0" placeholder="可留白">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+            <label class="field field--compact" id="f-mortgageInterest">
+              <span class="field__label">全年房貸利息</span>
+              <span class="field__control">
+                <input type="text" inputmode="numeric" value="0" placeholder="可留白">
+                <span class="field__unit">元</span>
+              </span>
+              <span class="field__error"></span>
+            </label>
+          </div>
+          <p class="field__hint">
+            儲蓄投資特別扣除額是<b>每一申報戶</b> 27 萬，全戶的存款利息合起來算。
+            而購屋借款利息扣除額要先扣掉你實際申報的儲蓄投資特扣，這兩格是連動的。
+          </p>
+        </fieldset>
+
+        <div class="btnrow">
+          <button type="button" class="btn btn--quiet btn--sm" id="resetBtn">全部清空重填</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- ============ 輸出 ============ -->
+    <div class="workbench__out stack-lg">
+
+      <section class="sheet" aria-labelledby="verdict-h">
+        <div class="sheet__body">
+          <div class="verdict" id="verdict">
+            <span class="verdict__stamp" id="verdictStamp" hidden></span>
+            <h2 class="verdict__lead" id="verdict-h">先填一家帳戶的級距</h2>
+            <p class="verdict__body" id="verdictBody">
+              填「高利上限」跟「上限內的年利率」，這裡就會告訴你錢該怎麼放。
+            </p>
+          </div>
+          <div class="readout-row" id="readouts">
+            <div class="readout"><span class="readout__label">拆單後全年利息</span><span class="readout__value" data-live id="r-split">—</span></div>
+            <div class="readout"><span class="readout__label">全押最高利那家</span><span class="readout__value" data-live id="r-single">—</span></div>
+            <div class="readout"><span class="readout__label">拆單多拿</span><span class="readout__value" data-live id="r-gain">—</span><span class="readout__delta" data-dir="down" id="r-gainPct"></span></div>
+            <div class="readout"><span class="readout__label">下一塊錢的利率</span><span class="readout__value" data-live id="r-marginal">—</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="plot" id="stairCard">
+        <div class="plot__head">
+          <h2 class="plot__title">你的每一塊錢，各自拿到幾 %</h2>
+          <div class="legend" id="legend"></div>
+        </div>
+        <canvas class="plot__canvas" id="stair" role="img" aria-labelledby="stairDesc"></canvas>
+        <p class="plot__foot" id="stairDesc">
+          橫軸是累計放進去的金額，縱軸是那一塊錢適用的年利率。每一階往下掉，
+          就是一段高利額度被填滿了。
+        </p>
+      </section>
+
+      <section class="sheet" id="allocCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">配置單</h2>
+          <span class="topbar__spacer"></span>
+          <span class="datestamp" id="allocNote">依邊際利率由高到低填滿</span>
+        </div>
+        <div class="ledger-wrap ledger-wrap--auto">
+          <table class="ledger">
+            <thead><tr>
+              <th scope="col">放哪裡</th><th scope="col">放多少</th><th scope="col">適用利率</th>
+              <th scope="col">全年利息</th><th scope="col">每次入帳</th><th scope="col">補充保費</th>
+            </tr></thead>
+            <tbody id="allocRows"></tbody>
+            <tfoot id="allocFoot"></tfoot>
+          </table>
+        </div>
+        <div class="sheet__foot" id="allocFootNote"></div>
+      </section>
+
+      <!-- ============ 補充保費那道斷崖 ============ -->
+      <section class="sheet" id="cliffCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">利息滿 2 萬的那一刻</h2>
+        </div>
+        <div class="sheet__body">
+          <p id="cliffLede">
+            二代健保補充保費對利息所得的規則是：<b>單次給付達 2 萬元就按全額計費</b>，
+            不是只算超過的部分。所以在門檻上方有一段區間，你領得比較多、實拿卻比較少。
+          </p>
+          <div class="deadzone" id="deadzone" aria-hidden="true">
+            <span class="deadzone__seg deadzone__seg--safe"></span>
+            <span class="deadzone__seg deadzone__seg--dead" id="dzDead"></span>
+            <span class="deadzone__seg deadzone__seg--over"></span>
+            <span class="deadzone__mark" id="dzMark" hidden></span>
+          </div>
+          <p class="deadzone__labels" id="dzLabels"></p>
+          <div class="note" id="cliffNote"></div>
+        </div>
+      </section>
+
+      <!-- ============ 稅 ============ -->
+      <section class="sheet" id="taxCard">
+        <div class="sheet__head">
+          <h2 class="sheet__title">報稅那一關</h2>
+        </div>
+        <div class="sheet__body" id="taxBody"></div>
+      </section>
+
+      <section class="sheet">
+        <div class="sheet__body" id="formulaHost"></div>
+      </section>
+
+      <div id="discloseHost"></div>
+
+      <p class="disclaimer">
+        本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+        本頁不提供、也不內建任何金融機構的牌告利率，畫面上的利率全部是你自己填的；
+        實際利率、優惠條件、額度上限與適用資格，一律以各金融機構的公告與核定為準。
+        補充保費費率與起扣門檻取自上方資料版本標示的常數檔，扣繳實務由給付單位執行，
+        個案認定以中央健康保險署為準；綜合所得稅相關金額以財政部為準。
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      <a href="../../index.html">回到看得見的錢</a>．<a href="../invest-tax/">想看投資與稅的全貌</a>．<a href="../../disclosure.html">合作與揭露</a>
+    </p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script src="../../assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

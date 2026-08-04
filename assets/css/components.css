@@ -1041,3 +1041,35 @@
 
 /* 篩選列 */
 .filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
+
+/* ==========================================================================
+   分潤揭露。只有真的送出過追蹤連結的頁面才會渲染（見 core/partners.js），
+   所以樣式放共用層、出現與否交給那支模組判斷。
+   ========================================================================== */
+.disclose__lead { margin: 0 0 var(--s-2); }
+.disclose__list { margin: 0 0 var(--s-2); padding-left: 1.1em; }
+.disclose__list li { margin-bottom: var(--s-1); }
+.disclose__law {
+  margin: 0; padding-top: var(--s-2);
+  border-top: 1px solid var(--rule-faint);
+  font-size: var(--t-xs); color: var(--ink-3);
+}
+
+/* 揭露頁的連結清單：一列一個機構，狀態自己說話 */
+.plist { list-style: none; margin: 0; padding: 0; }
+.plist__row {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: baseline;
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule-faint);
+}
+.plist__row:last-child { border-bottom: 0; }
+.plist__name { font-weight: 700; flex: 1 1 10rem; }
+.plist__note { flex: 1 1 100%; font-size: var(--t-sm); color: var(--ink-2); margin: 0; }
+.plist__state {
+  font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 700;
+  padding: 1px var(--s-2); border: 1px solid currentColor; white-space: nowrap;
+}
+.plist__state[data-s="live"] { color: var(--warn); }
+.plist__state[data-s="plain"] { color: var(--ink-3); }
+.plist__state[data-s="expired"] { color: var(--stamp-void); }
+.plist__empty { color: var(--ink-2); margin: 0; }

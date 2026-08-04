@@ -298,6 +298,9 @@ export function mountTheme(host) {
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem(KEY, next); } catch { /* noop */ }
     paint();
+    // 畫布是把色票讀成像素，不是套 CSS，所以換主題之後不重畫就會留著上一個主題的顏色。
+    // 這裡只負責廣播，要不要重畫由各頁自己決定。
+    window.dispatchEvent(new CustomEvent('vm:theme', { detail: next }));
   });
   paint();
   host.appendChild(btn);

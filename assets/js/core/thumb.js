@@ -78,6 +78,37 @@ const SKETCH = {
     }
   },
 
+  /** 轉貸回本：曲線從零線底下出發，往上穿過零線，穿過那一刻才開始賺 */
+  payback({ ctx, w, h }) {
+    const L = PAD, R = w - PAD, zero = h * 0.42;
+    const dip = h - PAD - 3;          // 一次性成本把起點壓到零線底下
+    const top = PAD + 2;
+    // 零線：打平的那一條
+    ctx.strokeStyle = css('--rule-strong', '#9B9B92');
+    ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(L, zero + 0.5); ctx.lineTo(R, zero + 0.5); ctx.stroke();
+    ctx.setLineDash([]);
+    // 累積淨省曲線：等速上升，所以穿越點的位置就是回本期數
+    const yAt = (t) => dip - t * (dip - top);
+    const cross = (dip - zero) / (dip - top);
+    ctx.strokeStyle = css('--series-1', '#123A72');
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (let t = 0, first = true; t <= 1.001; t += 0.05) {
+      const x = L + t * (R - L);
+      first ? (ctx.moveTo(x, yAt(t)), first = false) : ctx.lineTo(x, yAt(t));
+    }
+    ctx.stroke();
+    // 穿越那一刻
+    const cx = L + cross * (R - L);
+    ctx.strokeStyle = css('--stamp', '#B8342A');
+    ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(cx, PAD); ctx.lineTo(cx, h - PAD); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = css('--stamp', '#B8342A');
+    ctx.beginPath(); ctx.arc(cx, zero, 2.2, 0, Math.PI * 2); ctx.fill();
+  },
+
   /** 退休扇形：從一點展開的路徑束 */
   fan({ ctx, w, h }) {
     const L = PAD, R = w - PAD, mid = h / 2;
@@ -117,6 +148,29 @@ const SKETCH = {
     ctx.setLineDash([2, 2]); ctx.lineWidth = 1;
     const mx = PAD + ((n - 1) / 2) * bw + bw / 2;
     ctx.beginPath(); ctx.moveTo(mx, PAD); ctx.lineTo(mx, base); ctx.stroke();
+    ctx.setLineDash([]);
+  },
+
+  /** 存款利率階梯：一段一段往下掉的牌告利率，加一條「你的錢在這裡」的標記 */
+  stair({ ctx, w, h }) {
+    const L = PAD, R = w - PAD, B = h - PAD - 2, T = PAD + 2;
+    const steps = [1, 0.72, 0.72, 0.3, 0.3, 0.16];
+    const sw = (R - L) / steps.length;
+    ctx.strokeStyle = css('--series-1', '#123A72');
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < steps.length; i++) {
+      const y = B - steps[i] * (B - T);
+      const x0 = L + i * sw;
+      i === 0 ? ctx.moveTo(x0, y) : ctx.lineTo(x0, y);
+      ctx.lineTo(x0 + sw, y);
+    }
+    ctx.stroke();
+    // 你的錢停在第三段：階梯的價值就在於看得出自己停在哪一階
+    const mx = L + sw * 3;
+    ctx.strokeStyle = css('--accent', '#123A72');
+    ctx.setLineDash([2, 2]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(mx, PAD); ctx.lineTo(mx, h - PAD); ctx.stroke();
     ctx.setLineDash([]);
   },
 

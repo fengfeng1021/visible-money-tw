@@ -28,6 +28,18 @@ const SIMPLE = {
 
 const MODULES = [
   {
+    href: './apps/deposit-yield/',
+    name: '存錢',
+    kind: 'stair',
+    tint: 'var(--ply-1)',
+    job: '同一筆錢放在幾家數位帳戶，跟全部放一家，全年差多少利息。'
+      + '再往下算一關：利息一次進來太多會被扣二代健保補充保費，'
+      + '那條門檻前後有一段「多領反而少拿」的死區。',
+    chip: '自己填利率',
+    see: '牌告利率由你自己填，本站不建任何一家銀行的利率資料庫。'
+      + '附利率階梯圖、配置單、死區數線與五月報稅那一關。',
+  },
+  {
     href: './apps/borrow/',
     fallback: './apps/mortgage-cliff/',
     name: '借款',
@@ -35,6 +47,18 @@ const MODULES = [
     tint: 'var(--ply-3)',
     job: '我背的這筆房貸會不會爆，以及我還沒買的那間到底買不買得起。寬限期斷崖、分段利率、額外還本、升息與失業的壓力測試。',
     parts: ['房貸懸崖模擬器', '買房預算天花板壓力測試'],
+  },
+  {
+    href: './apps/refinance/',
+    name: '房貸轉貸',
+    kind: 'payback',
+    tint: 'var(--ply-3)',
+    job: '利率差只是分子。真正決定值不值得的是「一次性成本要幾個月的月付差才賺得回來」，'
+      + '而那筆成本裡最大的一項——提前清償違約金——只有你的合約知道。'
+      + '所以這一頁把不動、回原行議價、轉去別家三條路並排算。',
+    chip: '兩格必填',
+    see: '違約金與代書費不預填、必填、空白就不給判決。'
+      + '設定登記費按土地法第 76 條算給你看，塗銷免費也寫清楚是哪一條。',
   },
   {
     href: './apps/retire/',
@@ -387,7 +411,7 @@ function docRow(m, extraClass) {
           el('span', { text: m.name }),
           m.parts
             ? el('span', { class: 'chip', text: `${m.parts.length} 個工具` })
-            : el('span', { class: 'chip chip--on', text: '一屏看完' }),
+            : el('span', { class: 'chip chip--on', text: m.chip || '一屏看完' }),
         ]),
         el('p', { class: 'doc__job', text: m.job }),
         el('span', { class: 'doc__see', text: m.see || ('包含：' + (m.parts || []).join('、')) }),

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>合作與分潤揭露｜看得見的錢</title>
+<meta name="description" content="本站哪些離站連結有分潤、哪些沒有、活動什麼時候到期，全部列在這一頁。分潤不進入任何一條算式，也不改變任何排序。">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/tokens.css">
+<link rel="stylesheet" href="./assets/css/base.css">
+<link rel="stylesheet" href="./assets/css/components.css">
+<link rel="stylesheet" href="./assets/css/hub.css">
+</head>
+<body>
+<a class="skip-link" href="#state">跳到目前狀態</a>
+
+<main class="wrap wrap--narrow">
+
+  <section class="sheet sheet--raised">
+    <div class="sheet__head">
+      <span class="cover__org">看得見的錢</span>
+      <span class="datestamp" id="dataver">資料版本 —</span>
+    </div>
+    <div class="sheet__body">
+      <h1 class="sheet__title">合作與分潤揭露</h1>
+      <p>
+        這一頁把本站所有離站連結攤開來講：哪一個有分潤、哪一個沒有、活動什麼時候到期。
+        寫在這裡的每一句話都可以在原始碼裡核對，因為整站的離站連結只有一個出口
+        （<code>assets/js/core/partners.js</code>），設定只有一個檔
+        （<code>assets/data/partners.json</code>），而計算的程式碼從頭到尾沒有 import 過它們。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 目前狀態 ============ -->
+  <section class="section" id="state">
+    <h2>目前狀態</h2>
+    <div id="stateHost"></div>
+  </section>
+
+  <!-- ============ 完整清單 ============ -->
+  <section class="section" id="list">
+    <h2>離站連結完整清單</h2>
+    <p class="section__lede">
+      包含沒有分潤的機構。沒有分潤的一樣列出來、一樣參與計算，連結直接指向該機構官網。
+    </p>
+    <ul class="plist" id="plist"></ul>
+  </section>
+
+  <!-- ============ 四條規矩 ============ -->
+  <section class="section" id="rules">
+    <h2>分潤不能碰的四件事</h2>
+    <ul class="disclose__list" id="longList"></ul>
+    <p class="disclose__law" id="lawNote"></p>
+  </section>
+
+  <!-- ============ 不做的類別 ============ -->
+  <section class="section" id="excluded">
+    <h2>不碰的類別</h2>
+    <div id="exclHost"></div>
+  </section>
+
+  <!-- ============ 過期政策 ============ -->
+  <section class="section" id="expire">
+    <h2>活動過期怎麼辦</h2>
+    <p id="expireNote"></p>
+    <p class="disclaimer">
+      本站為獨立試算工具，不是稅務、法律或投資建議，也不代辦、不媒合、不收集你的個人資料。
+      正式金額與申辦條件以各機構公告及主管機關核定為準。
+      你點擊離站連結之後發生的事，由該機構自己的網站與條款決定。
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      看得見的錢．純靜態網站，原始碼公開。
+      <a href="./index.html">回首頁</a>
+      ．<a href="https://github.com/fengfeng1021/visible-money-tw">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="./assets/js/vendor/gsap.min.js"></script>
+<script src="./assets/js/vendor/CustomEase.min.js"></script>
+<script src="./assets/js/vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="./assets/js/disclosure.js"></script>
+</body>
+</html>

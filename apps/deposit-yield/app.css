@@ -1,0 +1,166 @@
+/* 存款利息實拿試算：只放這個 App 專有的版面，視覺語彙一律繼承共用系統 */
+
+.app-main { padding-block: var(--s-5) var(--s-8); }
+
+.app-head { margin-bottom: var(--s-5); }
+.app-lede {
+  padding: var(--s-4) var(--s-4) var(--s-2);
+  margin: 0;
+  font-size: var(--t-base);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+.sheet-actions { display: inline-flex; gap: var(--s-2); align-items: center; }
+.plies { padding: 0 var(--s-4); border-top: 1px solid var(--rule-faint); }
+
+.fieldset { border: 0; padding: 0; margin: 0 0 var(--s-5); }
+.fieldset legend { padding: 0; }
+.fieldset__hint { margin-top: 0; margin-bottom: var(--s-3); }
+
+/* --------------------------------------------------------------------------
+   可重複列：一家帳戶 = 一張小單據，裡面再疊它自己的級距列
+   -------------------------------------------------------------------------- */
+.rows { display: flex; flex-direction: column; gap: var(--s-3); margin-bottom: var(--s-3); }
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-end;
+  padding: var(--s-2);
+  background: var(--sheet-sunk);
+  border: 1px solid var(--rule-faint);
+}
+.row .field { flex: 1 1 7rem; min-width: 0; margin-bottom: 0; }
+.row .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.row .field__control { padding: var(--s-1) var(--s-2); background: var(--sheet); }
+.row .field input { font-size: var(--t-sm); }
+.row__del {
+  appearance: none; border: 1px solid var(--rule-strong); background: var(--sheet);
+  color: var(--ink-3); cursor: pointer; height: 30px; width: 30px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.row__del:hover { color: var(--up); border-color: var(--up); background: var(--up-wash); }
+.rows__error { display: block; }
+.rows__error:empty { display: none; }
+
+/* 一家帳戶 */
+.acct {
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet);
+  border-left-width: 3px;
+}
+.acct__head {
+  display: flex; align-items: flex-end; gap: var(--s-2);
+  padding: var(--s-2) var(--s-2) 0;
+}
+.acct__head .field { flex: 1 1 auto; margin-bottom: 0; }
+.acct__body { padding: 0 var(--s-2) var(--s-2); }
+/* 級距列比帳戶列再退一階，讀者一眼看得出從屬關係 */
+.acct__tiers { display: flex; flex-direction: column; gap: var(--s-1); margin: var(--s-2) 0; }
+.acct__tier {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: flex-end;
+  padding: var(--s-1) var(--s-2);
+  background: var(--sheet-sunk);
+  border-left: 1px solid var(--rule-faint);
+}
+.acct__tier .field { flex: 1 1 6rem; min-width: 0; margin-bottom: 0; }
+.acct__tier .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.acct__tier .field__control { padding: 2px var(--s-2); background: var(--sheet); }
+.acct__tier .field input { font-size: var(--t-sm); }
+.acct__rest {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: flex-end;
+  padding: var(--s-1) var(--s-2);
+  border-top: 1px dashed var(--rule-faint);
+}
+.acct__rest .field { flex: 1 1 6rem; min-width: 0; margin-bottom: 0; }
+.acct__rest .field__label { font-size: var(--t-xs); font-weight: 600; color: var(--ink-2); }
+.acct__rest .field__control { padding: 2px var(--s-2); background: var(--sheet); }
+.acct__rest .field input { font-size: var(--t-sm); }
+.acct__foot {
+  display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center;
+  padding: 0 var(--s-2) var(--s-1);
+}
+.acct__link { margin-left: auto; }
+.acct__swatch {
+  width: 10px; height: 10px; flex: 0 0 auto; margin-bottom: 10px;
+  border: 1px solid var(--rule-strong);
+}
+
+/* --------------------------------------------------------------------------
+   補充保費死區：一條門檻前後的數線，中間那段是「多領反而少拿」
+   -------------------------------------------------------------------------- */
+.deadzone {
+  position: relative;
+  display: flex;
+  height: 30px;
+  margin: var(--s-4) 0 var(--s-2);
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+}
+.deadzone__seg { display: block; height: 100%; }
+.deadzone__seg--safe { flex: 0 0 46%; background: var(--down-wash); }
+.deadzone__seg--dead {
+  flex: 0 0 8%;
+  background: var(--up);
+  /* 死區用實心硃砂加斜線，即使關掉顏色也還讀得出來這一段跟旁邊不同 */
+  background-image: repeating-linear-gradient(
+    45deg, transparent 0 4px, rgb(255 255 255 / 0.28) 4px 8px);
+}
+.deadzone__seg--over { flex: 1 1 auto; background: var(--up-wash); }
+.deadzone__mark {
+  position: absolute; top: -5px; bottom: -5px; width: 2px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.deadzone__mark::after {
+  content: attr(data-label);
+  position: absolute; left: 50%; bottom: 100%;
+  transform: translate(-50%, -3px);
+  font-family: var(--font-mono); font-size: var(--t-xs); font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-inv); background: var(--accent);
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+}
+.deadzone__labels {
+  display: flex; justify-content: space-between; gap: var(--s-2);
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-mono); font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+.deadzone__labels b { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   配置單裡的長條：金額大小用長度說，不用再讀一次數字
+   -------------------------------------------------------------------------- */
+.bar { display: block; height: 6px; background: var(--rule-faint); margin-top: 3px; }
+.bar > span { display: block; height: 100%; background: var(--accent); }
+.ledger tr[data-dead="true"] { background: var(--up-wash); }
+.ledger tr[data-rest="true"] td { color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   報稅那一關：三行帳，每一行是一個被吃掉或留下的金額
+   -------------------------------------------------------------------------- */
+.taxline {
+  display: flex; align-items: baseline; gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--rule-faint);
+}
+.taxline:last-of-type { border-bottom: 0; }
+.taxline__label { flex: 1 1 auto; color: var(--ink-2); font-size: var(--t-sm); }
+.taxline__value {
+  font-family: var(--font-mono); font-weight: 700; letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.taxline--bad .taxline__value { color: var(--up); }
+.taxline--good .taxline__value { color: var(--down); }
+.taxline--total { border-top: 2px solid var(--rule-strong); border-bottom: 0; }
+.taxline--total .taxline__label { color: var(--ink); font-weight: 700; }
+
+/* 分潤揭露的樣式在 assets/css/components.css，因為那不是這一頁專有的東西 */
+
+@media (max-width: 30rem) {
+  .readout-row { grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  .readout__value { font-size: var(--t-xl); }
+  .deadzone__labels { font-size: 10px; }
+}
