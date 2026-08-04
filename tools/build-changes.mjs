@@ -10,7 +10,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 
-const raw = JSON.parse(await readFile('_changelog_raw.json', 'utf8'));
+const raw = JSON.parse(await readFile('.research/changelog-verification.json', 'utf8'));
 const seed = JSON.parse(await readFile('assets/data/tw-changes.json', 'utf8'));
 
 /* 我手寫並且已經在瀏覽器裡驗算過的 impact 規格，優先於自動推斷 */

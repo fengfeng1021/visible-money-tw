@@ -1,8 +1,14 @@
 node_modules/
+.claude/
+
+# 截圖驗收的產出，每次跑都會重生
 .shots/
 tools/*.log
-_constants.json
-_slate.json
+
+# 查證與調研的原始材料。留在本機（見 .research/README.md），
+# 但不進 repo：裡面有幾百 KB 的原始網頁與 PDF，而網站真正用到的
+# 是整理過的 assets/data/*.json。
+.research/
+
 .DS_Store
 Thumbs.db
-.claude/
