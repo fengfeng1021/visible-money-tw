@@ -27,9 +27,17 @@ let TAX = null;
 const CONTRIB_MAX_PCT = 6;   // 勞工自願提繳上限，法定
 const EMPLOYER_PCT = 6;      // 雇主強制提繳
 
-/* 勞退月提繳工資分級表的上限。注意這跟勞保投保薪資分級表是兩張不同的表。
-   查證中，值放在資料檔裡，這裡只留一個明確的預設與標記。 */
-let CONTRIB_CAP = { value: 150000, confidence: 'unverified' };
+/* 勞退月提繳分級表。這跟勞保投保薪資分級表是兩張完全不同的表，
+   上限差 3.27 倍（150,000 vs 45,800），混用是這個題目最常見的算錯方式。 */
+let TABLE = null;   // { levels, min, max }
+let TAXCAP = null;  // { monthlyCap, annualCap }
+
+/** 歸級：實際工資往上取整到分級表的那一級，不是直接拿薪水乘。 */
+function gradeOf(monthly) {
+  if (!TABLE?.levels?.length) return Math.min(monthly, 150000);
+  for (const lv of TABLE.levels) if (monthly <= lv) return lv;
+  return TABLE.max;
+}
 
 /* ==========================================================================
    計算
@@ -47,23 +55,28 @@ function marginalRate(annualSalary) {
 }
 
 function compute(monthly, ratePct) {
-  const capped = Math.min(monthly, CONTRIB_CAP.value);
+  const capped = gradeOf(monthly);                  // 歸級後的月提繳工資
   const contrib = Math.round(capped * ratePct / 100);
   const annualSalary = monthly * 12;
   const mRate = marginalRate(annualSalary);
 
-  // 自提不計入當年度綜合所得，所以少繳的稅就是你「賺回來」的那一塊
-  const taxSaved = Math.round(contrib * 12 * mRate);
+  // 自提不計入當年度薪資所得，但可扣除的金額有天花板：
+  // 財政部 94 年函釋以「月提繳工資上限 150,000 的 6%」為限，也就是每月 9,000。
+  // 少了這一段，高薪者會被算成省更多稅。
+  const deductible = Math.min(contrib, TAXCAP?.monthlyCap ?? 9000);
+  const taxSaved = Math.round(deductible * 12 * mRate);
   const netCost = Math.round(contrib - taxSaved / 12);
 
   return {
-    capped, contrib, mRate, taxSaved,
+    capped, contrib, mRate, taxSaved, deductible,
     netCost,                                  // 這個月實際少領的
     naiveCost: contrib,                       // 大家以為會少的
     employer: Math.round(capped * EMPLOYER_PCT / 100),
     // 一次性的稅務槓桿：付出 netCost，帳戶裡多了 contrib
     leverage: netCost > 0 ? contrib / netCost : 1,
-    cappedBySalary: monthly > CONTRIB_CAP.value,
+    gradedUp: capped > monthly,               // 歸級讓提繳工資比實際薪水高
+    hitWageCap: monthly > (TABLE?.max ?? 150000),
+    hitTaxCap: contrib > deductible,
   };
 }
 
@@ -166,8 +179,8 @@ function render() {
     : `你以為會少 <s>${int(c.naiveCost)}</s>，但自提免稅，`
       + `所以實際只少 <b>${int(c.netCost)}</b>`;
   $('#r-gainSub').innerHTML = ratePct === 0
-    ? `雇主每月仍會提繳 ${int(c.employer)} 元`
-    : `雇主另外提繳 ${int(c.employer)} 元，合計每月進帳 <b>${int(c.contrib + c.employer)}</b>`;
+    ? `雇主每月仍會提繳至少 ${int(c.employer)} 元`
+    : `雇主另外提繳至少 ${int(c.employer)} 元，合計每月進帳 <b>${int(c.contrib + c.employer)}</b>`;
 
   renderVerdict(c);
   renderProjection(c);
@@ -194,15 +207,27 @@ function renderVerdict(c) {
   lead.innerHTML = `每月少領 <em>${int(c.netCost)}</em> 元，`
     + `帳戶多 <em>${int(c.contrib)}</em> 元。`;
 
+  const gap = be - annualReturn / 100;
+  const noTax = c.mRate <= 0 || c.taxSaved <= 0;
+
   body.textContent =
-    `自提不計入當年度綜合所得，所以你少領的比帳戶多的還少 ${int(c.contrib - c.netCost)} 元，`
-    + `那一塊就是省下的稅（邊際稅率 ${mr}%）。`
+    (noTax
+      ? `你的課稅所得還不到繳稅門檻，所以自提沒有任何節稅效果，少領多少就是少領多少。`
+        + `這個決定對你純粹是「強迫儲蓄」跟「這筆錢鎖到 60 歲」之間的取捨。`
+      : `自提不計入當年度綜合所得，所以你少領的比帳戶多的還少 ${int(c.contrib - c.netCost)} 元，`
+        + `那一塊就是省下的稅（邊際稅率 ${mr}%）。`)
     + (years > 0 && Number.isFinite(be)
       ? `把兩條路都推到 60 歲：這筆錢自己拿去投資，要每年穩定賺超過 ${pct(be, 2)} 才追得上自提。`
-        + `注意這個門檻只比勞退基金假設報酬 ${annualReturn}% 高一點點，`
-        + `因為稅務優勢是一次性的，攤到 ${years} 年之後每年只值 ${pct(be - annualReturn / 100, 2)}。`
+        + (noTax
+          ? `因為沒有節稅利益，這個門檻就等於勞退基金本身的報酬。`
+          : gap >= 0.01
+            ? `這個門檻比勞退基金假設報酬 ${annualReturn}% 高 ${pct(gap, 2)}，那就是節稅利益攤到 ${years} 年之後每年的價值。`
+            : `這個門檻幾乎等於勞退基金假設報酬 ${annualReturn}%，因為稅務優勢是一次性的，`
+              + `攤到 ${years} 年之後每年只值 ${pct(gap, 2)}。`)
       : '')
-    + (c.cappedBySalary ? `你的月薪超過提繳上限 ${int(CONTRIB_CAP.value)} 元，超出的部分不能提繳。` : '');
+    + (c.hitWageCap ? `你的月薪超過月提繳分級表上限 ${int(TABLE.max)} 元，超出的部分不能提繳。` : '')
+    + (c.hitTaxCap ? `另外，可以不計入所得課稅的金額每月最多 ${int(c.deductible)} 元，你超過的部分照樣提繳但不再省稅。` : '')
+    + (c.gradedUp ? `提繳工資依分級表往上歸級到 ${int(c.capped)} 元，所以提繳金額比你按薪水直接乘出來的高一點。` : '');
 
   stamp.hidden = false;
   const key = `${ratePct}:${Math.round(c.netCost)}:${ageNow}:${annualReturn}`;
@@ -255,10 +280,13 @@ function renderFormula(c) {
   const mr = c.mRate;
 
   host.appendChild(formulaBlock('攤開看：這幾個數字怎麼算出來的', [
-    `<b>提繳工資</b> = min(月薪, 提繳上限) = min(${int(salary)}, ${int(CONTRIB_CAP.value)}) = <b>${int(c.capped)}</b>`,
+    `<b>提繳工資</b> = 月薪 ${int(salary)} 依分級表<b>往上歸級</b> = <b>${int(c.capped)}</b>`,
+    `（分級表 62 級，最低 ${int(TABLE?.min ?? 1500)}、最高 ${int(TABLE?.max ?? 150000)}。這張表跟勞保投保薪資分級表不同，上限差 3.27 倍。）`,
     `<b>每月自提</b> = 提繳工資 × 自提率 = ${int(c.capped)} × ${ratePct}% = <b>${int(c.contrib)}</b>`,
+    `<b>可扣除金額</b> = min(每月自提, ${int(TAXCAP?.monthlyCap ?? 9000)}) = <b>${int(c.deductible)}</b>`,
+    `（財政部 94 年函釋以月提繳工資上限 150,000 的 6% 為限，也就是每月 9,000、每年 108,000。）`,
     `<b>邊際稅率</b> = ${pp(mr * 100, 0)}（以單身、標準扣除額、薪資特別扣除額估算）`,
-    `<b>全年省稅</b> = 每月自提 × 12 × 邊際稅率 = ${int(c.contrib)} × 12 × ${pp(mr * 100, 0)} = <b>${int(c.taxSaved)}</b>`,
+    `<b>全年省稅</b> = 可扣除金額 × 12 × 邊際稅率 = ${int(c.deductible)} × 12 × ${pp(mr * 100, 0)} = <b>${int(c.taxSaved)}</b>`,
     `<b>實際少領</b> = 每月自提 − 全年省稅 ÷ 12 = ${int(c.contrib)} − ${int(Math.round(c.taxSaved / 12))} = <b>${int(c.netCost)}</b>`,
     `<b>一次性稅務槓桿</b> = 每月自提 ÷ 實際少領 = ${int(c.contrib)} ÷ ${int(c.netCost)} = <b>${dec(c.leverage, 4)}</b> 倍`,
     `<b>損益兩平</b>：兩條路都推到 60 歲，自行投資要多少年化報酬才追得上`,
@@ -274,6 +302,8 @@ function renderFormula(c) {
     `這筆錢<b>60 歲以前領不出來</b>，緊急預備金不足的人不該先衝自提`,
     `勞退基金的<b>實際收益率逐年不同</b>，本頁的年化報酬是你自己填的假設，不是預測`,
     `自提<b>不影響</b>勞保年金、資遣費與其他給付的計算基礎`,
+    `扣繳憑單上的薪資給付總額<b>已經扣掉</b>自提金額，報稅時不要再自己減一次`,
+    `領回時屬退職所得，115 年度一次領取在 <b>206,000 × 年資</b> 以內全免，提繳 30 年就是 618 萬，所以多數人領回時是<b>真的免稅</b>不只是遞延`,
     `月薪超過提繳上限的部分不能提繳，高薪者的自提空間有天花板`,
   ], null));
 }
@@ -295,11 +325,26 @@ async function boot() {
     return;
   }
 
-  const cap = RULES?.contribution?.monthlyWageCap;
-  if (cap) CONTRIB_CAP = { value: cap.value ?? cap, confidence: cap.confidence || 'verified' };
+  const C = RULES?.contribution;
+  if (!C?.monthlyWageTable?.levels) {
+    $('#lead').textContent = '勞退月提繳分級表載不進來，這一頁不會用寫死的備份值算給你看';
+    $('#body').textContent = '請重新整理，或確認網路連線。';
+    return;
+  }
+  TABLE = C.monthlyWageTable;
+  TAXCAP = C.taxDeduction;
 
-  $('#dataver').textContent = `資料版本 ${TAX.version || '—'}`
-    + (CONTRIB_CAP.confidence !== 'verified' ? '．提繳上限未查證' : '');
+  // 保證收益是法定下限，拿它當預設比拿一個隨手填的 3% 誠實
+  const g = C.guaranteedReturn?.current;
+  if (Number.isFinite(g)) { annualReturn = g; fReturn.set(g, { silent: true }); }
+  const hint = $('#f-return')?.querySelector('.field__hint');
+  if (hint && C.guaranteedReturn) {
+    const act = C.actualReturn?.history || {};
+    hint.textContent = `預設是 115 年度的最低保證收益率 ${g}%（不得低於二年期定存，不足由國庫補足）。`
+      + `實際收益逐年不同：114 年 ${act['114']}%、113 年 ${act['113']}%、111 年 ${act['111']}%（虧損年）。`;
+  }
+
+  $('#dataver').textContent = `資料版本 ${RULES.version || TAX.version || '—'}`;
 
   // 共用檔案裡已經有月薪就直接用，不要再問一次
   if (P.has('salary')) {

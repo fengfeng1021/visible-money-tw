@@ -1,55 +1,260 @@
 {
-  "version": "2026-08",
-  "verifiedAt": "2026-08-03",
-  "note": "勞工保險老年給付。投保薪資分級表與最低工資自 115 年 1 月 1 日施行；年金物價指數調整自 115 年 5 月起生效。",
-  "formulaA": { "ratePct": 0.775, "addon": 3000 },
-  "formulaB": { "ratePct": 1.55 },
-  "deferred": { "perYearPct": 4, "maxPct": 20, "maxYears": 5 },
-  "early": { "perYearPct": 4, "maxPct": 20, "maxYears": 5 },
-  "annuityMinYears": 15,
-  "specialWorkAge": 55,
-  "avgSalaryMonthsAnnuity": 60,
-  "avgSalaryMonthsLegacyLumpsum": 36,
-  "claimAgeByBirthYear": [
-    { "birthYearROC": "46以前", "legalAge": 60, "earliestAge": 55 },
-    { "birthYearROC": "47", "legalAge": 61, "earliestAge": 56 },
-    { "birthYearROC": "48", "legalAge": 62, "earliestAge": 57 },
-    { "birthYearROC": "49", "legalAge": 63, "earliestAge": 58 },
-    { "birthYearROC": "50", "legalAge": 64, "earliestAge": 59 },
-    { "birthYearROC": "51以後", "legalAge": 65, "earliestAge": 60 }
-  ],
-  "insuredSalary": {
-    "grade1": 29500,
-    "max": 45800,
-    "grades": [29500, 30300, 31800, 33300, 34800, 36300, 38200, 40100, 42000, 43900, 45800],
-    "occupationalMax": 72800
+ "version": "2026-08",
+ "verifiedAt": "2026-08-04",
+ "note": "勞工保險老年給付。投保薪資分級表與最低工資自 115 年 1 月 1 日施行；年金物價指數調整自 115 年 5 月起生效。",
+ "formulaA": {
+  "ratePct": 0.775,
+  "addon": 3000
+ },
+ "formulaB": {
+  "ratePct": 1.55
+ },
+ "deferred": {
+  "perYearPct": 4,
+  "maxPct": 20,
+  "maxYears": 5
+ },
+ "early": {
+  "perYearPct": 4,
+  "maxPct": 20,
+  "maxYears": 5
+ },
+ "annuityMinYears": 15,
+ "specialWorkAge": 55,
+ "avgSalaryMonthsAnnuity": 60,
+ "avgSalaryMonthsLegacyLumpsum": 36,
+ "claimAgeByBirthYear": [
+  {
+   "birthYearROC": "46以前",
+   "legalAge": 60,
+   "earliestAge": 55
   },
-  "lumpsum": {
-    "oldAgeLumpsumMonthsPerYear": 1,
-    "oldAgeLumpsumPost60YearsCap": 5,
-    "legacyMonthsFirst15": 1,
-    "legacyMonthsAfter15": 2,
-    "legacyMonthsCap": 45,
-    "legacyMonthsCapWithPost60": 50
+  {
+   "birthYearROC": "47",
+   "legalAge": 61,
+   "earliestAge": 56
   },
-  "cpiAdjust": { "thresholdPct": 5, "applied2026Pct": 6.46 },
-  "minimumWage2026": { "monthly": 29500, "hourly": 196 },
-  "laborPensionMonthlyAnnuityInterestRatePct": 1.1473,
-  "traps": [
-    "年資未滿 15 年不得請領年金，只能請一次金。必須主動偵測並切換整個介面，不要算出一個不存在的月退。",
-    "提前請領的前提是年資已滿 15 年；年齡不足但年資已滿的可選區間要正確裁切。",
-    "投保薪資上限 45,800 會壓縮高薪者的年金。實際月薪高於上限時要明講「你的實際月薪不影響年金，因為已頂到級距天花板」。",
-    "CPI 調整是累計成長率達 5% 才調整，不是每年調，不可用固定通膨率外推。",
-    "老年一次金（年金制下）與一次請領老年給付（舊制）的給付月數規則差異極大，必須先讓使用者選擇適用制度。"
+  {
+   "birthYearROC": "48",
+   "legalAge": 62,
+   "earliestAge": 57
+  },
+  {
+   "birthYearROC": "49",
+   "legalAge": 63,
+   "earliestAge": 58
+  },
+  {
+   "birthYearROC": "50",
+   "legalAge": 64,
+   "earliestAge": 59
+  },
+  {
+   "birthYearROC": "51以後",
+   "legalAge": 65,
+   "earliestAge": 60
+  }
+ ],
+ "insuredSalary": {
+  "grade1": 29500,
+  "max": 45800,
+  "grades": [
+   29500,
+   30300,
+   31800,
+   33300,
+   34800,
+   36300,
+   38200,
+   40100,
+   42000,
+   43900,
+   45800
   ],
-  "sources": [
-    {
-      "label": "勞工保險條例第 58 條、第 58-1 條、第 58-2 條",
-      "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001"
-    },
-    {
-      "label": "勞動部勞工保險局－老年給付",
-      "url": "https://www.bli.gov.tw/"
-    }
-  ]
+  "occupationalMax": 72800
+ },
+ "lumpsum": {
+  "oldAgeLumpsumMonthsPerYear": 1,
+  "oldAgeLumpsumPost60YearsCap": 5,
+  "legacyMonthsFirst15": 1,
+  "legacyMonthsAfter15": 2,
+  "legacyMonthsCap": 45,
+  "legacyMonthsCapWithPost60": 50
+ },
+ "cpiAdjust": {
+  "thresholdPct": 5,
+  "applied2026Pct": 6.46
+ },
+ "minimumWage2026": {
+  "monthly": 29500,
+  "hourly": 196
+ },
+ "laborPensionMonthlyAnnuityInterestRatePct": 1.1473,
+ "traps": [
+  "年資未滿 15 年不得請領年金，只能請一次金。必須主動偵測並切換整個介面，不要算出一個不存在的月退。",
+  "提前請領的前提是年資已滿 15 年；年齡不足但年資已滿的可選區間要正確裁切。",
+  "投保薪資上限 45,800 會壓縮高薪者的年金。實際月薪高於上限時要明講「你的實際月薪不影響年金，因為已頂到級距天花板」。",
+  "CPI 調整是累計成長率達 5% 才調整，不是每年調，不可用固定通膨率外推。",
+  "老年一次金（年金制下）與一次請領老年給付（舊制）的給付月數規則差異極大，必須先讓使用者選擇適用制度。"
+ ],
+ "sources": [
+  {
+   "label": "勞工保險條例第 58 條、第 58-1 條、第 58-2 條",
+   "url": "https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050001"
+  },
+  {
+   "label": "勞動部勞工保險局－老年給付",
+   "url": "https://www.bli.gov.tw/"
+  }
+ ],
+ "contribution": {
+  "label": "勞工退休金（新制）自願提繳",
+  "note": "注意：勞退月提繳分級表與勞保投保薪資分級表是兩張完全不同的表，上限差 3.27 倍（150,000 vs 45,800），這是最常被混用而算錯的地方。",
+  "voluntaryMaxPct": {
+   "value": 6,
+   "unit": "%",
+   "legalBasis": "勞工退休金條例第 14 條第 3 項",
+   "confidence": "verified"
+  },
+  "employerMinPct": {
+   "value": 6,
+   "unit": "%",
+   "note": "這是下限不是固定值，也不是上限。雇主提繳是額外負擔，不從勞工薪資中扣。",
+   "legalBasis": "勞工退休金條例第 14 條第 1 項",
+   "confidence": "verified"
+  },
+  "adjustmentsPerYear": {
+   "value": 2,
+   "unit": "次",
+   "note": "提繳率一年內最多調整 2 次，自申報之次月 1 日生效；可隨時申報停繳，但已提繳的錢拿不回來。",
+   "legalBasis": "勞工退休金條例施行細則第 21-2 條",
+   "confidence": "verified"
+  },
+  "monthlyWageTable": {
+   "label": "勞工退休金月提繳分級表（115 年度，62 級）",
+   "note": "歸級規則：實際工資落在某級區間內，就以該級的月提繳工資計算，往上取整，不是用實際工資直接乘。",
+   "legalBasis": "勞工退休金條例第 14 條第 5 項；勞動部 114-11-24 勞動福 3 字第 1140153598 號令，115-01-01 生效",
+   "sourceUrl": "https://www.bli.gov.tw/0102563.html",
+   "confidence": "verified",
+   "min": 1500,
+   "max": 150000,
+   "levels": [
+    1500,
+    3000,
+    4500,
+    6000,
+    7500,
+    8700,
+    9900,
+    11100,
+    12540,
+    13500,
+    15840,
+    16500,
+    17280,
+    17880,
+    19047,
+    20008,
+    21009,
+    22000,
+    23100,
+    24000,
+    25250,
+    26400,
+    27600,
+    28590,
+    29500,
+    30300,
+    31800,
+    33300,
+    34800,
+    36300,
+    38200,
+    40100,
+    42000,
+    43900,
+    45800,
+    48200,
+    50600,
+    53000,
+    55400,
+    57800,
+    60800,
+    63800,
+    66800,
+    69800,
+    72800,
+    76500,
+    80200,
+    83900,
+    87600,
+    92100,
+    96600,
+    101100,
+    105600,
+    110100,
+    115500,
+    120900,
+    126300,
+    131700,
+    137100,
+    142500,
+    147900,
+    150000
+   ]
+  },
+  "taxDeduction": {
+   "label": "自願提繳不計入當年度薪資所得課稅",
+   "monthlyCap": 9000,
+   "annualCap": 108000,
+   "note": "在 6% 上限內是全額不計入所得總額（不是列舉也不是特別扣除額），但因分級表最高只到 150,000，實際每月最多 9,000、每年最多 108,000。扣繳憑單上的薪資給付總額已經扣掉自提金額，報稅時不要再自己減一次。",
+   "legalBasis": "勞工退休金條例第 14 條第 3 項；財政部 94-09-30 台財稅字第 09404571910 號令",
+   "sourceUrl": "https://law-out.mof.gov.tw/LawContent.aspx?id=GL005555",
+   "confidence": "verified"
+  },
+  "withdrawal": {
+   "minAge": 60,
+   "yearsForMonthly": 15,
+   "note": "年滿 60 歲才可請領，含雇主提繳與個人自提部分，兩者條件完全相同。年資滿 15 年可選月退或一次領，未滿只能一次領，核付後不得變更。60 歲前只有重度失能或身故由遺屬領這兩個出口。退休金請領權不得讓與、扣押、抵銷或供擔保（第 29 條），這保護你不被債權人追討，反面就是你自己也動不了。",
+   "legalBasis": "勞工退休金條例第 24 條、第 24 條之 2、第 29 條",
+   "confidence": "verified"
+  },
+  "exitTax": {
+   "label": "領回時屬退職所得，多數人完全免稅",
+   "lumpSumFullExemptPerYear": 206000,
+   "lumpSumHalfTaxUpperPerYear": 414000,
+   "monthlyAnnualDeduction": 894000,
+   "note": "115 年度標準。一次領取總額不超過 206,000 × 退職服務年資即全免；提繳 30 年的免稅額度是 618 萬，所以絕大多數受僱者一次領回時完全免稅。這使得「提繳時省稅、領回時免稅」在多數情況下是真正的免稅而不只是遞延。",
+   "legalBasis": "所得稅法第 14 條第 1 項第 9 類；財政部 114-11-27 台財稅字第 11404664070 號公告",
+   "confidence": "verified"
+  },
+  "guaranteedReturn": {
+   "label": "最低保證收益率",
+   "current": 1.7108,
+   "unit": "%",
+   "history": {
+    "110": 0.7858,
+    "111": 1.1003,
+    "112": 1.5559,
+    "113": 1.6797,
+    "114": 1.7108,
+    "115": 1.7108
+   },
+   "note": "不得低於當地銀行二年期定存利率，不足由國庫補足。這是累計保證不是年度保證：從開始提繳到請領那一天的整段期間累計收益不得低於同期二年定存累計，單一年度虧損不影響本金。",
+   "legalBasis": "勞工退休金條例第 23 條第 2 項；施行細則第 32 條",
+   "confidence": "verified"
+  },
+  "actualReturn": {
+   "label": "新制勞退基金實際收益率",
+   "history": {
+    "111": -6.6732,
+    "112": 12.6039,
+    "113": 16.1587,
+    "114": 15.6
+   },
+   "note": "111 年是虧損年。過去績效不代表未來，本頁的假設報酬由使用者自己填。",
+   "sourceUrl": "https://www.blf.gov.tw/",
+   "confidence": "verified"
+  }
+ }
 }
