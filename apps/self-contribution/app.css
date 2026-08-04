@@ -1,0 +1,115 @@
+/* 勞退自提：這一頁刻意比站上其他頁都薄。
+   核心答案必須在手機上不捲動就看完，其餘全部往下推。 */
+
+.solo { max-width: 46rem; padding-block: var(--s-5) var(--s-8); }
+.solo > * + * { margin-top: var(--s-5); }
+
+/* 一格輸入：比一般欄位大，因為它是唯一必填的東西 */
+.solo__salary { margin-bottom: var(--s-4); }
+.solo__salary .field__label { font-size: var(--t-md); font-weight: 700; }
+.solo__salary .field__control { padding: var(--s-2) var(--s-3); }
+.solo__salary input { font-size: var(--t-xl); }
+
+.solo__slider { margin-bottom: var(--s-4); }
+.solo__slider .slider__label { font-size: var(--t-md); font-weight: 700; }
+.solo__slider .slider__value { font-size: var(--t-xl); }
+.solo__slider input[type="range"] { height: 40px; }
+.solo__slider input[type="range"]::-webkit-slider-runnable-track { height: 12px; }
+.solo__slider input[type="range"]::-webkit-slider-thumb { width: 24px; height: 38px; margin-top: -14px; }
+.solo__slider input[type="range"]::-moz-range-track { height: 12px; }
+.solo__slider input[type="range"]::-moz-range-thumb { width: 20px; height: 34px; }
+
+/* ==========================================================================
+   天平：左邊這個月少多少，右邊帳戶多多少。
+   這一頁的招牌視覺就是這兩個數字的落差 —— 因為自提免稅，
+   左邊那個數字比每個人以為的都小，而那正是整個決定的關鍵。
+   ========================================================================== */
+.scale {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: start;
+  gap: 0;
+  border: 1px solid var(--rule-strong);
+  background: var(--sheet-sunk);
+  margin-bottom: var(--s-4);
+}
+.scale__pivot { background: var(--rule-strong); align-self: stretch; }
+.scale__side { padding: var(--s-3) var(--s-2); text-align: center; min-width: 0; }
+
+.scale__cap {
+  display: block;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-bottom: var(--s-2);
+}
+.scale__num {
+  display: block;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.375rem, 6.4vw, 2.375rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+.scale__side--cost .scale__num { color: var(--down); }
+.scale__side--gain .scale__num { color: var(--up); }
+.scale__sub {
+  display: block;
+  margin-top: var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.scale__sub s { color: var(--ink-3); }
+.scale__sub b { color: var(--ink-2); font-weight: 700; }
+
+/* 左右對照就是這一頁唯一的視覺論點，不到 320px 才拆開 */
+@media (max-width: 20rem) {
+  .scale { grid-template-columns: 1fr; }
+  .scale__pivot { height: 1px; width: auto; }
+}
+
+/* ==========================================================================
+   結論
+   ========================================================================== */
+.solo__verdict { border-width: 2px; }
+.solo__verdict .verdict__lead { font-size: var(--t-xl); }
+
+/* 往下才是給想細看的人 */
+.solo__more .sheet__title { font-size: var(--t-base); }
+.solo__cost { font-size: var(--t-sm); color: var(--ink-2); }
+
+.plot--bare { border: 0; background: none; }
+.plot--bare .plot__canvas { border: 1px solid var(--rule); background: var(--sheet); }
+
+/* 流動性代價的時間條 */
+.lock {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--rule-strong);
+  height: 34px;
+  margin-top: var(--s-3);
+  overflow: hidden;
+}
+.lock__locked {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--rule-strong) 0 5px,
+    transparent 5px 10px
+  );
+  background-color: var(--sheet-sunk);
+  flex: 0 0 auto;
+  position: relative;
+}
+.lock__free { background: var(--down-wash); flex: 1 1 auto; }
+.lock__labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-stretch: 75%;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  margin-top: var(--s-1);
+}

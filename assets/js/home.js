@@ -13,6 +13,19 @@ import * as P from './core/profile.js';
 import { askBox, portabilityBar } from './core/profile-ui.js';
 import { evaluate, sortChanges, sinceLastSeen, buildICS, personalEvents } from './core/changes.js';
 
+/* 這一個放在最前面，而且刻意跟下面三個模組不同層級。
+   它是整站唯一「一格輸入、一根滑桿、一屏看完」的東西，
+   也是唯一每個受僱勞工都用得到、而且每年真的要重做一次的決定。 */
+const SIMPLE = {
+  href: './apps/self-contribution/',
+  name: '勞退自提要不要勾',
+  kind: 'race',
+  tint: 'var(--down-wash)',
+  job: '人資系統裡那個欄位，每年可以改一次。填月薪、拉滑桿，看你這個月實際少領多少、退休帳戶多多少。'
+    + '自提是免稅的，所以你少領的比你以為的少很多。',
+  see: '一格輸入、一根滑桿、一屏看完。附自己投資要賺幾 % 才追得上的損益兩平點。',
+};
+
 const MODULES = [
   {
     href: './apps/borrow/',
@@ -365,30 +378,40 @@ function renderCover() {
 /* ==========================================================================
    三個模組
    ========================================================================== */
+function docRow(m, extraClass) {
+  return el('li', { class: 'doc' + (extraClass ? ' ' + extraClass : '') }, [
+    el('a', { class: 'doc__link', href: m.href, 'data-fallback': m.fallback || '' }, [
+      el('span', { class: 'doc__tint', style: `background:${m.tint}`, 'aria-hidden': 'true' }),
+      el('span', { class: 'doc__main' }, [
+        el('h3', { class: 'doc__name' }, [
+          el('span', { text: m.name }),
+          m.parts
+            ? el('span', { class: 'chip', text: `${m.parts.length} 個工具` })
+            : el('span', { class: 'chip chip--on', text: '一屏看完' }),
+        ]),
+        el('p', { class: 'doc__job', text: m.job }),
+        el('span', { class: 'doc__see', text: m.see || ('包含：' + (m.parts || []).join('、')) }),
+      ]),
+      el('canvas', {
+        class: 'doc__thumb', 'data-kind': m.kind, role: 'img',
+        'aria-label': `${m.name}的招牌視覺形狀示意`,
+      }),
+      el('span', { class: 'doc__go', html: `開啟 ${iconHTML('go')}` }),
+    ]),
+  ]);
+}
+
 function renderModules() {
+  const simple = $('#simpleDoc');
+  if (simple) { simple.replaceChildren(); simple.appendChild(docRow(SIMPLE, 'doc--hero')); }
   const list = $('#docs');
   list.replaceChildren();
-  for (const m of MODULES) {
-    list.appendChild(el('li', { class: 'doc' }, [
-      el('a', { class: 'doc__link', href: m.href, 'data-fallback': m.fallback }, [
-        el('span', { class: 'doc__tint', style: `background:${m.tint}`, 'aria-hidden': 'true' }),
-        el('span', { class: 'doc__main' }, [
-          el('h3', { class: 'doc__name' }, [
-            el('span', { text: m.name }),
-            el('span', { class: 'chip', text: `${m.parts.length} 個工具` }),
-          ]),
-          el('p', { class: 'doc__job', text: m.job }),
-          el('span', { class: 'doc__see', text: '包含：' + m.parts.join('、') }),
-        ]),
-        el('canvas', { class: 'doc__thumb', 'data-kind': m.kind, role: 'img', 'aria-label': `${m.name}的招牌視覺形狀示意` }),
-        el('span', { class: 'doc__go', html: `開啟 ${iconHTML('go')}` }),
-      ]),
-    ]));
-  }
-  $$('.doc__thumb', list).forEach((cv) => drawThumb(cv, cv.dataset.kind));
+  for (const m of MODULES) list.appendChild(docRow(m));
+  $$('.doc__thumb').forEach((cv) => drawThumb(cv, cv.dataset.kind));
 
   // 模組頁還沒上線時，連結退回原本的單一工具，不要給使用者 404
-  $$('.doc__link', list).forEach(async (a) => {
+  $$('.doc__link').forEach(async (a) => {
+    if (!a.dataset.fallback) return;
     try {
       const res = await fetch(a.getAttribute('href'), { method: 'HEAD' });
       if (!res.ok) a.setAttribute('href', a.dataset.fallback);

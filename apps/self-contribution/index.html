@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勞退自提划不划算｜看得見的錢</title>
+<meta name="description" content="人資系統裡那個「勞退自提」欄位要不要勾？填一格薪水、拉一根滑桿就知道。自提是免稅的，所以你實際少領的比你以為的少。含自己投資要賺幾 % 才划得來的損益兩平點。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="勞退自提划不划算？一根滑桿就知道">
+<meta property="og:description" content="自提是免稅的，所以你實際少領的比 6% 少很多。拉一下看你的數字。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75,400..700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/components.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<!--
+THESIS: 一個決定、一格輸入、一根滑桿、一屏看完。這一頁刻意拒絕本站其他頁面的專業級密度，因為人資系統裡那個欄位是每個受僱勞工都要面對的，而多數人放棄思考它的原因就是「看起來很麻煩」。
+OWN-WORLD: 台灣多聯式複寫單據。紙與墨的中性底、印泥靛藍是唯一強調色、台灣制漲紅跌綠只做語意、全站圓角 0、等寬數字對齊同一條格線。這一頁是那疊單據裡最薄的一張。
+STORY: 使用者填一格月薪、拉一根滑桿，當場看到左邊薪水少多少、右邊帳戶多多少，並得到一句能截圖轉發的話：自提等於立刻拿到多少無風險報酬。
+FIRST VIEWPORT: 一句提問當標題；一格月薪；一根 0 到 6% 的滑桿；滑桿正下方就是左右對照的兩個數字與一句結論。手機上不捲動就看得完。
+FORM: 台灣金融複寫聯票據；為依共鳴排序的第 6 個方向；seed key bc85ad9e。
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<main id="main" class="wrap solo">
+
+  <section class="sheet sheet--raised">
+    <div class="sheet__head">
+      <h1 class="sheet__title">人資系統那個「勞退自提」要不要勾？</h1>
+      <span class="datestamp" id="dataver">資料版本 —</span>
+      <span class="topbar__spacer"></span>
+      <span id="acts"></span>
+    </div>
+
+    <div class="sheet__body">
+
+      <!-- 一格輸入 -->
+      <label class="field solo__salary" id="f-salary">
+        <span class="field__label">你的月薪</span>
+        <span class="field__control">
+          <input type="text" inputmode="numeric" value="50,000" aria-describedby="salaryHint">
+          <span class="field__unit">元</span>
+        </span>
+        <span class="field__hint" id="salaryHint">填月薪就好，其他的我來。填過的會記在這台裝置上。</span>
+      </label>
+
+      <!-- 一根滑桿 -->
+      <div class="slider solo__slider" id="s-rate">
+        <div class="slider__top">
+          <span class="slider__label" id="l-rate">自提比率</span>
+          <span class="slider__value" aria-hidden="true">6<small>%</small></span>
+        </div>
+        <div class="slider__track">
+          <input type="range" min="0" max="6" step="1" value="6" aria-labelledby="l-rate">
+        </div>
+        <div class="slider__ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+        <label class="slider__twin">
+          <span class="sr-only">自提比率，數字輸入</span>
+          <input type="text" inputmode="numeric" value="6">
+          <span class="field__unit">%</span>
+        </label>
+      </div>
+
+      <!-- 左右對照：一屏之內的答案 -->
+      <div class="scale" id="scale">
+        <div class="scale__side scale__side--cost">
+          <span class="scale__cap">這個月薪水少</span>
+          <span class="scale__num" data-live id="r-cost">—</span>
+          <span class="scale__sub" id="r-costSub"></span>
+        </div>
+        <div class="scale__pivot" aria-hidden="true"></div>
+        <div class="scale__side scale__side--gain">
+          <span class="scale__cap">退休帳戶多</span>
+          <span class="scale__num" data-live id="r-gain">—</span>
+          <span class="scale__sub" id="r-gainSub"></span>
+        </div>
+      </div>
+
+      <!-- 一句結論 -->
+      <div class="verdict solo__verdict" id="verdict">
+        <span class="verdict__stamp" id="stamp" hidden></span>
+        <h2 class="verdict__lead" id="lead">拉一下上面那根滑桿</h2>
+        <p class="verdict__body" id="body"></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 以下是想再往下看的人才需要的 ============ -->
+
+  <section class="sheet solo__more">
+    <div class="sheet__head"><h2 class="sheet__title">那筆錢到退休會變多少</h2></div>
+    <div class="sheet__body">
+      <div class="plot plot--bare">
+        <canvas class="plot__canvas" id="chart" role="img" aria-labelledby="chartDesc"></canvas>
+      </div>
+      <p class="plot__foot" id="chartDesc"></p>
+      <div class="fieldgrid fieldgrid--2">
+        <label class="field" id="f-age">
+          <span class="field__label">你現在幾歲</span>
+          <span class="field__control">
+            <input type="text" inputmode="numeric" value="35">
+            <span class="field__unit">歲</span>
+          </span>
+        </label>
+        <label class="field" id="f-return">
+          <span class="field__label">假設年化報酬</span>
+          <span class="field__control">
+            <input type="text" inputmode="decimal" value="3">
+            <span class="field__unit">%</span>
+          </span>
+          <span class="field__hint">勞退基金保證不低於兩年期定存利率</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet solo__more">
+    <div class="sheet__head"><h2 class="sheet__title">代價：這筆錢 60 歲以前拿不出來</h2></div>
+    <div class="sheet__body">
+      <p class="solo__cost">
+        自提進去的錢跟雇主提繳的一樣，都鎖在你的勞退個人專戶裡，
+        要年滿 60 歲才能請領，中途離職、失業、急用都領不出來。
+        這是這個決定唯一真正的代價，比稅省多少更該先想清楚。
+      </p>
+      <div id="liquidity"></div>
+    </div>
+  </section>
+
+  <section class="sheet solo__more">
+    <div class="sheet__body" id="formulaHost"></div>
+  </section>
+
+  <p class="disclaimer">
+    本工具為獨立試算，所有計算都在你的瀏覽器內完成，輸入的數字不會離開這台裝置。
+    正式金額以勞動部勞工保險局核定與你的薪資單為準。
+    自提金額是否全額不計入當年度綜合所得，以及月提繳工資分級表的級距，
+    請以勞保局公告為準；本頁採用的數值與查證狀態列在上方的資料版本徽章裡。
+  </p>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><a href="../../index.html">回到看得見的錢</a>．<a href="../retire/">想看退休金全貌</a></p>
+  </div>
+</footer>
+
+<script src="../../assets/js/vendor/gsap.min.js"></script>
+<script src="../../assets/js/vendor/CustomEase.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

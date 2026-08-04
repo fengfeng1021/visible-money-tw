@@ -172,3 +172,9 @@
   .doc__thumb { grid-column: 2; width: 100%; max-width: 220px; justify-self: start; margin-top: var(--s-2); }
   .doc__go { grid-column: 2; justify-self: start; margin-top: var(--s-2); }
 }
+
+/* 最簡單的那一個放在最前面，而且要看得出它跟下面三個不同層級 */
+.doc--hero { border-top: 3px solid var(--accent); }
+.doc--hero .doc__name { font-size: var(--t-xl); }
+.doc--hero .doc__link { padding-block: var(--s-5); }
+.doc--hero .doc__job { font-size: var(--t-base); color: var(--ink); }
